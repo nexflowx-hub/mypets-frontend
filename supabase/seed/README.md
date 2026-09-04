@@ -1,6 +1,12 @@
-# supabase/seed
+# Supabase seed notes
 
-`0001_demo.sql` contains deterministic fictional staging data. It is safe to re-run because it uses idempotent upserts.
+The canonical Supabase seed entrypoint is:
+
+```text
+supabase/seed.sql
+```
+
+It contains deterministic fictional staging data and is safe to re-run because it uses idempotent upserts.
 
 All fictional story and impact rows are explicitly marked `is_demo = true` and must never be represented as real production impact.
 
@@ -11,11 +17,10 @@ The SQL seed mirrors `prisma/seed.ts` and currently includes:
 - 6 demo impact metrics;
 - the `legal.entity` content block for HUMAN IMPACT TECH LTD.
 
-Supabase staging bootstrap order:
+After linking a staging Supabase project, the standard deployment path is:
 
-```text
-supabase/migrations/0001_init.sql
-supabase/seed/0001_demo.sql
+```bash
+supabase db push --include-seed
 ```
 
 Prisma/Bun equivalent after the schema exists:
