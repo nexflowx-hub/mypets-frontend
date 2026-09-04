@@ -1,11 +1,25 @@
 # supabase/seed
 
-Deterministic fictional seed data (`is_demo = true` everywhere — never mixed with
-production data). Mirrors `prisma/seed.ts`:
+`0001_demo.sql` contains deterministic fictional staging data. It is safe to re-run because it uses idempotent upserts.
 
-- 2 protectors: **Ana • Porto** (14 cats, EUR) and **Carlos • São Paulo** (23 dogs, BRL)
-- 2 animals: **Luna** (in treatment) and **Milo** (needs care)
-- 6 impact metrics (3.482 animals, 612 protectors, 1.920 needs, 285 adoptions, 48.7t food, +12.500 community)
-- `legal.entity` content block (HUMAN IMPACT TECH LTD wording, configurable)
+All fictional story and impact rows are explicitly marked `is_demo = true` and must never be represented as real production impact.
 
-Reset/reseed locally: `bun prisma/seed.ts` (idempotent upserts).
+The SQL seed mirrors `prisma/seed.ts` and currently includes:
+
+- 2 protectors: **Ana • Porto** and **Carlos • São Paulo**;
+- 2 animals: **Luna** and **Milo**;
+- 6 demo impact metrics;
+- the `legal.entity` content block for HUMAN IMPACT TECH LTD.
+
+Supabase staging bootstrap order:
+
+```text
+supabase/migrations/0001_init.sql
+supabase/seed/0001_demo.sql
+```
+
+Prisma/Bun equivalent after the schema exists:
+
+```bash
+bun run db:seed
+```
