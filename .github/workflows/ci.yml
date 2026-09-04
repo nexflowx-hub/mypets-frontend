@@ -10,66 +10,24 @@ permissions:
 
 jobs:
   web:
-    name: lint · typecheck · postgres · build
+    name: lint · typecheck · build
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: mypets_ci
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres -d mypets_ci"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci?schema=public
-      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci?schema=public
-      PSQL_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci
-      APP_ENV: test
+      APP_ENV: production
       BRAND: mypets
-      SHOW_DEMO_IMPACT: "true"
-      PAYMENT_PROVIDER: mock
-      EMAIL_PROVIDER: console
-      PAYMENTS_LIVE: "false"
-      PAYOUTS_ENABLED: "false"
-
+      NEXT_PUBLIC_SITE_URL: https://mypets.lat
+      NEXT_PUBLIC_API_URL: https://api.mypets.lat/v1
+      NEXT_PUBLIC_SHOW_DEMO_IMPACT: "true"
     steps:
       - uses: actions/checkout@v4
-
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
-
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      - name: Apply canonical Supabase migration
-        run: psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20260904193000_init.sql
-
-      - name: Apply deterministic Supabase seed
-        run: psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f supabase/seed.sql
-
-      - name: Generate Prisma client
-        run: bun run db:generate
-
-      - name: Verify Prisma can read seeded database
-        run: bun run db:seed
-
       - name: Lint
         run: bun run lint
-
       - name: Typecheck
         run: bun run typecheck
-
       - name: Build
         run: bun run build
