@@ -30,6 +30,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci?schema=public
       PSQL_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci
       APP_ENV: test
       BRAND: mypets
