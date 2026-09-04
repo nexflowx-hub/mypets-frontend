@@ -115,7 +115,6 @@ Both seed implementations are deterministic and mark fictional story/impact rows
 
 Before a real production launch:
 
-- set `SHOW_DEMO_IMACT=false` only after correcting the typo below if encountered; the application variable is `SHOW_DEMO_IMPACT`;
-- use `SHOW_DEMO_IMPACT=false` in the real production environment;
+- use `SHOW_DEMO_IMPACT=false` in the production environment;
 - ensure real production metrics are backed by real records;
 - remove or clearly separate fictional story cards from real beneficiary cases.
