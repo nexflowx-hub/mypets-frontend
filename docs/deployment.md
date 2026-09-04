@@ -55,18 +55,24 @@ Use the exact DNS targets shown by Vercel when adding the custom domains in Clou
 
 ## Supabase staging
 
-Create a dedicated staging project.
-
-Apply in order:
+Create a dedicated staging project. The repository already follows the Supabase CLI layout:
 
 ```text
-supabase/migrations/0001_init.sql
-supabase/seed/0001_demo.sql
+supabase/migrations/20260904193000_init.sql
+supabase/seed.sql
 ```
 
-The active GitHub CI runs the same migration against PostgreSQL 16 before every successful build.
+Deploy through migration history rather than manually editing the remote schema:
 
-For Vercel/serverless Prisma traffic, use the Supabase pooled PostgreSQL URL when available.
+```bash
+supabase login
+supabase link --project-ref <STAGING_PROJECT_REF>
+supabase db push --include-seed
+```
+
+The active GitHub CI applies the same migration/seed against PostgreSQL 16 before a successful build.
+
+For Vercel/serverless Prisma traffic, use the Supabase transaction pooler connection string where appropriate. Use a migration-suitable connection mode for native migration tooling.
 
 Do not enable live payments or payouts in staging.
 
