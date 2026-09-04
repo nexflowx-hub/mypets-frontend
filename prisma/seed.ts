@@ -1,7 +1,6 @@
 /**
  * MyPets deterministic demo seed (is_demo = true everywhere).
- * Reproducible — no random content. Mirrors supabase/seed for production.
- * Run: bun prisma/seed.ts
+ * Reproducible — no random content.
  */
 import { PrismaClient } from "@prisma/client";
 
@@ -20,10 +19,11 @@ const stories = [
     descEn: "Currently caring for 14 cats.",
     image: "/images/story-ana.jpg",
     imageAlt: "Ana sentada num degrau rodeada por gatos resgatados no Porto",
-    tags: JSON.stringify(["RACAO", "MEDICACAO", "ESTERILIZACAO"]),
+    tags: ["RACAO", "MEDICACAO", "ESTERILIZACAO"],
     targetCents: 42000,
     raisedCents: 28500,
     sortOrder: 1,
+    isDemo: true,
   },
   {
     slug: "carlos-sao-paulo",
@@ -37,10 +37,11 @@ const stories = [
     descEn: "Feeds and looks after 23 dogs in a local community.",
     image: "/images/story-carlos.jpg",
     imageAlt: "Carlos ajoelhado entre cães resgatados numa comunidade de São Paulo",
-    tags: JSON.stringify(["RACAO", "VACINACAO", "TRANSPORTE"]),
+    tags: ["RACAO", "VACINACAO", "TRANSPORTE"],
     targetCents: 240000,
     raisedCents: 167000,
     sortOrder: 2,
+    isDemo: true,
   },
   {
     slug: "luna",
@@ -54,10 +55,11 @@ const stories = [
     descEn: "Found injured. Currently in treatment.",
     image: "/images/story-luna.jpg",
     imageAlt: "Luna, cadelinha em recuperação sobre coberta clínica",
-    tags: JSON.stringify(["CONSULTA", "CIRURGIA", "RECUPERACAO"]),
+    tags: ["CONSULTA", "CIRURGIA", "RECUPERACAO"],
     targetCents: 42000,
     raisedCents: 28500,
     sortOrder: 3,
+    isDemo: true,
   },
   {
     slug: "milo",
@@ -71,45 +73,57 @@ const stories = [
     descEn: "Rescued from the street. Needs care.",
     image: "/images/story-milo.jpg",
     imageAlt: "Milo, cão jovem resgatado da rua, a olhar para a câmara",
-    tags: JSON.stringify(["RACAO", "CONSULTA", "ACOLHIMENTO"]),
+    tags: ["RACAO", "CONSULTA", "ACOLHIMENTO"],
     targetCents: 30000,
     raisedCents: 12000,
     sortOrder: 4,
+    isDemo: true,
   },
 ];
 
 const metrics = [
-  { key: "animals_supported", value: 3482, icon: "paw", color: "coral", labelPtPT: "Animais apoiados", labelPtBR: "Animais apoiados", labelEn: "Animals supported", sortOrder: 1 },
-  { key: "protectors_supported", value: 612, icon: "paw", color: "teal", labelPtPT: "Protetores apoiados", labelPtBR: "Protetores apoiados", labelEn: "Protectors supported", sortOrder: 2 },
-  { key: "needs_resolved", value: 1920, icon: "check", color: "amber", labelPtPT: "Necessidades resolvidas", labelPtBR: "Necessidades resolvidas", labelEn: "Needs resolved", sortOrder: 3 },
-  { key: "adoptions", value: 285, icon: "heart", color: "red", labelPtPT: "Adoções", labelPtBR: "Adoções", labelEn: "Adoptions", sortOrder: 4 },
-  { key: "food_delivered", value: 48.7, decimals: 1, suffix: "ton", icon: "food", color: "blue", labelPtPT: "Ração doada", labelPtBR: "Ração doada", labelEn: "Food delivered", sortOrder: 5 },
-  { key: "community", value: 12500, prefix: "+", icon: "users", color: "green", labelPtPT: "Pessoas na comunidade", labelPtBR: "Pessoas na comunidade", labelEn: "Community members", sortOrder: 6 },
+  { key: "animals_supported", value: 3482, icon: "paw", color: "coral", labelPtPT: "Animais apoiados", labelPtBR: "Animais apoiados", labelEn: "Animals supported", sortOrder: 1, isDemo: true },
+  { key: "protectors_supported", value: 612, icon: "paw", color: "teal", labelPtPT: "Protetores apoiados", labelPtBR: "Protetores apoiados", labelEn: "Protectors supported", sortOrder: 2, isDemo: true },
+  { key: "needs_resolved", value: 1920, icon: "check", color: "amber", labelPtPT: "Necessidades resolvidas", labelPtBR: "Necessidades resolvidas", labelEn: "Needs resolved", sortOrder: 3, isDemo: true },
+  { key: "adoptions", value: 285, icon: "heart", color: "red", labelPtPT: "Adoções", labelPtBR: "Adoções", labelEn: "Adoptions", sortOrder: 4, isDemo: true },
+  { key: "food_delivered", value: 48.7, decimals: 1, suffix: "ton", icon: "food", color: "blue", labelPtPT: "Ração doada", labelPtBR: "Ração doada", labelEn: "Food delivered", sortOrder: 5, isDemo: true },
+  { key: "community", value: 12500, prefix: "+", icon: "users", color: "green", labelPtPT: "Pessoas na comunidade", labelPtBR: "Pessoas na comunidade", labelEn: "Community members", sortOrder: 6, isDemo: true },
 ];
 
 async function main() {
   console.log("🌱 Seeding MyPets demo data…");
 
-  for (const s of stories) {
-    await prisma.story.upsert({ where: { slug: s.slug }, update: s, create: s });
+  for (const story of stories) {
+    await prisma.story.upsert({
+      where: { slug: story.slug },
+      update: story,
+      create: story,
+    });
   }
-  for (const m of metrics) {
-    await prisma.impactMetric.upsert({ where: { key: m.key }, update: m, create: m });
+
+  for (const metric of metrics) {
+    await prisma.impactMetric.upsert({
+      where: { key: metric.key },
+      update: metric,
+      create: metric,
+    });
   }
+
+  const legalEntity = {
+    poweredBy: "HUMAN IMPACT TECH LTD",
+    companyNumber: "17422257",
+    address: "1-75 Shelton Street, Covent Garden, London, United Kingdom, WC2H 9JQ",
+    site: "humanimpact.tech",
+    disclaimerPt: "MyPets é uma iniciativa de impacto social powered by HUMAN IMPACT TECH LTD.",
+    disclaimerEn: "MyPets is a social impact initiative powered by HUMAN IMPACT TECH LTD.",
+  };
 
   await prisma.contentBlock.upsert({
     where: { key: "legal.entity" },
-    update: {},
+    update: { value: legalEntity },
     create: {
       key: "legal.entity",
-      value: JSON.stringify({
-        poweredBy: "HUMAN IMPACT TECH LTD",
-        companyNumber: "17422257",
-        address: "1-75 Shelton Street, Covent Garden, London, United Kingdom, WC2H 9JQ",
-        site: "humanimpact.tech",
-        disclaimerPt: "MyPets é uma iniciativa de impacto social powered by HUMAN IMPACT TECH LTD.",
-        disclaimerEn: "MyPets is a social impact initiative powered by HUMAN IMPACT TECH LTD.",
-      }),
+      value: legalEntity,
     },
   });
 
@@ -122,8 +136,8 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Seed failed:", e);
+  .catch((error) => {
+    console.error("❌ Seed failed:", error);
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());
