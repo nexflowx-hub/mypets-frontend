@@ -9,9 +9,11 @@ The previous SQLite sandbox compatibility layer has been removed from `prisma/sc
 Current sources of truth:
 
 - Prisma application mapping: `prisma/schema.prisma`
-- Canonical SQL bootstrap: `supabase/migrations/0001_init.sql`
-- Deterministic demo seed: `supabase/seed/0001_demo.sql`
+- Canonical SQL migration: `supabase/migrations/20260904193000_init.sql`
+- Deterministic Supabase seed: `supabase/seed.sql`
 - Prisma/Bun seed equivalent: `prisma/seed.ts`
+
+The Supabase directory follows the CLI convention of timestamped migrations and a standard `seed.sql` entrypoint.
 
 ## Environments
 
@@ -83,7 +85,9 @@ These mutations go through trusted server-side handlers. Future user-owned table
 
 ## Connection strategy
 
-For Vercel/serverless Prisma traffic, prefer the Supabase pooled PostgreSQL connection string where available. Keep the connection string server-side as `DATABASE_URL`.
+For Vercel/serverless Prisma traffic, prefer the Supabase transaction pooler connection string where appropriate. Keep the connection string server-side as `DATABASE_URL`.
+
+For migrations/administrative SQL, use a connection mode intended for migrations rather than the serverless transaction pooler. Supabase documents direct/session connections for native Postgres tooling and transaction mode for serverless application traffic.
 
 Never expose:
 
@@ -93,12 +97,25 @@ Never expose:
 
 through `NEXT_PUBLIC_*` variables.
 
+## Deploying migrations
+
+After creating and linking a remote Supabase project:
+
+```bash
+supabase login
+supabase link --project-ref <PROJECT_REF>
+supabase db push --include-seed
+```
+
+Keep remote schema changes migration-driven rather than manually editing production tables.
+
 ## Seed and demo honesty
 
 Both seed implementations are deterministic and mark fictional story/impact rows `is_demo = true`.
 
 Before a real production launch:
 
-- set `SHOW_DEMO_IMPACT=false`;
+- set `SHOW_DEMO_IMACT=false` only after correcting the typo below if encountered; the application variable is `SHOW_DEMO_IMPACT`;
+- use `SHOW_DEMO_IMPACT=false` in the real production environment;
 - ensure real production metrics are backed by real records;
 - remove or clearly separate fictional story cards from real beneficiary cases.
