@@ -21,7 +21,7 @@ Production-oriented implementation of the **MyPets** landing/platform foundation
 - stories, impact, newsletter, reports and mock contribution flow;
 - versioned lightweight REST handlers under `/api/v1`;
 - Prisma connected to **PostgreSQL**;
-- canonical Supabase SQL migration + deterministic demo seed;
+- canonical Supabase migration + deterministic demo seed;
 - Row Level Security baseline for the public slice;
 - GitHub Actions CI with PostgreSQL 16, migration, seed, lint, typecheck and build;
 - production-safe Next.js TypeScript checks and basic security headers.
@@ -68,8 +68,8 @@ Canonical files:
 
 ```text
 prisma/schema.prisma
-supabase/migrations/0001_init.sql
-supabase/seed/0001_demo.sql
+supabase/migrations/20260904193000_init.sql
+supabase/seed.sql
 ```
 
 All fictional story/impact records use `is_demo = true`.
@@ -106,11 +106,14 @@ bun run build
 
 ## Supabase staging bootstrap
 
-Create a dedicated staging project and apply, in order:
+The repository follows Supabase CLI conventions: timestamped migrations under `supabase/migrations/` and the standard `supabase/seed.sql` seed entrypoint.
 
-```text
-supabase/migrations/0001_init.sql
-supabase/seed/0001_demo.sql
+After creating and linking a staging project:
+
+```bash
+supabase login
+supabase link --project-ref <STAGING_PROJECT_REF>
+supabase db push --include-seed
 ```
 
 Use the Supabase pooled PostgreSQL connection string for Vercel `DATABASE_URL` when available. Never expose a database password or service-role key with a `NEXT_PUBLIC_` prefix.
@@ -140,7 +143,7 @@ The active workflow lives at:
 .github/workflows/ci.yml
 ```
 
-It validates the canonical SQL migration against PostgreSQL 16, seeds demo data, then runs:
+It validates the canonical SQL migration and seed against PostgreSQL 16, verifies Prisma can read/write the schema, then runs:
 
 ```text
 lint
@@ -175,7 +178,7 @@ prisma/
 
 supabase/
   migrations/
-  seed/
+  seed.sql
 
 public/
   images/
