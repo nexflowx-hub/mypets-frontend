@@ -12,6 +12,12 @@ import { AuthDialog } from "@/components/layout/auth-dialog";
 
 export const dynamic = "force-dynamic";
 
+function stringTags(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((tag): tag is string => typeof tag === "string")
+    : [];
+}
+
 async function getStories(): Promise<StoryDTO[]> {
   try {
     const rows = await db.story.findMany({
@@ -19,24 +25,28 @@ async function getStories(): Promise<StoryDTO[]> {
       orderBy: { sortOrder: "asc" },
       take: 12,
     });
-    return rows.map((s) => ({
-      id: s.id,
-      slug: s.slug,
-      kind: s.kind,
-      name: s.name,
-      location: s.location,
-      country: s.country,
-      currency: s.currency as "EUR" | "BRL",
-      descPtPT: s.descPtPT,
-      descPtBR: s.descPtBR,
-      descEn: s.descEn,
-      image: s.image,
-      imageAlt: s.imageAlt,
-      tags: JSON.parse(s.tags || "[]") as string[],
-      targetCents: s.targetCents,
-      raisedCents: s.raisedCents,
-      progress: s.targetCents > 0 ? Math.min(100, Math.round((s.raisedCents / s.targetCents) * 100)) : 0,
-      isDemo: s.isDemo,
+
+    return rows.map((story) => ({
+      id: story.id,
+      slug: story.slug,
+      kind: story.kind,
+      name: story.name,
+      location: story.location,
+      country: story.country,
+      currency: story.currency as "EUR" | "BRL",
+      descPtPT: story.descPtPT,
+      descPtBR: story.descPtBR,
+      descEn: story.descEn,
+      image: story.image,
+      imageAlt: story.imageAlt,
+      tags: stringTags(story.tags),
+      targetCents: story.targetCents,
+      raisedCents: story.raisedCents,
+      progress:
+        story.targetCents > 0
+          ? Math.min(100, Math.round((story.raisedCents / story.targetCents) * 100))
+          : 0,
+      isDemo: story.isDemo,
     }));
   } catch (error) {
     console.error("[page] failed to load stories", error);
@@ -58,8 +68,8 @@ function StructuredData() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "MyPets",
-    url: "https://www.mypets.lat",
-    logo: "https://www.mypets.lat/icon.svg",
+    url: "https://mypets.lat",
+    logo: "https://mypets.lat/icon.svg",
     slogan: "Quem ajuda animais também merece ajuda.",
     sameAs: ["https://facepets.org"],
     parentOrganization: {
@@ -68,6 +78,7 @@ function StructuredData() {
       url: "https://humanimpact.tech",
     },
   };
+
   return (
     <script
       type="application/ld+json"
@@ -79,7 +90,7 @@ function StructuredData() {
 export default async function HomePage() {
   const [stories, metrics] = await Promise.all([getStories(), getMetrics()]);
   const showDemo = process.env.SHOW_DEMO_IMPACT !== "false";
-  const visibleMetrics = showDemo ? metrics : metrics.filter((m) => !m.isDemo);
+  const visibleMetrics = showDemo ? metrics : metrics.filter((metric) => !metric.isDemo);
 
   return (
     <>
@@ -97,7 +108,6 @@ export default async function HomePage() {
 
       <SiteFooter />
 
-      {/* Global overlays */}
       <DonateDialog stories={stories} />
       <SearchDialog stories={stories} />
       <AuthDialog />
