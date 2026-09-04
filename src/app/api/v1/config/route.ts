@@ -4,31 +4,32 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/v1/config — brand/entity config for CMS-configurable legal wording.
+ * GET /api/v1/config — public brand/entity configuration.
+ * Only explicitly public content blocks should ever be returned here.
  */
 export async function GET() {
   try {
-    const blocks = await db.contentBlock.findMany();
-    const config: Record<string, unknown> = {};
-    for (const b of blocks) {
-      try {
-        config[b.key] = JSON.parse(b.value);
-      } catch {
-        config[b.key] = b.value;
-      }
-    }
+    const blocks = await db.contentBlock.findMany({
+      where: { key: { in: ["legal.entity"] } },
+    });
+
+    const config: Record<string, unknown> = Object.fromEntries(
+      blocks.map((block) => [block.key, block.value])
+    );
+
     return NextResponse.json({
       brand: process.env.BRAND ?? "mypets",
       appEnv: process.env.APP_ENV ?? "development",
       showDemoImpact: process.env.SHOW_DEMO_IMPACT !== "false",
-      payoutsEnabled: false, // feature flag — never enable from client
+      payoutsEnabled: false,
       paymentsLive: false,
       legal: config["legal.entity"] ?? null,
     });
-  } catch {
+  } catch (error) {
+    console.error("[api/v1/config]", error);
     return NextResponse.json({
       brand: "mypets",
-      appEnv: "development",
+      appEnv: process.env.APP_ENV ?? "development",
       showDemoImpact: process.env.SHOW_DEMO_IMPACT !== "false",
       payoutsEnabled: false,
       paymentsLive: false,
