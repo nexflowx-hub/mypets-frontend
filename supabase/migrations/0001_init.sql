@@ -1,6 +1,6 @@
--- 0001_init.sql — MyPets public slice (maps prisma/schema.prisma 1:1)
--- Full platform migration set extends this with the §37 table list.
--- Target: Supabase PostgreSQL. Enable RLS on everything (see policies/).
+-- 0001_init.sql — MyPets public slice
+-- Canonical target: Supabase PostgreSQL.
+-- This migration is intentionally aligned with prisma/schema.prisma.
 
 create extension if not exists "pgcrypto";
 
@@ -18,7 +18,7 @@ create table if not exists public.stories (
   desc_en       text not null,
   image         text not null,
   image_alt     text not null,
-  tags          jsonb not null default '[]',
+  tags          jsonb not null default '[]'::jsonb,
   target_cents  integer not null check (target_cents >= 0),
   raised_cents  integer not null default 0 check (raised_cents >= 0),
   is_demo       boolean not null default true,
@@ -45,10 +45,10 @@ create table if not exists public.impact_metrics (
   sort_order  integer not null default 0
 );
 
--- ── newsletter subscribers (explicit consent only)
+-- ── newsletter subscribers (emails are normalized to lowercase by the API)
 create table if not exists public.newsletter_subscribers (
   id         uuid primary key default gen_random_uuid(),
-  email      citext not null unique,
+  email      text not null unique,
   locale     text not null default 'pt-PT',
   consent    boolean not null default false,
   is_demo    boolean not null default false,
@@ -87,7 +87,7 @@ create table if not exists public.reports (
   created_at timestamptz not null default now()
 );
 
--- ── content blocks (CMS-configurable legal/copy)
+-- ── content blocks (CMS-configurable public/legal copy)
 create table if not exists public.content_blocks (
   id         uuid primary key default gen_random_uuid(),
   key        text not null unique,
@@ -95,7 +95,7 @@ create table if not exists public.content_blocks (
   updated_at timestamptz not null default now()
 );
 
--- ── RLS: public read for demo/active content; writes only via backend (service role)
+-- ── RLS: public reads only where explicitly safe; writes remain backend-only.
 alter table public.stories                enable row level security;
 alter table public.impact_metrics         enable row level security;
 alter table public.newsletter_subscribers enable row level security;
@@ -105,8 +105,12 @@ alter table public.content_blocks         enable row level security;
 
 create policy stories_public_read on public.stories
   for select using (active = true);
+
 create policy impact_public_read on public.impact_metrics
   for select using (true);
+
 create policy content_public_read on public.content_blocks
-  for select using (true);
--- newsletter_subscribers / contributions / reports: NO anon policies (backend-only via service role).
+  for select using (key = 'legal.entity');
+
+-- newsletter_subscribers / contributions / reports:
+-- NO anon write/read policies. Mutations go through trusted server-side code.
