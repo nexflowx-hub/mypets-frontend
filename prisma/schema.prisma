@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// MyPets + FacePets — core demo/public data models
+// Production target: Supabase PostgreSQL (see supabase/migrations)
+// SQLite here keeps the sandbox/dev parity with the same schema.
+// ─────────────────────────────────────────────────────────────
+
+model Story {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  kind         String // PROTECTOR | ANIMAL | NETWORK
+  name         String
+  location     String? // public city-level only (never exact address)
+  country      String // PT | BR
+  currency     String // EUR | BRL
+  descPtPT     String
+  descPtBR     String
+  descEn       String
+  image        String
+  imageAlt     String
+  tags         String // JSON string[] of tag keys
+  targetCents  Int
+  raisedCents  Int      @default(0)
+  isDemo       Boolean  @default(true)
+  active       Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  contributions Contribution[]
+}
+
+model ImpactMetric {
+  id         String  @id @default(cuid())
+  key        String  @unique
+  value      Float
+  prefix     String? // e.g. "+"
+  suffix     String? // e.g. "ton"
+  decimals   Int     @default(0)
+  labelPtPT  String
+  labelPtBR  String
+  labelEn    String
+  icon       String // paw | shield | check | heart | food | users
+  color      String // coral | teal | amber | red | blue | green
+  isDemo     Boolean @default(true)
+  sortOrder  Int     @default(0)
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  locale    String   @default("pt-PT")
+  consent   Boolean  @default(false)
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Contribution {
+  id             String   @id @default(cuid())
+  storyId        String?
+  story          Story?   @relation(fields: [storyId], references: [id])
+  targetType     String // ANIMAL | PROTECTOR | NETWORK | GUARDIANS
+  targetLabel    String
+  amountCents    Int
+  currency       String // EUR | BRL
+  frequency      String // ONE_TIME | MONTHLY
+  donorName      String?
+  donorEmail     String?
+  provider       String   @default("mock")
+  providerRef    String?
+  status         String   @default("PENDING") // PENDING | PAID | FAILED — only backend sets PAID
+  idempotencyKey String   @unique
+  isDemo         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  reason    String
+  entityUrl String?
+  email     String?
+  status    String   @default("OPEN") // moderation queue
+  createdAt DateTime @default(now())
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
