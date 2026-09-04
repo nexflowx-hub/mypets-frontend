@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
 import type { StoryDTO, MetricDTO } from "@/lib/types";
+import { apiGet } from "@/lib/api";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { HeroSection, FacePetsSection } from "@/components/sections/hero";
@@ -12,53 +12,24 @@ import { AuthDialog } from "@/components/layout/auth-dialog";
 
 export const dynamic = "force-dynamic";
 
-function stringTags(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.filter((tag): tag is string => typeof tag === "string")
-    : [];
-}
+type ApiEnvelope<T> = { data: T };
 
 async function getStories(): Promise<StoryDTO[]> {
   try {
-    const rows = await db.story.findMany({
-      where: { active: true },
-      orderBy: { sortOrder: "asc" },
-      take: 12,
-    });
-
-    return rows.map((story) => ({
-      id: story.id,
-      slug: story.slug,
-      kind: story.kind,
-      name: story.name,
-      location: story.location,
-      country: story.country,
-      currency: story.currency as "EUR" | "BRL",
-      descPtPT: story.descPtPT,
-      descPtBR: story.descPtBR,
-      descEn: story.descEn,
-      image: story.image,
-      imageAlt: story.imageAlt,
-      tags: stringTags(story.tags),
-      targetCents: story.targetCents,
-      raisedCents: story.raisedCents,
-      progress:
-        story.targetCents > 0
-          ? Math.min(100, Math.round((story.raisedCents / story.targetCents) * 100))
-          : 0,
-      isDemo: story.isDemo,
-    }));
+    const response = await apiGet<ApiEnvelope<StoryDTO[]>>("/stories");
+    return response.data;
   } catch (error) {
-    console.error("[page] failed to load stories", error);
+    console.error("[page] failed to load stories from API", error);
     return [];
   }
 }
 
 async function getMetrics(): Promise<MetricDTO[]> {
   try {
-    return await db.impactMetric.findMany({ orderBy: { sortOrder: "asc" } });
+    const response = await apiGet<ApiEnvelope<MetricDTO[]>>("/impact/public");
+    return response.data;
   } catch (error) {
-    console.error("[page] failed to load metrics", error);
+    console.error("[page] failed to load metrics from API", error);
     return [];
   }
 }
@@ -89,8 +60,7 @@ function StructuredData() {
 
 export default async function HomePage() {
   const [stories, metrics] = await Promise.all([getStories(), getMetrics()]);
-  const showDemo = process.env.SHOW_DEMO_IMPACT !== "false";
-  const visibleMetrics = showDemo ? metrics : metrics.filter((metric) => !metric.isDemo);
+  const showDemo = process.env.NEXT_PUBLIC_SHOW_DEMO_IMPACT !== "false";
 
   return (
     <>
@@ -101,7 +71,7 @@ export default async function HomePage() {
         <HeroSection />
         <MissionBand />
         <StoriesSection stories={stories} />
-        <ImpactSection metrics={visibleMetrics} showDemo={showDemo} />
+        <ImpactSection metrics={metrics} showDemo={showDemo} />
         <FacePetsSection />
         <PartnerBand />
       </main>
