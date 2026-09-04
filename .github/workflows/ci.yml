@@ -53,12 +53,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Apply canonical Supabase migration
-        run: psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/0001_init.sql
+        run: psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/20260904193000_init.sql
+
+      - name: Apply deterministic Supabase seed
+        run: psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f supabase/seed.sql
 
       - name: Generate Prisma client
         run: bun run db:generate
 
-      - name: Seed deterministic demo data
+      - name: Verify Prisma can read seeded database
         run: bun run db:seed
 
       - name: Lint
