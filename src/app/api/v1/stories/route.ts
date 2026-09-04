@@ -5,6 +5,12 @@ export const dynamic = "force-dynamic";
 
 type Locale = "pt-PT" | "pt-BR" | "en";
 
+function stringTags(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((tag): tag is string => typeof tag === "string")
+    : [];
+}
+
 /**
  * GET /api/v1/stories?locale=pt-PT
  * Public active stories (protectors, animals, campaigns) — localized.
@@ -21,23 +27,30 @@ export async function GET(req: NextRequest) {
       take: 12,
     });
 
-    const stories = rows.map((s) => ({
-      id: s.id,
-      slug: s.slug,
-      kind: s.kind,
-      name: s.name,
-      location: s.location,
-      country: s.country,
-      currency: s.currency as "EUR" | "BRL",
+    const stories = rows.map((story) => ({
+      id: story.id,
+      slug: story.slug,
+      kind: story.kind,
+      name: story.name,
+      location: story.location,
+      country: story.country,
+      currency: story.currency as "EUR" | "BRL",
       description:
-        locale === "pt-BR" ? s.descPtBR : locale === "en" ? s.descEn : s.descPtPT,
-      image: s.image,
-      imageAlt: s.imageAlt,
-      tags: JSON.parse(s.tags || "[]") as string[],
-      targetCents: s.targetCents,
-      raisedCents: s.raisedCents,
-      progress: s.targetCents > 0 ? Math.min(100, Math.round((s.raisedCents / s.targetCents) * 100)) : 0,
-      isDemo: s.isDemo,
+        locale === "pt-BR"
+          ? story.descPtBR
+          : locale === "en"
+            ? story.descEn
+            : story.descPtPT,
+      image: story.image,
+      imageAlt: story.imageAlt,
+      tags: stringTags(story.tags),
+      targetCents: story.targetCents,
+      raisedCents: story.raisedCents,
+      progress:
+        story.targetCents > 0
+          ? Math.min(100, Math.round((story.raisedCents / story.targetCents) * 100))
+          : 0,
+      isDemo: story.isDemo,
     }));
 
     return NextResponse.json({ data: stories, count: stories.length });
