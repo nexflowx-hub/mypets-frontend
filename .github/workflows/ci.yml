@@ -30,6 +30,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci?schema=public
+      PSQL_URL: postgresql://postgres:postgres@localhost:5432/mypets_ci
       APP_ENV: test
       BRAND: mypets
       SHOW_DEMO_IMPACT: "true"
@@ -52,7 +53,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Apply canonical Supabase migration
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/0001_init.sql
+        run: psql "$PSQL_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/0001_init.sql
 
       - name: Generate Prisma client
         run: bun run db:generate
