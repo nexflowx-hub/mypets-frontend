@@ -17,7 +17,7 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.mypets.lat"),
+  metadataBase: new URL("https://mypets.lat"),
   title: {
     default: "MyPets — Quem ajuda animais também merece ajuda.",
     template: "%s · MyPets",
@@ -37,27 +37,28 @@ export const metadata: Metadata = {
   authors: [{ name: "HUMAN IMPACT TECH LTD" }],
   alternates: {
     canonical: "/",
-    languages: {
-      "pt-PT": "/?locale=pt-PT",
-      "pt-BR": "/?locale=pt-BR",
-      en: "/?locale=en",
-    },
   },
   openGraph: {
     title: "MyPets — Quem ajuda animais também merece ajuda.",
     description:
       "Uma comunidade. Milhares de histórias. Um impacto que podemos acompanhar. Apoie protetores e animais em Portugal e no Brasil.",
-    url: "https://www.mypets.lat",
+    url: "https://mypets.lat",
     siteName: "MyPets",
     type: "website",
-    locale: "pt-PT",
-    images: [{ url: "/images/hero.jpg", width: 1440, height: 720, alt: "Protetora a alimentar cães resgatados" }],
+    locale: "pt_PT",
+    images: [
+      {
+        url: "/images/hero.jpg",
+        width: 1440,
+        height: 720,
+        alt: "Protetora a alimentar cães resgatados",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "MyPets — Quem ajuda animais também merece ajuda.",
-    description:
-      "Apoie quem ajuda animais todos os dias. Pessoas. Animais. Impacto Real.",
+    description: "Apoie quem ajuda animais todos os dias. Pessoas. Animais. Impacto Real.",
     images: ["/images/hero.jpg"],
   },
   robots: { index: true, follow: true },
