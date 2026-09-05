@@ -20,7 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useDonateStore, useUiStore } from "@/lib/stores";
+import { useUiStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
 import { onAuthChanged, readSession } from "@/lib/auth-client";
 
@@ -28,7 +28,6 @@ export function SiteHeader() {
   const { locale, setLocale, dict } = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const openDonate = useDonateStore((s) => s.openDonate);
   const setSearchOpen = useUiStore((s) => s.setSearchOpen);
   const setAuthOpen = useUiStore((s) => s.setAuthOpen);
   const [scrolled, setScrolled] = React.useState(false);
@@ -74,6 +73,8 @@ export function SiteHeader() {
     else setAuthOpen(true);
   };
 
+  const helpNow = () => router.push("/join/ajudar?utm_source=mypets&utm_medium=onsite&utm_campaign=always_on&utm_content=header_cta");
+
   return (
     <header
       className={cn(
@@ -117,7 +118,7 @@ export function SiteHeader() {
           </button>
 
           <Button
-            onClick={() => pathname === "/" ? openDonate() : router.push("/#historias")}
+            onClick={helpNow}
             className="h-10 shrink-0 rounded-full bg-coral px-4 text-[13px] font-bold text-white shadow-[0_6px_16px_-6px_rgba(255,98,88,0.55)] hover:bg-coral-dark sm:px-5 sm:text-[13.5px]"
           >
             {dict.nav.helpNow}
