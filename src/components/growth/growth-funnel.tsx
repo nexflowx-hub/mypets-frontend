@@ -44,7 +44,7 @@ export function GrowthFunnel({ campaign, tracking }: { campaign: GrowthCampaign;
       campaign: tracking.campaign,
       content: tracking.content,
       landingPath: landingPath(),
-      metadata: { intent: campaign.intent, variant: campaign.landingVariant, entryCta: tracking.entryCta },
+      metadata: { intent: campaign.intent, variant: campaign.landingVariant, entryCta: tracking.entryCta, targetCauseId: tracking.targetCauseId },
     });
   }, [campaign, tracking]);
 
@@ -72,10 +72,10 @@ export function GrowthFunnel({ campaign, tracking }: { campaign: GrowthCampaign;
         contactConsent: form.contactConsent,
         marketingConsent: form.marketingConsent,
         website: form.website,
-        metadata: { variant: campaign.landingVariant, entryCta: tracking.entryCta },
+        metadata: { variant: campaign.landingVariant, entryCta: tracking.entryCta, targetCauseId: tracking.targetCauseId },
       });
       setLeadId(result.data.id);
-      savePendingGrowthIntent(campaign.intent, result.data.id);
+      savePendingGrowthIntent(campaign.intent, result.data.id, tracking.targetCauseId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível guardar o contacto.");
     } finally {
@@ -84,8 +84,8 @@ export function GrowthFunnel({ campaign, tracking }: { campaign: GrowthCampaign;
   };
 
   const beginSignup = () => {
-    savePendingGrowthIntent(campaign.intent, leadId);
-    void recordGrowthEvent({ campaignSlug: campaign.slug, leadId, eventName: "SIGNUP_STARTED", source: tracking.source, medium: tracking.medium, campaign: tracking.campaign ?? campaign.slug, content: tracking.content, landingPath: landingPath(), metadata: { entryCta: tracking.entryCta, variant: campaign.landingVariant } });
+    savePendingGrowthIntent(campaign.intent, leadId, tracking.targetCauseId);
+    void recordGrowthEvent({ campaignSlug: campaign.slug, leadId, eventName: "SIGNUP_STARTED", source: tracking.source, medium: tracking.medium, campaign: tracking.campaign ?? campaign.slug, content: tracking.content, landingPath: landingPath(), metadata: { entryCta: tracking.entryCta, variant: campaign.landingVariant, targetCauseId: tracking.targetCauseId } });
     openAuth({ mode: "signup", email: form.email });
   };
 
