@@ -66,6 +66,7 @@ export default async function JoinPage({ params, searchParams }: { params: Promi
     landingVariant: requestedVariant === "social" ? "SOCIAL" : baseCampaign.landingVariant,
   };
 
+  const targetCauseId = one(query.cause_id);
   const tracking = {
     source: one(query.utm_source) ?? null,
     medium: one(query.utm_medium) ?? null,
@@ -74,6 +75,7 @@ export default async function JoinPage({ params, searchParams }: { params: Promi
     term: one(query.utm_term) ?? null,
     refCode: one(query.ref) ?? null,
     entryCta: one(query.src_cta) ?? null,
+    targetCauseId: targetCauseId && /^[0-9a-f-]{36}$/i.test(targetCauseId) ? targetCauseId : null,
   };
 
   return (
