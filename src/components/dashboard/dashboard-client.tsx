@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { authApi } from "@/lib/auth-api";
 import { getValidSession, onAuthChanged, signOut } from "@/lib/auth-client";
-import type { CoreNeed, CorePet, MePayload } from "@/lib/core-types";
+import type { CoreNeed, CorePet, MePayload, ParticipationPayload } from "@/lib/core-types";
 import { useUiStore } from "@/lib/stores";
 
 type Envelope<T> = { data: T };
@@ -21,6 +21,7 @@ export function DashboardClient() {
   const router = useRouter();
   const setAuthOpen = useUiStore((s) => s.setAuthOpen);
   const [me, setMe] = React.useState<MePayload | null>(null);
+  const [participation, setParticipation] = React.useState<ParticipationPayload | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [busy, setBusy] = React.useState("");
   const [error, setError] = React.useState("");
@@ -33,10 +34,15 @@ export function DashboardClient() {
       const session = await getValidSession();
       if (!session) {
         setMe(null);
+        setParticipation(null);
         return;
       }
-      const response = await authApi<Envelope<MePayload>>("/me");
-      setMe(response.data);
+      const [meResponse, participationResponse] = await Promise.all([
+        authApi<Envelope<MePayload>>("/me"),
+        authApi<Envelope<ParticipationPayload>>("/me/participation"),
+      ]);
+      setMe(meResponse.data);
+      setParticipation(participationResponse.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar a conta.");
     } finally {
@@ -64,11 +70,7 @@ export function DashboardClient() {
   }
 
   if (loading) {
-    return (
-      <div className="mx-auto flex min-h-[55vh] max-w-6xl items-center justify-center px-6">
-        <RefreshCw className="h-6 w-6 animate-spin text-coral" aria-label="A carregar" />
-      </div>
-    );
+    return <div className="mx-auto flex min-h-[55vh] max-w-6xl items-center justify-center px-6"><RefreshCw className="h-6 w-6 animate-spin text-coral" aria-label="A carregar" /></div>;
   }
 
   if (!me) {
@@ -76,13 +78,15 @@ export function DashboardClient() {
       <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-6 py-20 text-center">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-coral/10 text-coral"><PawPrint className="h-7 w-7" /></span>
         <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-petrol">A sua área MyPets</h1>
-        <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">Entre ou crie uma conta para registar o seu perfil de protetor, animais, necessidades e atualizações.</p>
+        <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">Entre ou crie uma conta para participar como protetor, voluntário, doador, padrinho, adotante ou apoiador.</p>
         <Button onClick={() => setAuthOpen(true)} className="mt-7 h-12 rounded-xl bg-coral px-7 font-bold text-white hover:bg-coral-dark">Entrar / criar conta</Button>
       </section>
     );
   }
 
   const protector = me.protector;
+  const roles = participation?.roles ?? [];
+  const protectorWorkspace = Boolean(protector) || roles.includes("PROTECTOR");
   const pets = protector?.pets ?? [];
   const needs = protector?.needs ?? [];
 
@@ -95,27 +99,22 @@ export function DashboardClient() {
           <p className="mt-2 text-sm text-muted-foreground">{me.email}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {protector && (
-            <Button asChild variant="outline" className="rounded-xl"><Link href={`/protetores/${protector.slug}`}>Ver perfil público</Link></Button>
-          )}
-          <Button
-            variant="outline"
-            className="rounded-xl"
-            onClick={() => void run("logout", async () => { await signOut(); router.push("/"); router.refresh(); })}
-          >
+          {protector && <Button asChild variant="outline" className="rounded-xl"><Link href={`/protetores/${protector.slug}`}>Ver perfil público</Link></Button>}
+          <Button variant="outline" className="rounded-xl" onClick={() => void run("logout", async () => { await signOut(); router.push("/"); router.refresh(); })}>
             <LogOut className="mr-2 h-4 w-4" /> Sair
           </Button>
         </div>
       </div>
 
-      {(error || notice) && (
-        <div className="mt-6">
-          {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>}
-          {notice && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{notice}</p>}
-        </div>
-      )}
+      {(error || notice) && <div className="mt-6">{error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>}{notice && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{notice}</p>}</div>}
 
-      {!protector ? (
+      {!protectorWorkspace ? (
+        <section className="mt-8 rounded-3xl border border-border bg-white p-6 sm:p-8">
+          <h2 className="text-2xl font-extrabold text-petrol">A sua área de participação</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">Escolha acima como quer participar. Voluntários podem já indicar disponibilidade. As áreas de doador, padrinho e adotante serão enriquecidas à medida que ativarmos causas, correspondências e pagamentos reais.</p>
+          {roles.length > 0 && <div className="mt-5 flex flex-wrap gap-2">{roles.map((role) => <span key={role} className="rounded-full bg-sand px-3 py-1.5 text-xs font-extrabold text-petrol">{role}</span>)}</div>}
+        </section>
+      ) : !protector ? (
         <ProtectorForm busy={busy === "protector"} onSubmit={(payload) => run("protector", async () => {
           await authApi("/protectors", { method: "POST", body: JSON.stringify(payload) });
           setNotice("Perfil de protetor criado. Agora pode registar o primeiro animal.");
@@ -130,59 +129,35 @@ export function DashboardClient() {
           </section>
 
           <div className="mt-8 grid gap-8 xl:grid-cols-2">
-            <PetForm
-              country={protector.country}
-              busy={busy === "pet"}
-              onSubmit={(payload) => run("pet", async () => {
-                const result = await authApi<Envelope<CorePet>>("/pets", { method: "POST", body: JSON.stringify(payload) });
-                setNotice(`Animal registado com FacePets ID ${result.data.facepetsId}.`);
-              })}
-            />
-            <NeedForm
-              country={protector.country}
-              pets={pets}
-              busy={busy === "need"}
-              onSubmit={(payload) => run("need", async () => {
-                await authApi<Envelope<CoreNeed>>("/needs", { method: "POST", body: JSON.stringify(payload) });
-                setNotice("Necessidade publicada.");
-              })}
-            />
+            <PetForm country={protector.country} busy={busy === "pet"} onSubmit={(payload) => run("pet", async () => {
+              const result = await authApi<Envelope<CorePet>>("/pets", { method: "POST", body: JSON.stringify(payload) });
+              setNotice(`Animal registado com FacePets ID ${result.data.facepetsId}.`);
+            })} />
+            <NeedForm country={protector.country} pets={pets} busy={busy === "need"} onSubmit={(payload) => run("need", async () => {
+              await authApi<Envelope<CoreNeed>>("/needs", { method: "POST", body: JSON.stringify(payload) });
+              setNotice("Necessidade publicada.");
+            })} />
           </div>
 
           <section className="mt-10">
             <h2 className="text-xl font-extrabold text-petrol">Os meus animais</h2>
-            {pets.length === 0 ? <Empty text="Ainda não registou nenhum animal." /> : (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {pets.map((pet) => (
-                  <Link key={pet.id} href={`/pets/${pet.facepetsId}`} className="rounded-2xl border border-border bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="font-extrabold text-petrol">{pet.name}</h3>
-                      <span className="rounded-full bg-sand px-2.5 py-1 text-[10px] font-bold text-ink/65">{pet.status}</span>
-                    </div>
-                    <p className="mt-2 font-mono text-xs font-bold text-coral">{pet.facepetsId}</p>
-                    <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{pet.story || "Sem história publicada ainda."}</p>
-                  </Link>
-                ))}
-              </div>
-            )}
+            {pets.length === 0 ? <Empty text="Ainda não registou nenhum animal." /> : <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{pets.map((pet) => (
+              <Link key={pet.id} href={`/pets/${pet.facepetsId}`} className="rounded-2xl border border-border bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-lg">
+                <div className="flex items-center justify-between gap-3"><h3 className="font-extrabold text-petrol">{pet.name}</h3><span className="rounded-full bg-sand px-2.5 py-1 text-[10px] font-bold text-ink/65">{pet.status}</span></div>
+                <p className="mt-2 font-mono text-xs font-bold text-coral">{pet.facepetsId}</p>
+                <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{pet.story || "Sem história publicada ainda."}</p>
+              </Link>
+            ))}</div>}
           </section>
 
           <section className="mt-10">
             <h2 className="text-xl font-extrabold text-petrol">Necessidades publicadas</h2>
-            {needs.length === 0 ? <Empty text="Ainda não publicou nenhuma necessidade." /> : (
-              <div className="mt-4 grid gap-3">
-                {needs.map((need) => (
-                  <div key={need.id} className="flex flex-col gap-2 rounded-2xl border border-border bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-xs font-extrabold uppercase tracking-wide text-coral">{need.type}</p>
-                      <h3 className="mt-1 font-extrabold text-petrol">{need.title}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{need.description}</p>
-                    </div>
-                    <span className="w-fit rounded-full bg-sand px-3 py-1 text-xs font-bold text-ink/70">{need.status}</span>
-                  </div>
-                ))}
+            {needs.length === 0 ? <Empty text="Ainda não publicou nenhuma necessidade." /> : <div className="mt-4 grid gap-3">{needs.map((need) => (
+              <div key={need.id} className="flex flex-col gap-2 rounded-2xl border border-border bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div><p className="text-xs font-extrabold uppercase tracking-wide text-coral">{need.type}</p><h3 className="mt-1 font-extrabold text-petrol">{need.title}</h3><p className="mt-1 text-sm text-muted-foreground">{need.description}</p></div>
+                <span className="w-fit rounded-full bg-sand px-3 py-1 text-xs font-bold text-ink/70">{need.status}</span>
               </div>
-            )}
+            ))}</div>}
           </section>
         </>
       )}
@@ -191,12 +166,7 @@ export function DashboardClient() {
 }
 
 function Stat({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-border bg-white p-5">
-      <div className="flex items-center gap-2 text-coral">{icon}<span className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">{label}</span></div>
-      <p className="mt-3 text-lg font-extrabold text-petrol">{value}</p>
-    </div>
-  );
+  return <div className="rounded-2xl border border-border bg-white p-5"><div className="flex items-center gap-2 text-coral">{icon}<span className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">{label}</span></div><p className="mt-3 text-lg font-extrabold text-petrol">{value}</p></div>;
 }
 
 function Empty({ text }: { text: string }) {
@@ -207,9 +177,9 @@ function ProtectorForm({ busy, onSubmit }: { busy: boolean; onSubmit: (payload: 
   const [form, setForm] = React.useState({ displayName: "", country: "PT", city: "", region: "", bio: "", yearsActive: "0", animalsCurrent: "0", activityTypes: "resgate, acolhimento, alimentação" });
   return (
     <section className="mt-8 rounded-3xl border border-border bg-white p-6 sm:p-8">
-      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-coral">Primeiro passo</p>
-      <h2 className="mt-2 text-2xl font-extrabold text-petrol">Criar perfil de protetor</h2>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">Este perfil identifica quem está na linha da frente. A verificação documental será adicionada numa etapa separada e nunca será publicada.</p>
+      <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-coral">Perfil de protetor</p>
+      <h2 className="mt-2 text-2xl font-extrabold text-petrol">Conte-nos sobre o trabalho com animais</h2>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">Este perfil identifica quem está na linha da frente. A verificação documental será tratada separadamente e nunca será publicada.</p>
       <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); void onSubmit({
         displayName: form.displayName,
         country: form.country,
