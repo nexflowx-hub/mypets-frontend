@@ -20,6 +20,21 @@ export type ParticipationPayload = {
   volunteer: VolunteerProfile | null;
 };
 
+export type PetMedia = {
+  id: string;
+  petId: string;
+  mediaType: "IMAGE";
+  storageBucket: string | null;
+  storagePath: string | null;
+  externalUrl: string | null;
+  publicUrl: string | null;
+  provenance: "REAL_CASE" | "AI_GENERATED" | "LICENSED_STOCK";
+  caption: string | null;
+  sortOrder: number;
+  isPublic: boolean;
+  createdAt: string;
+};
+
 export type CorePet = {
   id: string;
   facepetsId: string;
