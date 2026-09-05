@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Camera, ImageIcon, Loader2 } from "lucide-react";
+import { apiGet } from "@/lib/api";
 import { authApi } from "@/lib/auth-api";
 import { getValidSession, onAuthChanged } from "@/lib/auth-client";
 import type { MePayload } from "@/lib/core-types";
@@ -12,11 +13,16 @@ type Envelope<T> = { data: T };
 
 export function PetMediaWorkspace() {
   const [me, setMe] = React.useState<MePayload | null>(null);
+  const [enabled, setEnabled] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
 
   const load = React.useCallback(async () => {
     try {
-      const session = await getValidSession();
+      const [configResponse, session] = await Promise.all([
+        apiGet<Envelope<{ mediaStorageEnabled?: boolean }>>("/config").catch(() => ({ data: { mediaStorageEnabled: false } })),
+        getValidSession(),
+      ]);
+      setEnabled(configResponse.data.mediaStorageEnabled === true);
       if (!session) { setMe(null); return; }
       const response = await authApi<Envelope<MePayload>>("/me");
       setMe(response.data);
@@ -34,7 +40,7 @@ export function PetMediaWorkspace() {
 
   if (loading) return <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8"><Loader2 className="h-5 w-5 animate-spin text-coral" /></div>;
   const pets = me?.protector?.pets ?? [];
-  if (!pets.length) return null;
+  if (!enabled || !pets.length) return null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
