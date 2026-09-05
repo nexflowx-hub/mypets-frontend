@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, Heart, MapPin, ShieldCheck } from "lucide-react";
 import { apiGet } from "@/lib/api";
-import type { CoreNeed, CorePet } from "@/lib/core-types";
+import type { CoreNeed, CorePet, PetMedia } from "@/lib/core-types";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { ShareActions } from "@/components/share/share-actions";
+import { PetGallery } from "@/components/pets/pet-gallery";
 
 export const dynamic = "force-dynamic";
 
@@ -26,12 +27,20 @@ export default async function FacePetsPage({ params }: { params: Promise<{ facep
     notFound();
   }
 
+  let media: PetMedia[] = [];
+  try {
+    media = (await apiGet<Envelope<PetMedia[]>>(`/pets/${encodeURIComponent(facepetsId)}/media`)).data;
+  } catch {
+    media = [];
+  }
+
   return (
     <>
       <SiteHeader />
       <main className="min-h-screen bg-cream">
-        <section className="bg-petrol text-white">
-          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden bg-petrol text-white">
+          <div aria-hidden className="absolute -right-28 -top-28 h-72 w-72 rounded-full bg-coral/10 blur-3xl" />
+          <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
             <p className="font-mono text-sm font-extrabold tracking-[0.18em] text-coral">{pet.facepetsId}</p>
             <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
               <div>
@@ -41,7 +50,7 @@ export default async function FacePetsPage({ params }: { params: Promise<{ facep
                   {pet.rescueDate && <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />Resgatado em {new Intl.DateTimeFormat("pt-PT").format(new Date(pet.rescueDate))}</span>}
                 </div>
               </div>
-              <span className="w-fit rounded-full bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-wide">{pet.status}</span>
+              <span className="w-fit rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-wide backdrop-blur">{pet.status}</span>
             </div>
           </div>
         </section>
@@ -56,7 +65,9 @@ export default async function FacePetsPage({ params }: { params: Promise<{ facep
 
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
           <div>
-            <section className="rounded-3xl border border-border bg-white p-6 sm:p-8">
+            <PetGallery name={pet.name} media={media} fallback={pet.primaryImage} />
+
+            <section className="mt-8 rounded-3xl border border-border bg-white p-6 shadow-[0_16px_38px_-32px_rgba(16,32,42,0.45)] sm:p-8">
               <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-coral">Every pet has a story.</p>
               <h2 className="mt-2 text-2xl font-extrabold text-petrol">A história de {pet.name}</h2>
               <p className="mt-4 whitespace-pre-line text-[15px] leading-7 text-ink/75">{pet.story || "A história deste animal está a ser preparada pelo protetor responsável."}</p>
@@ -67,7 +78,7 @@ export default async function FacePetsPage({ params }: { params: Promise<{ facep
               {pet.updates.length === 0 ? <Empty text="Ainda não existem atualizações públicas." /> : (
                 <div className="mt-5 space-y-4">
                   {pet.updates.map((update) => (
-                    <article key={update.id} className="rounded-2xl border border-border bg-white p-5">
+                    <article key={update.id} className="rounded-2xl border border-border bg-white p-5 shadow-[0_12px_30px_-28px_rgba(16,32,42,0.4)]">
                       <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-extrabold text-petrol">{update.title || "Atualização"}</h3><time className="text-xs text-muted-foreground">{new Intl.DateTimeFormat("pt-PT", { dateStyle: "medium" }).format(new Date(update.createdAt))}</time></div>
                       <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{update.body}</p>
                       {update.statusAfter && <p className="mt-3 text-xs font-bold text-coral">Estado: {update.statusAfter}</p>}
@@ -79,13 +90,13 @@ export default async function FacePetsPage({ params }: { params: Promise<{ facep
           </div>
 
           <aside className="space-y-5">
-            <section className="rounded-3xl border border-border bg-white p-6">
+            <section className="rounded-3xl border border-border bg-white p-6 shadow-[0_14px_34px_-30px_rgba(16,32,42,0.4)]">
               <div className="flex items-center gap-2 text-coral"><ShieldCheck className="h-5 w-5" /><span className="text-xs font-extrabold uppercase tracking-wide">Responsável</span></div>
               <Link href={`/protetores/${pet.protector.slug}`} className="mt-3 block text-lg font-extrabold text-petrol hover:text-coral">{pet.protector.displayName}</Link>
               <p className="mt-1 text-xs font-bold text-muted-foreground">{pet.protector.verification.replaceAll("_", " ")}</p>
             </section>
 
-            <section className="rounded-3xl border border-border bg-white p-6">
+            <section className="rounded-3xl border border-border bg-white p-6 shadow-[0_14px_34px_-30px_rgba(16,32,42,0.4)]">
               <div className="flex items-center gap-2 text-coral"><Heart className="h-5 w-5" /><h2 className="font-extrabold text-petrol">Como ajudar</h2></div>
               {pet.needs.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">Não existem necessidades públicas neste momento.</p> : (
                 <div className="mt-4 space-y-3">
