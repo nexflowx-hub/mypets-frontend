@@ -24,7 +24,7 @@ const INTENT_COPY: Record<GrowthCampaign["intent"], { eyebrow: string; formTitle
 };
 
 export function GrowthFunnel({ campaign, tracking }: { campaign: GrowthCampaign; tracking: GrowthTracking }) {
-  const setAuthOpen = useUiStore((state) => state.setAuthOpen);
+  const openAuth = useUiStore((state) => state.openAuth);
   const copy = INTENT_COPY[campaign.intent];
   const [form, setForm] = React.useState({ name: "", email: "", phone: "", country: campaign.country ?? "PT", city: "", message: "", contactConsent: false, marketingConsent: false, website: "" });
   const [busy, setBusy] = React.useState(false);
@@ -83,7 +83,7 @@ export function GrowthFunnel({ campaign, tracking }: { campaign: GrowthCampaign;
   const beginSignup = () => {
     savePendingGrowthIntent(campaign.intent, leadId);
     void recordGrowthEvent({ campaignSlug: campaign.slug, leadId, eventName: "SIGNUP_STARTED", source: tracking.source, medium: tracking.medium, campaign: tracking.campaign ?? campaign.slug, content: tracking.content, landingPath: window.location.pathname });
-    setAuthOpen(true);
+    openAuth({ mode: "signup", email: form.email });
   };
 
   const share = async () => {
