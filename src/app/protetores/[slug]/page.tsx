@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, HeartHandshake, MapPin, PawPrint } from "lucide-react";
+import { BadgeCheck, ExternalLink, HeartHandshake, MapPin, PawPrint } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import type { CoreProtector } from "@/lib/core-types";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { Button } from "@/components/ui/button";
+import { ShareActions } from "@/components/share/share-actions";
 
 type Envelope<T> = { data: T };
 
@@ -21,6 +22,9 @@ export default async function ProtectorPage({ params }: { params: Promise<{ slug
     notFound();
   }
 
+  const socialLinks = await apiGet<Envelope<Record<string, string>>>(`/protectors/${encodeURIComponent(slug)}/social-links`)
+    .then((response) => response.data)
+    .catch(() => ({}));
   const pets = protector.pets ?? [];
   const needs = protector.needs ?? [];
 
@@ -47,11 +51,25 @@ export default async function ProtectorPage({ params }: { params: Promise<{ slug
               </Button>
             </div>
             {protector.bio && <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-white/78">{protector.bio}</p>}
+
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+              {Object.entries(socialLinks).map(([network, url]) => (
+                <a key={network} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold capitalize text-white/75 transition hover:text-white">
+                  <ExternalLink className="h-3.5 w-3.5" />{network}
+                </a>
+              ))}
+            </div>
           </div>
         </section>
 
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <section className="grid gap-4 sm:grid-cols-3">
+          <ShareActions
+            title={`${protector.displayName} · MyPets`}
+            text={`Conheça o trabalho de ${protector.displayName} e as necessidades dos animais que acompanha.`}
+            path={`/protetores/${protector.slug}`}
+          />
+
+          <section className="mt-7 grid gap-4 sm:grid-cols-3">
             <Stat label="Animais atualmente" value={String(protector.animalsCurrent)} />
             <Stat label="Anos de atividade" value={String(protector.yearsActive)} />
             <Stat label="Necessidades abertas" value={String(needs.filter((n) => n.status === "OPEN").length)} />
