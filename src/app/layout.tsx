@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
+import { AttributionBootstrap } from "@/components/growth/attribution-bootstrap";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -84,6 +85,7 @@ export default function RootLayout({
       >
         <LocaleProvider>
           <AuthBootstrap />
+          <AttributionBootstrap />
           {children}
         </LocaleProvider>
         <Toaster />
