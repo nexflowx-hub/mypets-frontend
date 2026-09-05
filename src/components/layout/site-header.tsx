@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Search, Menu, X, ChevronDown, Globe } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Search, Menu, X, ChevronDown, Globe, UserRound } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { LOCALES, LOCALE_META, type Locale } from "@/lib/i18n/dictionaries";
 import { MyPetsLogo } from "@/components/brand/logo";
@@ -21,20 +22,30 @@ import {
 } from "@/components/ui/sheet";
 import { useDonateStore, useUiStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
+import { onAuthChanged, readSession } from "@/lib/auth-client";
 
 export function SiteHeader() {
   const { locale, setLocale, dict } = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const openDonate = useDonateStore((s) => s.openDonate);
   const setSearchOpen = useUiStore((s) => s.setSearchOpen);
   const setAuthOpen = useUiStore((s) => s.setAuthOpen);
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [signedIn, setSignedIn] = React.useState(false);
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  React.useEffect(() => {
+    const sync = () => setSignedIn(Boolean(readSession()));
+    sync();
+    return onAuthChanged(sync);
   }, []);
 
   const navItems = [
@@ -50,8 +61,17 @@ export function SiteHeader() {
 
   const go = (href: string) => {
     setMobileOpen(false);
+    if (pathname !== "/") {
+      router.push(`/${href}`);
+      return;
+    }
     const el = document.querySelector(href);
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const account = () => {
+    if (signedIn) router.push("/dashboard");
+    else setAuthOpen(true);
   };
 
   return (
@@ -62,37 +82,26 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6 lg:px-8">
-        {/* Logo — compact on mobile, full from sm up */}
-        <a
-          href="#top"
-          aria-label="MyPets — início"
-          className="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-coral"
-          onClick={(e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        >
+        <a href="/" aria-label="MyPets — início" className="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-coral">
           <MyPetsLogo className="sm:hidden" compact />
           <MyPetsLogo className="hidden sm:inline-flex" />
         </a>
 
-        {/* Desktop nav */}
         <nav aria-label={dict.nav.menu} className="hidden items-center gap-5 xl:flex">
           {navItems.map((item) => (
             <button
               key={item.label}
               onClick={() => go(item.href)}
-              className="text-[13.5px] font-semibold text-ink/80 transition-colors hover:text-coral focus-visible:outline-2 focus-visible:outline-coral rounded-sm"
+              className="rounded-sm text-[13.5px] font-semibold text-ink/80 transition-colors hover:text-coral focus-visible:outline-2 focus-visible:outline-coral"
             >
               {item.label}
             </button>
           ))}
         </nav>
 
-        {/* Right cluster */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
           <button
-            onClick={() => setSearchOpen(true)}
+            onClick={() => pathname === "/" ? setSearchOpen(true) : router.push("/#historias")}
             aria-label={dict.nav.search}
             className="rounded-full p-2.5 text-ink/75 transition-colors hover:bg-accent hover:text-coral focus-visible:outline-2 focus-visible:outline-coral"
           >
@@ -100,20 +109,20 @@ export function SiteHeader() {
           </button>
 
           <button
-            onClick={() => setAuthOpen(true)}
-            className="hidden rounded-full px-3 py-2 text-[13.5px] font-semibold text-ink/80 transition-colors hover:text-coral focus-visible:outline-2 focus-visible:outline-coral md:block"
+            onClick={account}
+            className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[13.5px] font-semibold text-ink/80 transition-colors hover:text-coral focus-visible:outline-2 focus-visible:outline-coral md:flex"
           >
-            {dict.nav.signIn}
+            {signedIn && <UserRound className="h-4 w-4" />}
+            {signedIn ? "Conta" : dict.nav.signIn}
           </button>
 
           <Button
-            onClick={() => openDonate()}
+            onClick={() => pathname === "/" ? openDonate() : router.push("/#historias")}
             className="h-10 shrink-0 rounded-full bg-coral px-4 text-[13px] font-bold text-white shadow-[0_6px_16px_-6px_rgba(255,98,88,0.55)] hover:bg-coral-dark sm:px-5 sm:text-[13.5px]"
           >
             {dict.nav.helpNow}
           </Button>
 
-          {/* Locale selector */}
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Idioma / Language"
@@ -140,7 +149,6 @@ export function SiteHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Mobile hamburger */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger
               aria-label={dict.nav.menu}
@@ -150,9 +158,7 @@ export function SiteHeader() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[86vw] max-w-xs border-l-border bg-white p-0">
               <SheetHeader className="border-b border-border px-5 py-4 text-left">
-                <SheetTitle asChild>
-                  <div><MyPetsLogo compact /></div>
-                </SheetTitle>
+                <SheetTitle asChild><div><MyPetsLogo compact /></div></SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-1 px-3 py-4" aria-label={dict.nav.menu}>
                 {navItems.map((item) => (
@@ -166,13 +172,10 @@ export function SiteHeader() {
                 ))}
                 <div className="mt-3 border-t border-border pt-4">
                   <button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      setAuthOpen(true);
-                    }}
+                    onClick={() => { setMobileOpen(false); account(); }}
                     className="w-full rounded-lg px-3 py-3 text-left text-[15px] font-semibold text-ink transition-colors hover:bg-accent hover:text-coral"
                   >
-                    {dict.nav.signIn}
+                    {signedIn ? "Conta / Dashboard" : dict.nav.signIn}
                   </button>
                 </div>
               </nav>
@@ -184,27 +187,14 @@ export function SiteHeader() {
   );
 }
 
-/** Small inline locale switch used inside the footer (country pills) */
-export function LocalePill({
-  label,
-  flag,
-  active,
-  onClick,
-}: {
-  label: string;
-  flag: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+export function LocalePill({ label, flag, active, onClick }: { label: string; flag: string; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       aria-pressed={active}
       className={cn(
         "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-all",
-        active
-          ? "border-coral/70 bg-coral/10 text-white"
-          : "border-white/15 bg-white/5 text-white/80 hover:border-white/35 hover:text-white"
+        active ? "border-coral/70 bg-coral/10 text-white" : "border-white/15 bg-white/5 text-white/80 hover:border-white/35 hover:text-white"
       )}
     >
       {flag === "🌐" ? <Globe className="h-4 w-4" aria-hidden /> : <span aria-hidden>{flag}</span>}
