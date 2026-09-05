@@ -18,15 +18,17 @@ export function GrowthOnboardingBridge() {
       const session = await getValidSession();
       if (!session || cancelled) return;
 
-      const role = roleForIntent(pending.intent);
-      await recordGrowthEvent({ leadId: pending.leadId, eventName: "SIGNUP_COMPLETED", metadata: { intent: pending.intent } });
-
-      if (!role) {
-        clearPendingGrowthIntent();
-        return;
-      }
-
       try {
+        if (pending.leadId) {
+          await authApi(`/growth/leads/${pending.leadId}/convert`, { method: "POST" });
+        }
+
+        const role = roleForIntent(pending.intent);
+        if (!role) {
+          clearPendingGrowthIntent();
+          return;
+        }
+
         const response = await authApi<Envelope<ParticipationPayload>>("/me/participation");
         const roles = Array.from(new Set<ParticipationRole>([...response.data.roles, role]));
         if (!response.data.roles.includes(role)) {
@@ -36,6 +38,7 @@ export function GrowthOnboardingBridge() {
           });
           await recordGrowthEvent({ leadId: pending.leadId, eventName: "ROLE_SELECTED", metadata: { intent: pending.intent, role } });
         }
+
         clearPendingGrowthIntent();
         if (!cancelled) window.location.replace("/dashboard?onboarding=done");
       } catch {
