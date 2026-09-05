@@ -4,6 +4,7 @@ const BASE = "https://mypets.lat";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const evergreen = [
+    "/causas",
     "/join",
     "/join/ajudar",
     "/join/voluntario",
@@ -19,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...evergreen.map((path, index) => ({
       url: `${BASE}${path}`,
       changeFrequency: "weekly" as const,
-      priority: index === 0 ? 0.9 : 0.8,
+      priority: index === 0 ? 0.9 : index === 1 ? 0.9 : 0.8,
     })),
   ];
 }
