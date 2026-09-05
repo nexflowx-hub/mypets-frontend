@@ -2,7 +2,6 @@
 
 import { apiUrl } from "@/lib/api";
 import type { ParticipationRole } from "@/lib/core-types";
-import { readAttribution } from "@/lib/attribution";
 
 export type GrowthIntent = "SUPPORT" | "VOLUNTEER" | "SPONSOR" | "DONATE" | "PROTECTOR" | "ADOPT" | "PROJECT" | "FOUND_ANIMAL";
 
@@ -24,6 +23,7 @@ export type GrowthTracking = {
   content?: string | null;
   term?: string | null;
   refCode?: string | null;
+  entryCta?: string | null;
 };
 
 const PENDING_INTENT_KEY = "mypets.growth.pending-intent.v1";
@@ -41,6 +41,8 @@ export function roleForIntent(intent: GrowthIntent): ParticipationRole | null {
   return ROLE_BY_INTENT[intent] ?? null;
 }
 
+// This state is stored only after the user explicitly submits the funnel,
+// so it is functional onboarding state rather than pre-consent marketing tracking.
 export function savePendingGrowthIntent(intent: GrowthIntent, leadId?: string | null) {
   if (typeof window === "undefined") return;
   localStorage.setItem(PENDING_INTENT_KEY, JSON.stringify({ intent, leadId: leadId ?? null, savedAt: Date.now() }));
@@ -64,36 +66,10 @@ export function clearPendingGrowthIntent() {
 }
 
 export async function createGrowthLead(payload: Record<string, unknown>) {
-  const attribution = readAttribution();
-  const first = attribution.first;
-  const currentMetadata = payload.metadata && typeof payload.metadata === "object" && !Array.isArray(payload.metadata)
-    ? payload.metadata as Record<string, unknown>
-    : {};
-  const enriched = {
-    ...payload,
-    source: first?.source ?? payload.source ?? null,
-    medium: first?.medium ?? payload.medium ?? null,
-    campaign: first?.campaign ?? payload.campaign ?? null,
-    content: first?.content ?? payload.content ?? null,
-    term: first?.term ?? payload.term ?? null,
-    metadata: {
-      ...currentMetadata,
-      firstTouch: attribution.first,
-      lastTouch: attribution.last,
-      currentTouch: {
-        source: payload.source ?? null,
-        medium: payload.medium ?? null,
-        campaign: payload.campaign ?? null,
-        content: payload.content ?? null,
-        term: payload.term ?? null,
-      },
-    },
-  };
-
   const response = await fetch(apiUrl("/growth/leads"), {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(enriched),
+    body: JSON.stringify(payload),
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body?.error?.message ?? "Não foi possível guardar o contacto.");
