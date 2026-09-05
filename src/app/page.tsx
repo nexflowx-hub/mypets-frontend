@@ -3,6 +3,7 @@ import { apiGet } from "@/lib/api";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { HeroSection, FacePetsSection } from "@/components/sections/hero";
+import { GrowthGateway } from "@/components/growth/growth-gateway";
 import { MissionBand } from "@/components/sections/mission-band";
 import { StoriesSection } from "@/components/sections/stories-section";
 import { ImpactSection, PartnerBand } from "@/components/sections/impact-section";
@@ -74,6 +75,7 @@ export default async function HomePage() {
 
       <main className="flex-1">
         <HeroSection />
+        <GrowthGateway />
         <MissionBand />
         <StoriesSection stories={stories} />
         <ImpactSection metrics={metrics} />
