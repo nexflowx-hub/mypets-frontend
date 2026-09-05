@@ -7,16 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PawPrint, ShieldCheck } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { useUiStore } from "@/lib/stores";
+import { useUiStore, type AuthMode } from "@/lib/stores";
 import { requestPasswordReset, signIn, signUp } from "@/lib/auth-client";
 
-type Mode = "login" | "signup" | "recover";
-
 export function AuthDialog() {
-  const { authOpen, setAuthOpen } = useUiStore();
+  const { authOpen, setAuthOpen, authMode, authEmail } = useUiStore();
   const { dict, locale } = useLocale();
   const router = useRouter();
-  const [mode, setMode] = React.useState<Mode>("login");
+  const [mode, setMode] = React.useState<AuthMode>("login");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -35,11 +33,13 @@ export function AuthDialog() {
   };
 
   React.useEffect(() => {
-    if (authOpen) {
-      setError("");
-      setMessage("");
-    }
-  }, [authOpen, mode]);
+    if (!authOpen) return;
+    setMode(authMode);
+    if (authEmail) setEmail(authEmail);
+    setPassword("");
+    setError("");
+    setMessage("");
+  }, [authOpen, authMode, authEmail]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
