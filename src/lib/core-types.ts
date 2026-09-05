@@ -1,3 +1,25 @@
+export type ParticipationRole = "PROTECTOR" | "VOLUNTEER" | "DONOR" | "SPONSOR" | "ADOPTER" | "SUPPORTER";
+
+export type VolunteerProfile = {
+  userId: string;
+  country: "PT" | "BR" | null;
+  city: string | null;
+  region: string | null;
+  availability: string | null;
+  participation: string[];
+  skills: string[];
+  radiusKm: number | null;
+  notes: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ParticipationPayload = {
+  roles: ParticipationRole[];
+  volunteer: VolunteerProfile | null;
+};
+
 export type CorePet = {
   id: string;
   facepetsId: string;
