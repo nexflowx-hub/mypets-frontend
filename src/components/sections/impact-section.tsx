@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, PawPrint, ShieldCheck, CircleCheck, Heart, Package, Users } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { MetricDTO } from "@/lib/types";
-import { useDonateStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -83,7 +83,7 @@ function MetricTile({ metric, label }: { metric: MetricDTO; label: string }) {
 
 export function ImpactSection({ metrics }: { metrics: MetricDTO[] }) {
   const { dict, locale } = useLocale();
-  const openDonate = useDonateStore((s) => s.openDonate);
+  const router = useRouter();
   const label = (m: MetricDTO) => locale === "pt-BR" ? m.labelPtBR : locale === "en" ? m.labelEn : m.labelPtPT;
 
   return (
@@ -94,7 +94,7 @@ export function ImpactSection({ metrics }: { metrics: MetricDTO[] }) {
           <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#0b161d]/94 via-[#0b161d]/72 to-[#0b161d]/15" />
           <div className="relative z-10 max-w-sm">
             <h2 className="text-balance text-[26px] font-extrabold leading-[1.14] tracking-tight text-white sm:text-[32px]">{dict.cta.title}</h2>
-            <button onClick={() => openDonate()} className="group mt-7 inline-flex min-h-11 items-center gap-2 rounded-lg bg-white px-5 text-[14px] font-bold text-petrol transition-all hover:bg-cream hover:shadow-xl focus-visible:outline-2 focus-visible:outline-coral">
+            <button onClick={() => router.push("/join/ajudar?utm_source=mypets&utm_medium=onsite&utm_campaign=always_on&utm_content=impact_cta")} className="group mt-7 inline-flex min-h-11 items-center gap-2 rounded-lg bg-white px-5 text-[14px] font-bold text-petrol transition-all hover:bg-cream hover:shadow-xl focus-visible:outline-2 focus-visible:outline-coral">
               {dict.cta.button}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
             </button>
           </div>
@@ -128,7 +128,7 @@ export function PartnerBand() {
     <section id="parceiros" className="border-t border-border/60 bg-white py-12">
       <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-5 px-4 text-center sm:px-6 lg:flex-row lg:justify-between lg:px-8 lg:text-left">
         <p className="max-w-xl text-balance text-[19px] font-extrabold tracking-tight text-petrol sm:text-[22px]">{dict.partner.text}</p>
-        <a href="mailto:partners@mypets.lat?subject=Parceria%20MyPets" className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-coral px-6 text-[14px] font-bold text-white shadow-[0_8px_22px_-10px_rgba(255,98,88,0.6)] transition-all hover:bg-coral-dark focus-visible:outline-2 focus-visible:outline-coral">
+        <a href="/join/projeto?utm_source=mypets&utm_medium=onsite&utm_campaign=projects&utm_content=partner_band" className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-coral px-6 text-[14px] font-bold text-white shadow-[0_8px_22px_-10px_rgba(255,98,88,0.6)] transition-all hover:bg-coral-dark focus-visible:outline-2 focus-visible:outline-coral">
           {dict.partner.cta}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
         </a>
       </div>
