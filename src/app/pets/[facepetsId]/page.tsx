@@ -6,6 +6,7 @@ import type { CoreNeed, CorePet } from "@/lib/core-types";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
+import { ShareActions } from "@/components/share/share-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,14 @@ export default async function FacePetsPage({ params }: { params: Promise<{ facep
             </div>
           </div>
         </section>
+
+        <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
+          <ShareActions
+            title={`${pet.name} · ${pet.facepetsId} · FacePets`}
+            text={`Conheça a história de ${pet.name}, acompanhe as necessidades e veja como pode ajudar.`}
+            path={`/pets/${pet.facepetsId}`}
+          />
+        </div>
 
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
           <div>
