@@ -60,7 +60,6 @@ function StructuredData() {
 
 export default async function HomePage() {
   const [stories, metrics] = await Promise.all([getStories(), getMetrics()]);
-  const showDemo = process.env.NEXT_PUBLIC_SHOW_DEMO_IMPACT !== "false";
 
   return (
     <>
@@ -71,7 +70,7 @@ export default async function HomePage() {
         <HeroSection />
         <MissionBand />
         <StoriesSection stories={stories} />
-        <ImpactSection metrics={metrics} showDemo={showDemo} />
+        <ImpactSection metrics={metrics} />
         <FacePetsSection />
         <PartnerBand />
       </main>
