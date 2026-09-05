@@ -2,6 +2,7 @@
 
 import { apiUrl } from "@/lib/api";
 import type { ParticipationRole } from "@/lib/core-types";
+import { readAttribution } from "@/lib/attribution";
 
 export type GrowthIntent = "SUPPORT" | "VOLUNTEER" | "SPONSOR" | "DONATE" | "PROTECTOR" | "ADOPT" | "PROJECT" | "FOUND_ANIMAL";
 
@@ -63,10 +64,36 @@ export function clearPendingGrowthIntent() {
 }
 
 export async function createGrowthLead(payload: Record<string, unknown>) {
+  const attribution = readAttribution();
+  const first = attribution.first;
+  const currentMetadata = payload.metadata && typeof payload.metadata === "object" && !Array.isArray(payload.metadata)
+    ? payload.metadata as Record<string, unknown>
+    : {};
+  const enriched = {
+    ...payload,
+    source: first?.source ?? payload.source ?? null,
+    medium: first?.medium ?? payload.medium ?? null,
+    campaign: first?.campaign ?? payload.campaign ?? null,
+    content: first?.content ?? payload.content ?? null,
+    term: first?.term ?? payload.term ?? null,
+    metadata: {
+      ...currentMetadata,
+      firstTouch: attribution.first,
+      lastTouch: attribution.last,
+      currentTouch: {
+        source: payload.source ?? null,
+        medium: payload.medium ?? null,
+        campaign: payload.campaign ?? null,
+        content: payload.content ?? null,
+        term: payload.term ?? null,
+      },
+    },
+  };
+
   const response = await fetch(apiUrl("/growth/leads"), {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(enriched),
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body?.error?.message ?? "Não foi possível guardar o contacto.");
