@@ -32,6 +32,10 @@ function config() {
   return { url, key };
 }
 
+function siteUrl() {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://mypets.lat").replace(/\/$/, "");
+}
+
 function notify() {
   if (typeof window !== "undefined") window.dispatchEvent(new Event(AUTH_EVENT));
 }
@@ -100,9 +104,44 @@ export async function signUp(email: string, password: string) {
 }
 
 export async function requestPasswordReset(email: string) {
-  return authRequest<{ message?: string }>("/recover", {
+  const redirect = encodeURIComponent(`${siteUrl()}/auth/update-password`);
+  return authRequest<{ message?: string }>(`/recover?redirect_to=${redirect}`, {
     method: "POST",
     body: JSON.stringify({ email: email.trim().toLowerCase() }),
+  });
+}
+
+export async function consumeImplicitSessionFromUrl(): Promise<AuthSession | null> {
+  if (typeof window === "undefined" || !window.location.hash) return readSession();
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  if (!accessToken || !refreshToken) return readSession();
+
+  const user = await authRequest<AuthUser>("/user", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  const session: AuthSession = {
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_in: Number(params.get("expires_in") ?? 3600),
+    token_type: params.get("token_type") ?? "bearer",
+    user,
+  };
+  saveSession(session);
+  window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+  return session;
+}
+
+export async function updatePassword(password: string) {
+  const session = await getValidSession();
+  if (!session) throw new Error("Recovery session is missing or expired");
+  return authRequest<AuthUser>("/user", {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify({ password }),
   });
 }
 
