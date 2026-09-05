@@ -5,6 +5,7 @@ import { apiGet } from "@/lib/api";
 import type { CoreNeed, CorePet } from "@/lib/core-types";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { AuthDialog } from "@/components/layout/auth-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +90,7 @@ export default async function FacePetsPage({ params }: { params: Promise<{ facep
         </div>
       </main>
       <SiteFooter />
+      <AuthDialog />
     </>
   );
 }
