@@ -5,6 +5,7 @@ import { AuthDialog } from "@/components/layout/auth-dialog";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { ParticipationPanel } from "@/components/dashboard/participation-panel";
 import { ProtectorSocialPanel } from "@/components/dashboard/protector-social-panel";
+import { ReferralPanel } from "@/components/dashboard/referral-panel";
 import { GrowthOnboardingBridge } from "@/components/growth/growth-onboarding-bridge";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function DashboardPage() {
       <main className="min-h-screen bg-cream">
         <GrowthOnboardingBridge />
         <ParticipationPanel />
+        <ReferralPanel />
         <ProtectorSocialPanel />
         <DashboardClient />
       </main>
