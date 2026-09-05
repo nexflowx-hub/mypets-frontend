@@ -7,6 +7,7 @@ import { ParticipationPanel } from "@/components/dashboard/participation-panel";
 import { ProtectorSocialPanel } from "@/components/dashboard/protector-social-panel";
 import { ReferralPanel } from "@/components/dashboard/referral-panel";
 import { AdminShortcut } from "@/components/dashboard/admin-shortcut";
+import { PetMediaWorkspace } from "@/components/dashboard/pet-media-workspace";
 import { GrowthOnboardingBridge } from "@/components/growth/growth-onboarding-bridge";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function DashboardPage() {
         <ParticipationPanel />
         <ReferralPanel />
         <ProtectorSocialPanel />
+        <PetMediaWorkspace />
         <DashboardClient />
       </main>
       <SiteFooter />
