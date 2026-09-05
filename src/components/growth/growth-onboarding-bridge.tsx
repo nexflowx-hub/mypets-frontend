@@ -36,7 +36,15 @@ export function GrowthOnboardingBridge() {
             method: "PUT",
             body: JSON.stringify({ roles }),
           });
-          await recordGrowthEvent({ leadId: pending.leadId, eventName: "ROLE_SELECTED", metadata: { intent: pending.intent, role } });
+          await recordGrowthEvent({ leadId: pending.leadId, eventName: "ROLE_SELECTED", metadata: { intent: pending.intent, role, targetCauseId: pending.targetCauseId } });
+        }
+
+        if (pending.intent === "SPONSOR" && pending.targetCauseId) {
+          await authApi("/sponsorships/interests", {
+            method: "POST",
+            body: JSON.stringify({ causeId: pending.targetCauseId, isAnonymous: false, communicationPreferences: {} }),
+          });
+          await recordGrowthEvent({ leadId: pending.leadId, eventName: "SPONSORSHIP_STARTED", metadata: { causeId: pending.targetCauseId } });
         }
 
         clearPendingGrowthIntent();
