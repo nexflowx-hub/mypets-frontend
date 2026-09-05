@@ -57,8 +57,14 @@ export async function generateMetadata({ params }: { params: Promise<{ intent: s
 export default async function JoinPage({ params, searchParams }: { params: Promise<{ intent: string }>; searchParams: Promise<Search> }) {
   const { intent } = await params;
   const query = await searchParams;
-  const campaign = await getCampaign(intent);
-  if (!campaign) notFound();
+  const baseCampaign = await getCampaign(intent);
+  if (!baseCampaign) notFound();
+
+  const requestedVariant = one(query.v)?.toLowerCase();
+  const campaign: Campaign = {
+    ...baseCampaign,
+    landingVariant: requestedVariant === "social" ? "SOCIAL" : baseCampaign.landingVariant,
+  };
 
   const tracking = {
     source: one(query.utm_source) ?? null,
