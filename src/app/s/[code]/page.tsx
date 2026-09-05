@@ -7,10 +7,14 @@ type Envelope<T> = { data: T };
 
 export default async function ShareRedirectPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
+  let destination = "/join/ajudar";
+
   try {
     const response = await apiGet<Envelope<{ destination: string }>>(`/growth/share/${encodeURIComponent(code)}`);
-    redirect(response.data.destination);
+    destination = response.data.destination;
   } catch {
-    redirect("/join/ajudar");
+    // Expired or invalid short links fall back to the general participation funnel.
   }
+
+  redirect(destination);
 }
