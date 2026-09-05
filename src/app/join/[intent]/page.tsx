@@ -65,6 +65,7 @@ export default async function JoinPage({ params, searchParams }: { params: Promi
     content: one(query.utm_content) ?? null,
     term: one(query.utm_term) ?? null,
     refCode: one(query.ref) ?? null,
+    entryCta: one(query.src_cta) ?? null,
   };
 
   return (
