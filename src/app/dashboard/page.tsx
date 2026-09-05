@@ -5,6 +5,7 @@ import { AuthDialog } from "@/components/layout/auth-dialog";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { ParticipationPanel } from "@/components/dashboard/participation-panel";
 import { ProtectorSocialPanel } from "@/components/dashboard/protector-social-panel";
+import { GrowthOnboardingBridge } from "@/components/growth/growth-onboarding-bridge";
 
 export const metadata: Metadata = {
   title: "O Meu Impacto | MyPets",
@@ -16,6 +17,7 @@ export default function DashboardPage() {
     <>
       <SiteHeader />
       <main className="min-h-screen bg-cream">
+        <GrowthOnboardingBridge />
         <ParticipationPanel />
         <ProtectorSocialPanel />
         <DashboardClient />
