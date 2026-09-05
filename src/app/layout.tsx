@@ -3,6 +3,7 @@ import { Manrope, Caveat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
+import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -81,7 +82,10 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${caveat.variable} antialiased bg-background text-foreground font-sans min-h-screen flex flex-col`}
       >
-        <LocaleProvider>{children}</LocaleProvider>
+        <LocaleProvider>
+          <AuthBootstrap />
+          {children}
+        </LocaleProvider>
         <Toaster />
       </body>
     </html>
