@@ -24,6 +24,13 @@ export type GrowthTracking = {
   term?: string | null;
   refCode?: string | null;
   entryCta?: string | null;
+  targetCauseId?: string | null;
+};
+
+type PendingGrowthIntent = {
+  intent: GrowthIntent;
+  leadId: string | null;
+  targetCauseId: string | null;
 };
 
 const PENDING_INTENT_KEY = "mypets.growth.pending-intent.v1";
@@ -41,21 +48,21 @@ export function roleForIntent(intent: GrowthIntent): ParticipationRole | null {
   return ROLE_BY_INTENT[intent] ?? null;
 }
 
-// This state is stored only after the user explicitly submits the funnel,
-// so it is functional onboarding state rather than pre-consent marketing tracking.
-export function savePendingGrowthIntent(intent: GrowthIntent, leadId?: string | null) {
+// Stored only after an explicit funnel submission: this is functional onboarding state,
+// not pre-consent advertising tracking.
+export function savePendingGrowthIntent(intent: GrowthIntent, leadId?: string | null, targetCauseId?: string | null) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(PENDING_INTENT_KEY, JSON.stringify({ intent, leadId: leadId ?? null, savedAt: Date.now() }));
+  localStorage.setItem(PENDING_INTENT_KEY, JSON.stringify({ intent, leadId: leadId ?? null, targetCauseId: targetCauseId ?? null, savedAt: Date.now() }));
 }
 
-export function readPendingGrowthIntent(): { intent: GrowthIntent; leadId: string | null } | null {
+export function readPendingGrowthIntent(): PendingGrowthIntent | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(PENDING_INTENT_KEY);
     if (!raw) return null;
-    const value = JSON.parse(raw) as { intent?: GrowthIntent; leadId?: string | null; savedAt?: number };
+    const value = JSON.parse(raw) as { intent?: GrowthIntent; leadId?: string | null; targetCauseId?: string | null; savedAt?: number };
     if (!value.intent || !value.savedAt || Date.now() - value.savedAt > 1000 * 60 * 60 * 24 * 30) return null;
-    return { intent: value.intent, leadId: value.leadId ?? null };
+    return { intent: value.intent, leadId: value.leadId ?? null, targetCauseId: value.targetCauseId ?? null };
   } catch {
     return null;
   }
