@@ -27,7 +27,7 @@ export function GrowthFunnel({ campaign, tracking }: { campaign: GrowthCampaign;
   const openAuth = useUiStore((state) => state.openAuth);
   const copy = INTENT_COPY[campaign.intent];
   const socialVariant = campaign.landingVariant === "SOCIAL";
-  const [form, setForm] = React.useState({ name: "", email: "", phone: "", country: campaign.country ?? "PT", city: "", message: "", contactConsent: false, marketingConsent: false, website: "" });
+  const [form, setForm] = React.useState({ name: "", email: "", phone: "", country: String(campaign.country ?? "PT"), city: "", message: "", contactConsent: false, marketingConsent: false, website: "" });
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
   const [leadId, setLeadId] = React.useState<string | null>(null);
