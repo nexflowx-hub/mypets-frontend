@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { Button } from "@/components/ui/button";
-import { useDonateStore } from "@/lib/stores";
 import { FacePetsPanel } from "./facepets-panel";
 
 const AVATARS = [
@@ -18,7 +17,6 @@ const AVATARS = [
 export function HeroSection() {
   const { dict } = useLocale();
   const router = useRouter();
-  const openDonate = useDonateStore((s) => s.openDonate);
 
   return (
     <section id="top" className="xl:grid xl:grid-cols-[minmax(0,1fr)_330px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -52,7 +50,7 @@ export function HeroSection() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button
-                onClick={() => openDonate()}
+                onClick={() => router.push("/join/ajudar?utm_source=mypets&utm_medium=onsite&utm_campaign=always_on&utm_content=hero_primary")}
                 className="group h-12 min-w-[190px] justify-between rounded-md bg-coral px-6 text-[15px] font-bold text-white shadow-[0_10px_28px_-10px_rgba(255,98,88,0.65)] transition-all hover:bg-coral-dark hover:shadow-[0_14px_34px_-10px_rgba(255,98,88,0.7)] focus-visible:outline-2 focus-visible:outline-white"
               >
                 {dict.hero.ctaPrimary}
@@ -60,7 +58,7 @@ export function HeroSection() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/join/protetor?utm_source=mypets&utm_medium=onsite&utm_campaign=protectors&utm_content=hero_secondary")}
                 className="h-12 rounded-md border-white/70 bg-white/5 px-6 text-[15px] font-bold text-white backdrop-blur-sm transition-all hover:border-white hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
               >
                 {dict.hero.ctaSecondary}
