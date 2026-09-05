@@ -7,12 +7,14 @@ import { MissionBand } from "@/components/sections/mission-band";
 import { StoriesSection } from "@/components/sections/stories-section";
 import { ImpactSection, PartnerBand } from "@/components/sections/impact-section";
 import { DonateDialog } from "@/components/donate/donate-dialog";
+import { SupportIntentDialog } from "@/components/donate/support-intent-dialog";
 import { SearchDialog } from "@/components/layout/search-dialog";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 
 export const dynamic = "force-dynamic";
 
 type ApiEnvelope<T> = { data: T };
+type PublicConfig = { paymentsLive: boolean };
 
 async function getStories(): Promise<StoryDTO[]> {
   try {
@@ -34,6 +36,15 @@ async function getMetrics(): Promise<MetricDTO[]> {
   }
 }
 
+async function getConfig(): Promise<PublicConfig> {
+  try {
+    const response = await apiGet<ApiEnvelope<PublicConfig>>("/config");
+    return response.data;
+  } catch {
+    return { paymentsLive: false };
+  }
+}
+
 function StructuredData() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -50,16 +61,11 @@ function StructuredData() {
     },
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />;
 }
 
 export default async function HomePage() {
-  const [stories, metrics] = await Promise.all([getStories(), getMetrics()]);
+  const [stories, metrics, config] = await Promise.all([getStories(), getMetrics(), getConfig()]);
 
   return (
     <>
@@ -77,7 +83,7 @@ export default async function HomePage() {
 
       <SiteFooter />
 
-      <DonateDialog stories={stories} />
+      {config.paymentsLive ? <DonateDialog stories={stories} /> : <SupportIntentDialog />}
       <SearchDialog stories={stories} />
       <AuthDialog />
     </>
