@@ -1,12 +1,33 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 import { ArrowRight, HandHeart, HeartHandshake, Megaphone, PawPrint, ShieldCheck, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { growthDestination } from "@/lib/growth-navigation";
 
-const copy = {
+type GatewayPath = {
+  icon: LucideIcon;
+  kicker: string;
+  title: string;
+  text: string;
+  cta: string;
+  href: string;
+  campaign: string;
+  ctaId: string;
+  links: Array<[string, string]>;
+};
+
+type GatewayCopy = {
+  eyebrow: string;
+  title: string;
+  text: string;
+  paths: GatewayPath[];
+  trust: string[];
+};
+
+const copy: Record<"pt-PT" | "pt-BR" | "en", GatewayCopy> = {
   "pt-PT": {
     eyebrow: "Comece pelo que precisa agora",
     title: "Um caminho simples para pedir ajuda, apoiar ou participar.",
@@ -21,11 +42,7 @@ const copy = {
         href: "/join/protetor",
         campaign: "need_support",
         ctaId: "gateway_request_support",
-        links: [
-          ["Sou protetor", "/join/protetor"],
-          ["Tenho um projeto", "/join/projeto"],
-          ["Encontrei um animal", "/join/encontrei-um-animal"],
-        ],
+        links: [["Sou protetor", "/join/protetor"], ["Tenho um projeto", "/join/projeto"], ["Encontrei um animal", "/join/encontrei-um-animal"]],
       },
       {
         icon: HeartHandshake,
@@ -36,11 +53,7 @@ const copy = {
         href: "/join/ajudar",
         campaign: "supporters",
         ctaId: "gateway_support",
-        links: [
-          ["Ser padrinho", "/join/padrinho"],
-          ["Ser doador", "/join/doador"],
-          ["Ver causas", "/causas"],
-        ],
+        links: [["Ser padrinho", "/join/padrinho"], ["Ser doador", "/join/doador"], ["Ver causas", "/causas"]],
       },
       {
         icon: UsersRound,
@@ -51,11 +64,7 @@ const copy = {
         href: "/join/voluntario",
         campaign: "participation",
         ctaId: "gateway_participate",
-        links: [
-          ["Voluntariado", "/join/voluntario"],
-          ["Adotar", "/join/adotar"],
-          ["Divulgar", "/join/ajudar"],
-        ],
+        links: [["Voluntariado", "/join/voluntario"], ["Adotar", "/join/adotar"], ["Divulgar", "/join/ajudar"]],
       },
     ],
     trust: ["Onboarding rápido", "Perfis e causas ligados", "Partilha com atribuição"],
@@ -82,7 +91,7 @@ const copy = {
     ],
     trust: ["Fast onboarding", "Connected profiles and causes", "Attributed sharing"],
   },
-} as const;
+};
 
 export function GrowthGateway() {
   const router = useRouter();
