@@ -5,6 +5,7 @@ import { apiGet } from "@/lib/api";
 import type { CoreProtector } from "@/lib/core-types";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { AuthDialog } from "@/components/layout/auth-dialog";
 import { Button } from "@/components/ui/button";
 
 type Envelope<T> = { data: T };
@@ -88,6 +89,7 @@ export default async function ProtectorPage({ params }: { params: Promise<{ slug
         </div>
       </main>
       <SiteFooter />
+      <AuthDialog />
     </>
   );
 }
