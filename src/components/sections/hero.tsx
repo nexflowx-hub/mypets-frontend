@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 import { ArrowRight, ChevronDown, HeartHandshake, Megaphone, PawPrint } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,8 @@ const AVATARS = [
   { src: "/images/avatar-4.jpg", alt: "Membro da comunidade MyPets" },
 ];
 
-const heroTrust = {
+type TrustItem = [LucideIcon, string];
+const heroTrust: Record<"pt-PT" | "pt-BR" | "en", TrustItem[]> = {
   "pt-PT": [
     [PawPrint, "Causas e animais num só lugar"],
     [HeartHandshake, "Apoio com intenção clara"],
@@ -32,7 +34,7 @@ const heroTrust = {
     [HeartHandshake, "Support with a clear purpose"],
     [Megaphone, "Sharing is helping too"],
   ],
-} as const;
+};
 
 export function HeroSection() {
   const { dict, locale } = useLocale();
@@ -42,7 +44,7 @@ export function HeroSection() {
   return (
     <section id="top" className="xl:grid xl:grid-cols-[minmax(0,1fr)_330px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="relative isolate min-h-[92svh] overflow-hidden bg-petrol sm:min-h-[86svh] xl:min-h-[calc(100svh-68px)] xl:max-h-[900px]">
-        <motion.div initial={{ scale: 1.035, opacity: 0.86 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0">
+        <motion.div initial={{ scale: 1.035, opacity: 0.86 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.15, ease: "easeOut" }} className="absolute inset-0">
           <Image
             src="/images/hero.jpg"
             alt="Protetora a alimentar dois cães resgatados numa rua urbana"
@@ -69,12 +71,12 @@ export function HeroSection() {
         <div className="relative z-10 mx-auto flex h-full max-w-[1440px] flex-col justify-center px-4 py-24 sm:px-6 lg:px-8 xl:py-0">
           <div className="max-w-xl lg:max-w-2xl">
             <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.09, delayChildren: 0.12 } } }}>
-              <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } } }} className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/8 px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-[0.15em] text-white/85 backdrop-blur-md">
+              <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } } }} className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/8 px-3.5 py-2 text-[11px] font-extrabold uppercase tracking-[0.15em] text-white/85 backdrop-blur-md">
                 <span className="h-2 w-2 rounded-full bg-coral shadow-[0_0_0_5px_rgba(255,98,88,0.16)]" />
                 MyPets · Pessoas a ajudar quem ajuda animais
               </motion.div>
 
-              <motion.h1 variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] } } }} className="text-balance text-[36px] font-extrabold leading-[1.03] tracking-[-0.035em] text-white sm:text-5xl lg:text-[62px]">
+              <motion.h1 variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.62, ease: "easeOut" } } }} className="text-balance text-[36px] font-extrabold leading-[1.03] tracking-[-0.035em] text-white sm:text-5xl lg:text-[62px]">
                 {dict.hero.title}
               </motion.h1>
               <motion.p variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.55 } } }} className="mt-5 max-w-lg text-[15px] leading-relaxed text-white/84 sm:text-base lg:text-[17px] lg:leading-7">{dict.hero.subtitle}</motion.p>
