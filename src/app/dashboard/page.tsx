@@ -6,6 +6,7 @@ import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { ParticipationPanel } from "@/components/dashboard/participation-panel";
 import { ProtectorSocialPanel } from "@/components/dashboard/protector-social-panel";
 import { ReferralPanel } from "@/components/dashboard/referral-panel";
+import { AdminShortcut } from "@/components/dashboard/admin-shortcut";
 import { GrowthOnboardingBridge } from "@/components/growth/growth-onboarding-bridge";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function DashboardPage() {
       <SiteHeader />
       <main className="min-h-screen bg-cream">
         <GrowthOnboardingBridge />
+        <AdminShortcut />
         <ParticipationPanel />
         <ReferralPanel />
         <ProtectorSocialPanel />
