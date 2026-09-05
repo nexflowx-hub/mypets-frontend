@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
 import { ParticipationPanel } from "@/components/dashboard/participation-panel";
+import { ProtectorSocialPanel } from "@/components/dashboard/protector-social-panel";
 
 export const metadata: Metadata = {
   title: "O Meu Impacto | MyPets",
@@ -16,6 +17,7 @@ export default function DashboardPage() {
       <SiteHeader />
       <main className="min-h-screen bg-cream">
         <ParticipationPanel />
+        <ProtectorSocialPanel />
         <DashboardClient />
       </main>
       <SiteFooter />
