@@ -38,13 +38,15 @@ export async function generateMetadata({ params }: { params: Promise<{ intent: s
   const { intent } = await params;
   const campaign = await getCampaign(intent);
   if (!campaign) return { title: "Participar | MyPets" };
+  const canonical = `/join/${campaign.slug}`;
   return {
     title: `${campaign.name} | MyPets`,
     description: campaign.subheadline ?? campaign.headline,
+    alternates: { canonical },
     openGraph: {
       title: campaign.headline,
       description: campaign.subheadline ?? "Participe no MyPets.",
-      url: `https://mypets.lat/join/${campaign.slug}`,
+      url: `https://mypets.lat${canonical}`,
       siteName: "MyPets",
       type: "website",
       images: [{ url: "/images/hero.jpg", width: 1440, height: 720, alt: campaign.headline }],
