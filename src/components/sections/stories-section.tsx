@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Flag, BadgeCheck, RefreshCw, Eye, ShieldAlert } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { StoryDTO } from "@/lib/types";
 import { useDonateStore } from "@/lib/stores";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -125,7 +125,6 @@ function StoryCard({ story, index }: { story: StoryDTO; index: number }) {
   );
 }
 
-/** Trust transparency strip (verify / updates / clear needs / moderation) */
 function TrustStrip() {
   const { dict } = useLocale();
   const items = [
@@ -156,13 +155,13 @@ export function StoriesSection({ stories }: { stories: StoryDTO[] }) {
           <h2 className="max-w-md text-balance text-[24px] font-extrabold leading-[1.15] tracking-tight text-petrol sm:text-[28px]">
             {dict.stories.title}
           </h2>
-          <button
-            onClick={() => document.querySelector("#top")?.scrollIntoView({ behavior: "smooth" })}
+          <Link
+            href="/causas"
             className="group inline-flex items-center gap-1.5 text-[13.5px] font-bold text-coral transition-colors hover:text-coral-dark focus-visible:outline-2 focus-visible:outline-coral"
           >
             {dict.stories.viewAll}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
-          </button>
+          </Link>
         </div>
 
         {stories.length === 0 ? (
