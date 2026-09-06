@@ -7,7 +7,6 @@ import { GrowthGateway } from "@/components/growth/growth-gateway";
 import { MissionBand } from "@/components/sections/mission-band";
 import { StoriesSection } from "@/components/sections/stories-section";
 import { ImpactSection, PartnerBand } from "@/components/sections/impact-section";
-import { DonateDialog } from "@/components/donate/donate-dialog";
 import { SupportIntentDialog } from "@/components/donate/support-intent-dialog";
 import { SearchDialog } from "@/components/layout/search-dialog";
 import { AuthDialog } from "@/components/layout/auth-dialog";
@@ -15,7 +14,6 @@ import { AuthDialog } from "@/components/layout/auth-dialog";
 export const dynamic = "force-dynamic";
 
 type ApiEnvelope<T> = { data: T };
-type PublicConfig = { paymentsLive: boolean };
 
 async function getStories(): Promise<StoryDTO[]> {
   try {
@@ -34,15 +32,6 @@ async function getMetrics(): Promise<MetricDTO[]> {
   } catch (error) {
     console.error("[page] failed to load metrics from API", error);
     return [];
-  }
-}
-
-async function getConfig(): Promise<PublicConfig> {
-  try {
-    const response = await apiGet<ApiEnvelope<PublicConfig>>("/config");
-    return response.data;
-  } catch {
-    return { paymentsLive: false };
   }
 }
 
@@ -66,7 +55,7 @@ function StructuredData() {
 }
 
 export default async function HomePage() {
-  const [stories, metrics, config] = await Promise.all([getStories(), getMetrics(), getConfig()]);
+  const [stories, metrics] = await Promise.all([getStories(), getMetrics()]);
 
   return (
     <>
@@ -85,7 +74,7 @@ export default async function HomePage() {
 
       <SiteFooter />
 
-      {config.paymentsLive ? <DonateDialog stories={stories} /> : <SupportIntentDialog />}
+      <SupportIntentDialog />
       <SearchDialog stories={stories} />
       <AuthDialog />
     </>
