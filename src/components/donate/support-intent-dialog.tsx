@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { HeartHandshake, Share2, UserRoundPlus } from "lucide-react";
+import { HeartHandshake, Share2, UserRoundPlus, ArrowRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useDonateStore, useUiStore } from "@/lib/stores";
@@ -41,17 +41,21 @@ export function SupportIntentDialog() {
 
         <div className="px-6 py-6">
           <div className="rounded-xl border border-border bg-sand/55 p-4">
-            <p className="text-sm font-extrabold text-petrol">Pagamentos online em ativação</p>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">Estamos a preparar os meios de pagamento reais da plataforma. Não processamos nem simulamos pagamentos enquanto essa integração não estiver ativa.</p>
+            <p className="text-sm font-extrabold text-petrol">Apoio financeiro acontece nas causas</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">O MyPets só apresenta checkout financeiro em causas ativas e elegíveis. Histórias editoriais ou de demonstração nunca geram uma cobrança direta.</p>
           </div>
 
           <div className="mt-5 grid gap-2.5">
+            <Button asChild className="h-11 rounded-xl bg-coral font-bold text-white hover:bg-coral-dark">
+              <Link href="/causas" onClick={closeDonate}>Ver causas para apoiar <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
             <Button
               onClick={() => {
                 closeDonate();
                 setAuthOpen(true);
               }}
-              className="h-11 rounded-xl bg-coral font-bold text-white hover:bg-coral-dark"
+              variant="outline"
+              className="h-11 rounded-xl font-bold"
             >
               <UserRoundPlus className="mr-2 h-4 w-4" /> Criar conta / acompanhar
             </Button>
