@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { SocialWall } from "@/components/social/social-wall";
 import { ShareActions } from "@/components/share/share-actions";
+import { CauseCheckout } from "@/components/payments/cause-checkout";
 import { ArrowRight, HeartHandshake, MapPin, PawPrint, ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,13 @@ type SocialData = {
   content: Array<{ id: string; socialProfileId: string; platform: string; canonicalUrl: string; contentType: string; captionExcerpt: string | null; thumbnailUrl: string | null; publishedAt: string | null; featured: boolean }>;
 };
 
+type PublicConfig = {
+  paymentsLive: boolean;
+  paymentProvider?: string | null;
+  paymentCurrencies?: string[];
+  embeddedCheckout?: boolean;
+};
+
 type Envelope<T> = { data: T };
 
 async function getCause(slug: string) {
@@ -46,6 +54,10 @@ async function getCause(slug: string) {
 
 async function getSocial(slug: string): Promise<SocialData> {
   try { return (await apiGet<Envelope<SocialData>>(`/causes/${encodeURIComponent(slug)}/social`)).data; } catch { return { profiles: [], content: [] }; }
+}
+
+async function getConfig(): Promise<PublicConfig> {
+  try { return (await apiGet<Envelope<PublicConfig>>("/config")).data; } catch { return { paymentsLive: false, paymentCurrencies: [] }; }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -68,15 +80,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 function money(cents: number, currency: string) {
-  return new Intl.NumberFormat("pt-PT", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
+  return new Intl.NumberFormat(currency === "BRL" ? "pt-BR" : "pt-PT", { style: "currency", currency, maximumFractionDigits: 0 }).format(cents / 100);
 }
 
 export default async function CausePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [cause, social] = await Promise.all([getCause(slug), getSocial(slug)]);
+  const [cause, social, config] = await Promise.all([getCause(slug), getSocial(slug), getConfig()]);
   if (!cause) notFound();
 
   const sponsorHref = `/join/padrinho?v=social&cause_id=${encodeURIComponent(cause.id)}&src_cta=cause_sponsor&utm_source=mypets&utm_medium=internal&utm_campaign=cause_${encodeURIComponent(cause.slug)}`;
+  const paymentCurrency = cause.currency === "EUR" || cause.currency === "BRL" ? cause.currency : null;
+  const financialCause = cause.supportMode !== "NON_FINANCIAL" && Boolean(paymentCurrency);
+  const checkoutEnabled = Boolean(
+    financialCause &&
+    config.paymentsLive &&
+    config.embeddedCheckout &&
+    config.paymentProvider === "xpayments" &&
+    paymentCurrency &&
+    (config.paymentCurrencies ?? []).includes(paymentCurrency)
+  );
+  const progress = cause.targetAmountCents
+    ? Math.min(100, Math.round((cause.raisedAmountCents / cause.targetAmountCents) * 100))
+    : 0;
 
   return (
     <>
@@ -93,13 +118,14 @@ export default async function CausePage({ params }: { params: Promise<{ slug: st
               {cause.summary && <p className="mt-5 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">{cause.summary}</p>}
 
               <div className="mt-7 flex flex-wrap gap-3">
+                {paymentCurrency && <CauseCheckout causeId={cause.id} causeTitle={cause.title} currency={paymentCurrency} enabled={checkoutEnabled} />}
                 <Link href={sponsorHref} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-coral px-5 text-sm font-extrabold text-white transition hover:bg-coral-dark">
                   <HeartHandshake className="h-4 w-4" /> Quero acompanhar / ser padrinho <ArrowRight className="h-4 w-4" />
                 </Link>
                 <ShareActions title={cause.title} text={cause.summary ?? "Conheça esta causa no MyPets."} path={`/causas/${cause.slug}`} />
               </div>
             </div>
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5">
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/10">
               {cause.primaryImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={cause.primaryImage} alt="" className="aspect-[4/3] h-full w-full object-cover" />
@@ -159,7 +185,11 @@ export default async function CausePage({ params }: { params: Promise<{ slug: st
                 <div className="rounded-2xl bg-sand p-4"><p className="text-2xl font-extrabold text-petrol">{cause.sponsors}</p><p className="text-xs text-muted-foreground">padrinhos/interessados</p></div>
               </div>
               {cause.targetAmountCents && cause.currency && (
-                <div className="mt-4 rounded-2xl bg-petrol p-4 text-white"><p className="text-xs font-bold text-white/60">Objetivo futuro de apoio</p><p className="mt-1 text-xl font-extrabold">{money(cause.targetAmountCents, cause.currency)}</p><p className="mt-1 text-[11px] text-white/55">Pagamentos só serão ativados quando XPAYMENTS estiver integrado.</p></div>
+                <div className="mt-4 rounded-2xl bg-petrol p-4 text-white">
+                  <div className="flex items-baseline justify-between gap-3"><div><p className="text-xs font-bold text-white/60">Apoio financeiro</p><p className="mt-1 text-xl font-extrabold">{money(cause.raisedAmountCents, cause.currency)}</p></div><p className="text-xs font-bold text-white/60">de {money(cause.targetAmountCents, cause.currency)}</p></div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-coral transition-[width]" style={{ width: `${progress}%` }} /></div>
+                  <p className="mt-2 text-[11px] text-white/55">{checkoutEnabled ? "Pagamentos processados no checkout seguro XPAYMENTS." : "Pagamento online será disponibilizado quando a Store XPAYMENTS desta moeda estiver ativa."}</p>
+                </div>
               )}
             </div>
 
