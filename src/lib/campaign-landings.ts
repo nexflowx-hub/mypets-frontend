@@ -107,6 +107,21 @@ export async function getCampaignSummary(campaignKey: string): Promise<CampaignS
   }
 }
 
+export async function getVerticalCampaigns(vertical: CampaignVertical, limit = 12): Promise<CampaignSummary[]> {
+  try {
+    const safeLimit = Math.max(1, Math.min(50, Math.trunc(limit)));
+    return (await apiGet<Envelope<CampaignSummary[]>>(`/causes/vertical/${vertical}?limit=${safeLimit}`)).data;
+  } catch {
+    return [];
+  }
+}
+
+export function campaignSegmentForProject(projectSlug: string): CampaignRouteSegment | null {
+  const entry = (Object.entries(CAMPAIGN_VERTICALS) as Array<[CampaignRouteSegment, (typeof CAMPAIGN_VERTICALS)[CampaignRouteSegment]]>)
+    .find(([, config]) => config.projectSlug === projectSlug);
+  return entry?.[0] ?? null;
+}
+
 export async function getCampaignCause(slug: string): Promise<CampaignCause | null> {
   try {
     const cause = (await apiGet<Envelope<Omit<CampaignCause, "vertical" | "campaignKey" | "campaignMeta">>>(`/causes/${encodeURIComponent(slug)}`)).data;
