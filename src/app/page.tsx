@@ -6,6 +6,7 @@ import { HeroSection, FacePetsSection } from "@/components/sections/hero";
 import { GrowthGateway } from "@/components/growth/growth-gateway";
 import { MissionBand } from "@/components/sections/mission-band";
 import { StoriesSection } from "@/components/sections/stories-section";
+import { ProjectsSection } from "@/components/sections/projects-section";
 import { ImpactSection, PartnerBand } from "@/components/sections/impact-section";
 import { SupportIntentDialog } from "@/components/donate/support-intent-dialog";
 import { SearchDialog } from "@/components/layout/search-dialog";
@@ -67,6 +68,7 @@ export default async function HomePage() {
         <GrowthGateway />
         <MissionBand />
         <StoriesSection stories={stories} />
+        <ProjectsSection />
         <ImpactSection metrics={metrics} />
         <FacePetsSection />
         <PartnerBand />
