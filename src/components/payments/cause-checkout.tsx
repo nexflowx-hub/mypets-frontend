@@ -126,7 +126,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
 
     async function reconcileSilently() {
       try {
-        const status = await fetchPaymentStatus(intentId);
+        const status = await fetchPaymentStatus(intentId!);
         if (!cancelled) applyStatus(status);
       } catch {
         // Silent fallback: the signed webhook remains the source of truth.
