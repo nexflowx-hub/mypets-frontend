@@ -2,112 +2,73 @@
 
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, HandHeart, HeartHandshake, Megaphone, PawPrint, ShieldCheck, UsersRound } from "lucide-react";
+import { ArrowRight, HeartHandshake, PawPrint, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { growthDestination } from "@/lib/growth-navigation";
 
 type GatewayPath = {
   icon: LucideIcon;
-  kicker: string;
   title: string;
   text: string;
-  cta: string;
   href: string;
   campaign: string;
   ctaId: string;
-  links: Array<[string, string]>;
+  tone: "teal" | "coral" | "gold";
 };
 
-type GatewayCopy = {
-  eyebrow: string;
-  title: string;
-  text: string;
-  paths: GatewayPath[];
-  trust: string[];
+const paths: Record<"pt-PT" | "pt-BR" | "en", GatewayPath[]> = {
+  "pt-PT": [
+    { icon: PawPrint, title: "Pedir apoio", text: "É protetor, associação ou tutor numa situação urgente? Conte a sua história e encontre apoio.", href: "/join/protetor", campaign: "need_support", ctaId: "gateway_request_support", tone: "teal" },
+    { icon: HeartHandshake, title: "Apoiar uma causa", text: "Escolha uma causa, acompanhe a evolução e ajude a transformar uma história real.", href: "/causas", campaign: "supporters", ctaId: "gateway_support", tone: "coral" },
+    { icon: UsersRound, title: "Ser padrinho", text: "Acompanhe um animal ou causa e ofereça apoio continuado ao longo do tempo.", href: "/join/padrinho", campaign: "sponsors", ctaId: "gateway_sponsor", tone: "gold" },
+  ],
+  "pt-BR": [
+    { icon: PawPrint, title: "Pedir apoio", text: "É protetor, ONG ou tutor em uma situação de emergência? Conte sua história e receba apoio.", href: "/join/protetor", campaign: "need_support", ctaId: "gateway_request_support", tone: "teal" },
+    { icon: HeartHandshake, title: "Apoiar uma causa", text: "Escolha uma causa, acompanhe a evolução e ajude a transformar uma história real.", href: "/causas", campaign: "supporters", ctaId: "gateway_support", tone: "coral" },
+    { icon: UsersRound, title: "Ser padrinho", text: "Acompanhe um animal ou causa e ofereça suporte contínuo ao longo do tempo.", href: "/join/padrinho", campaign: "sponsors", ctaId: "gateway_sponsor", tone: "gold" },
+  ],
+  en: [
+    { icon: PawPrint, title: "Request support", text: "Are you a protector, NGO or pet guardian facing an urgent situation? Tell your story and find support.", href: "/join/protetor", campaign: "need_support", ctaId: "gateway_request_support", tone: "teal" },
+    { icon: HeartHandshake, title: "Support a cause", text: "Choose a cause, follow its progress and help transform a real story.", href: "/causas", campaign: "supporters", ctaId: "gateway_support", tone: "coral" },
+    { icon: UsersRound, title: "Become a sponsor", text: "Follow an animal or cause and provide ongoing support over time.", href: "/join/padrinho", campaign: "sponsors", ctaId: "gateway_sponsor", tone: "gold" },
+  ],
 };
 
-const copy: Record<"pt-PT" | "pt-BR" | "en", GatewayCopy> = {
-  "pt-PT": {
-    eyebrow: "Comece pelo que precisa agora",
-    title: "Um caminho simples para pedir ajuda, apoiar ou participar.",
-    text: "O MyPets adapta o onboarding à sua intenção. Não precisa preencher tudo antes de começar.",
-    paths: [
-      { icon: PawPrint, kicker: "Preciso de apoio", title: "Ajudo animais e preciso de ajuda", text: "Crie o seu perfil, registe animais, necessidades ou apresente um projeto.", cta: "Pedir apoio", href: "/join/protetor", campaign: "need_support", ctaId: "gateway_request_support", links: [["Sou protetor", "/join/protetor"], ["Tenho um projeto", "/join/projeto"], ["Encontrei um animal", "/join/encontrei-um-animal"]] },
-      { icon: HeartHandshake, kicker: "Quero apoiar", title: "Quero transformar uma história", text: "Descubra causas, acompanhe um animal, torne-se padrinho ou manifeste intenção de apoiar.", cta: "Quero ajudar", href: "/join/ajudar", campaign: "supporters", ctaId: "gateway_support", links: [["Ser padrinho", "/join/padrinho"], ["Ser doador", "/join/doador"], ["Ver causas", "/causas"]] },
-      { icon: UsersRound, kicker: "Quero participar", title: "Tempo, alcance e presença também salvam", text: "Ajude como voluntário, adotante, divulgador ou membro da comunidade MyPets.", cta: "Participar", href: "/join/voluntario", campaign: "participation", ctaId: "gateway_participate", links: [["Voluntariado", "/join/voluntario"], ["Adotar", "/join/adotar"], ["Divulgar", "/join/ajudar"]] },
-    ],
-    trust: ["Onboarding rápido", "Perfis e causas ligados", "Partilha com atribuição"],
-  },
-  "pt-BR": {
-    eyebrow: "Comece pelo que você precisa agora",
-    title: "Um caminho simples para pedir ajuda, apoiar ou participar.",
-    text: "O MyPets adapta o onboarding à sua intenção. Você não precisa preencher tudo antes de começar.",
-    paths: [
-      { icon: PawPrint, kicker: "Preciso de apoio", title: "Ajudo animais e preciso de ajuda", text: "Crie seu perfil, registre animais, necessidades ou apresente um projeto.", cta: "Pedir apoio", href: "/join/protetor", campaign: "need_support", ctaId: "gateway_request_support", links: [["Sou protetor", "/join/protetor"], ["Tenho um projeto", "/join/projeto"], ["Encontrei um animal", "/join/encontrei-um-animal"]] },
-      { icon: HeartHandshake, kicker: "Quero apoiar", title: "Quero transformar uma história", text: "Descubra causas, acompanhe um animal, torne-se padrinho ou manifeste intenção de apoiar.", cta: "Quero ajudar", href: "/join/ajudar", campaign: "supporters", ctaId: "gateway_support", links: [["Ser padrinho", "/join/padrinho"], ["Ser doador", "/join/doador"], ["Ver causas", "/causas"]] },
-      { icon: UsersRound, kicker: "Quero participar", title: "Tempo, alcance e presença também salvam", text: "Ajude como voluntário, adotante, divulgador ou membro da comunidade MyPets.", cta: "Participar", href: "/join/voluntario", campaign: "participation", ctaId: "gateway_participate", links: [["Voluntariado", "/join/voluntario"], ["Adotar", "/join/adotar"], ["Divulgar", "/join/ajudar"]] },
-    ],
-    trust: ["Onboarding rápido", "Perfis e causas conectados", "Compartilhamento com atribuição"],
-  },
-  en: {
-    eyebrow: "Start with what you need now",
-    title: "A simple path to ask for help, support or take part.",
-    text: "MyPets adapts onboarding to your intent. You do not need to complete everything before getting started.",
-    paths: [
-      { icon: PawPrint, kicker: "I need support", title: "I help animals and need help", text: "Create your profile, register animals, needs or submit a project.", cta: "Request support", href: "/join/protetor", campaign: "need_support", ctaId: "gateway_request_support", links: [["I am a protector", "/join/protetor"], ["I run a project", "/join/projeto"], ["I found an animal", "/join/encontrei-um-animal"]] },
-      { icon: HeartHandshake, kicker: "I want to support", title: "I want to change a story", text: "Discover causes, follow an animal, become a sponsor or show your intent to help.", cta: "I want to help", href: "/join/ajudar", campaign: "supporters", ctaId: "gateway_support", links: [["Become a sponsor", "/join/padrinho"], ["Become a donor", "/join/doador"], ["View causes", "/causas"]] },
-      { icon: UsersRound, kicker: "I want to participate", title: "Time, reach and presence save lives too", text: "Help as a volunteer, adopter, advocate or member of the MyPets community.", cta: "Take part", href: "/join/voluntario", campaign: "participation", ctaId: "gateway_participate", links: [["Volunteer", "/join/voluntario"], ["Adopt", "/join/adotar"], ["Share", "/join/ajudar"]] },
-    ],
-    trust: ["Fast onboarding", "Connected profiles and causes", "Attributed sharing"],
-  },
+const tones = {
+  teal: { wrap: "bg-[#eef8f7] border-[#d5efec]", icon: "bg-[#0d6e6b] text-white", arrow: "bg-[#ccebea] text-[#0d6e6b]" },
+  coral: { wrap: "bg-[#fff0ee] border-[#ffe0db]", icon: "bg-coral text-white", arrow: "bg-[#ffd4cf] text-coral-dark" },
+  gold: { wrap: "bg-[#fff8ec] border-[#f5e8cf]", icon: "bg-[#c99546] text-white", arrow: "bg-[#f3ddb6] text-[#936923]" },
 };
 
 export function GrowthGateway() {
   const router = useRouter();
   const { locale } = useLocale();
-  const t = copy[locale as keyof typeof copy] ?? copy["pt-PT"];
+  const items = paths[locale as keyof typeof paths] ?? paths["pt-BR"];
 
   return (
-    <section className="relative overflow-hidden border-b border-border/60 bg-white py-14 sm:py-16 lg:py-20">
-      <div aria-hidden className="absolute left-1/2 top-0 h-52 w-[80%] -translate-x-1/2 rounded-full bg-coral/5 blur-3xl" />
-      <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-        <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.55, ease: "easeOut" }} className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-coral">{t.eyebrow}</p>
-          <h2 className="mt-3 text-balance text-3xl font-extrabold leading-tight tracking-tight text-petrol sm:text-4xl">{t.title}</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-7 text-muted-foreground sm:text-base">{t.text}</p>
-        </motion.div>
-
-        <div className="mt-9 grid gap-4 lg:grid-cols-3">
-          {t.paths.map((path, index) => {
-            const Icon = path.icon;
-            return (
-              <motion.article key={path.kicker} initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }} whileHover={{ y: -5 }} className="group relative overflow-hidden rounded-3xl border border-border/80 bg-cream p-6 shadow-[0_14px_34px_-28px_rgba(16,32,42,0.35)] transition-shadow hover:shadow-[0_22px_48px_-28px_rgba(16,32,42,0.42)] sm:p-7">
-                <div className="flex items-start justify-between gap-4">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-coral-soft text-coral"><Icon className="h-5 w-5" /></span>
-                  <span className="rounded-full border border-border bg-white px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">{path.kicker}</span>
-                </div>
-                <h3 className="mt-6 max-w-sm text-[22px] font-extrabold leading-tight tracking-tight text-petrol">{path.title}</h3>
-                <p className="mt-3 min-h-[66px] text-sm leading-6 text-muted-foreground">{path.text}</p>
-                <button onClick={() => router.push(growthDestination(path.href, { campaign: path.campaign, cta: path.ctaId }))} className="mt-6 inline-flex min-h-11 w-full items-center justify-between rounded-xl bg-petrol px-4 text-sm font-extrabold text-white transition-colors hover:bg-petrol-light focus-visible:outline-2 focus-visible:outline-coral">
-                  {path.cta}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </button>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {path.links.map(([label, href], chipIndex) => (
-                    <button key={label} onClick={() => router.push(growthDestination(href, { campaign: path.campaign, cta: `${path.ctaId}_chip_${chipIndex + 1}` }))} className="rounded-full border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-ink/70 transition hover:border-coral/40 hover:text-coral">{label}</button>
-                  ))}
-                </div>
-              </motion.article>
-            );
-          })}
-        </div>
-
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="mt-7 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-xs font-semibold text-ink/55">
-          {t.trust.map((item, index) => {
-            const Icon = index === 0 ? HandHeart : index === 1 ? ShieldCheck : Megaphone;
-            return <span key={item} className="inline-flex items-center gap-2"><Icon className="h-4 w-4 text-coral" />{item}</span>;
-          })}
-        </motion.div>
+    <section id="como-ajudar" className="relative z-20 -mt-1 bg-white py-4 sm:py-5">
+      <div className="mx-auto grid max-w-[1320px] gap-3 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
+        {items.map((path, index) => {
+          const Icon = path.icon;
+          const tone = tones[path.tone];
+          return (
+            <motion.button
+              key={path.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.42, delay: index * 0.05 }}
+              whileHover={{ y: -3 }}
+              onClick={() => router.push(growthDestination(path.href, { campaign: path.campaign, cta: path.ctaId }))}
+              className={`group flex min-h-[112px] items-center gap-4 rounded-2xl border p-4 text-left shadow-[0_8px_24px_-22px_rgba(16,32,42,0.35)] transition-shadow hover:shadow-[0_14px_30px_-20px_rgba(16,32,42,0.3)] ${tone.wrap}`}
+            >
+              <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full shadow-inner ring-4 ring-white/45 ${tone.icon}`}><Icon className="h-6 w-6" /></span>
+              <span className="min-w-0 flex-1"><span className="block text-[18px] font-black tracking-tight text-petrol">{path.title}</span><span className="mt-1 block text-[12px] font-medium leading-[1.45] text-ink/68">{path.text}</span></span>
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform group-hover:translate-x-1 ${tone.arrow}`}><ArrowRight className="h-4 w-4" /></span>
+            </motion.button>
+          );
+        })}
       </div>
     </section>
   );

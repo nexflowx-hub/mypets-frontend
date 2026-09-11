@@ -2,10 +2,9 @@ import type { StoryDTO, MetricDTO } from "@/lib/types";
 import { apiGet } from "@/lib/api";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { HeroSection, FacePetsSection } from "@/components/sections/hero";
+import { HeroSection } from "@/components/sections/hero";
 import { GrowthGateway } from "@/components/growth/growth-gateway";
-import { MissionBand } from "@/components/sections/mission-band";
-import { StoriesSection } from "@/components/sections/stories-section";
+import { HomeDiscoverySection, type HomeCause } from "@/components/sections/home-discovery-section";
 import { ProjectsSection } from "@/components/sections/projects-section";
 import { ImpactSection, PartnerBand } from "@/components/sections/impact-section";
 import { SupportIntentDialog } from "@/components/donate/support-intent-dialog";
@@ -19,8 +18,7 @@ type ApiEnvelope<T> = { data: T };
 
 async function getStories(): Promise<StoryDTO[]> {
   try {
-    const response = await apiGet<ApiEnvelope<StoryDTO[]>>("/stories");
-    return response.data;
+    return (await apiGet<ApiEnvelope<StoryDTO[]>>("/stories")).data;
   } catch (error) {
     console.error("[page] failed to load stories from API", error);
     return [];
@@ -29,10 +27,18 @@ async function getStories(): Promise<StoryDTO[]> {
 
 async function getMetrics(): Promise<MetricDTO[]> {
   try {
-    const response = await apiGet<ApiEnvelope<MetricDTO[]>>("/impact/public");
-    return response.data;
+    return (await apiGet<ApiEnvelope<MetricDTO[]>>("/impact/public")).data;
   } catch (error) {
     console.error("[page] failed to load metrics from API", error);
+    return [];
+  }
+}
+
+async function getCauses(): Promise<HomeCause[]> {
+  try {
+    return (await apiGet<ApiEnvelope<HomeCause[]>>("/causes?limit=8")).data;
+  } catch (error) {
+    console.error("[page] failed to load causes from API", error);
     return [];
   }
 }
@@ -52,31 +58,25 @@ function StructuredData() {
       url: "https://humanimpact.tech",
     },
   };
-
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />;
 }
 
 export default async function HomePage() {
-  const [stories, metrics] = await Promise.all([getStories(), getMetrics()]);
+  const [stories, metrics, causes] = await Promise.all([getStories(), getMetrics(), getCauses()]);
 
   return (
     <>
       <StructuredData />
       <SiteHeader />
-
-      <main className="flex-1">
+      <main className="flex-1 bg-white">
         <HeroSection />
         <GrowthGateway />
-        <MissionBand />
-        <StoriesSection stories={stories} />
+        <HomeDiscoverySection causes={causes} stories={stories} />
         <ProjectsSection />
         <ImpactSection metrics={metrics} />
-        <FacePetsSection />
         <PartnerBand />
       </main>
-
       <SiteFooter />
-
       <SupportIntentDialog />
       <SearchDialog stories={stories} />
       <AuthDialog />
