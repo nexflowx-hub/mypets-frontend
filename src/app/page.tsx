@@ -11,6 +11,7 @@ import { ImpactSection, PartnerBand } from "@/components/sections/impact-section
 import { SupportIntentDialog } from "@/components/donate/support-intent-dialog";
 import { SearchDialog } from "@/components/layout/search-dialog";
 import { AuthDialog } from "@/components/layout/auth-dialog";
+import { BRAND } from "@/lib/brand";
 
 export const dynamic = "force-dynamic";
 
@@ -40,11 +41,11 @@ function StructuredData() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "MyPets",
-    url: "https://mypets.lat",
-    logo: "https://mypets.lat/icon.svg",
+    name: BRAND.name,
+    url: BRAND.siteUrl,
+    logo: BRAND.logoUrl,
     slogan: "Quem ajuda animais também merece ajuda.",
-    sameAs: ["https://facepets.org"],
+    sameAs: [BRAND.facebookUrl, BRAND.instagramUrl, BRAND.facePetsUrl],
     parentOrganization: {
       "@type": "Organization",
       name: "HUMAN IMPACT TECH LTD",
