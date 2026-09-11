@@ -17,7 +17,7 @@ export type HomeCause = {
   supportMode: string;
   targetAmountCents: number | null;
   raisedAmountCents: number;
-  currency: string | null;
+  currency: "EUR" | "BRL" | null;
 };
 
 function causeProgress(cause: HomeCause) {
@@ -45,7 +45,7 @@ export function HomeDiscoverySection({ causes, stories }: { causes: HomeCause[];
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {featuredCauses.map((cause) => {
                 const progress = causeProgress(cause);
-                const currency = cause.currency ?? (cause.country === "BR" ? "BRL" : "EUR");
+                const currency: "EUR" | "BRL" = cause.currency ?? (cause.country === "BR" ? "BRL" : "EUR");
                 return (
                   <article key={cause.id} className="group overflow-hidden rounded-xl border border-border/80 bg-white shadow-[0_3px_16px_-13px_rgba(16,32,42,0.4)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_28px_-20px_rgba(16,32,42,0.4)]">
                     <Link href={`/causas/${cause.slug}`} className="block">
