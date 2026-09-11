@@ -120,12 +120,13 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   }, [applyStatus, fetchPaymentStatus]);
 
   React.useEffect(() => {
-    if (!intent?.id || paid || verifying) return;
+    const intentId = intent?.id;
+    if (!intentId || paid || verifying) return;
     let cancelled = false;
 
     async function reconcileSilently() {
       try {
-        const status = await fetchPaymentStatus(intent.id);
+        const status = await fetchPaymentStatus(intentId);
         if (!cancelled) applyStatus(status);
       } catch {
         // Silent fallback: the signed webhook remains the source of truth.
