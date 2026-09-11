@@ -53,11 +53,21 @@ export default async function CausesPage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          <Link href="/projetos/together-we-feed" className="group mb-8 flex flex-col justify-between gap-5 rounded-3xl bg-petrol p-6 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg sm:flex-row sm:items-center sm:p-7">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">Primeiro projeto apoiado pelo MyPets</p>
+              <h2 className="mt-2 text-2xl font-extrabold">Together We Feed</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">Alimentação e apoio imediato para animais em situação de vulnerabilidade, com um funil dedicado de captação.</p>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-2 text-sm font-extrabold">Conhecer projeto <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+          </Link>
+
           {rows.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-border bg-white p-10 text-center">
               <PawPrint className="mx-auto h-8 w-8 text-coral" />
               <h2 className="mt-4 text-xl font-extrabold text-petrol">As primeiras causas verificadas estão a chegar.</h2>
               <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">Não publicamos causas descobertas automaticamente como se fossem oficiais. Primeiro são revistas e reivindicadas pelos responsáveis.</p>
+              <Link href="/projetos" className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-coral">Ver projetos apoiados <ArrowRight className="h-4 w-4" /></Link>
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
