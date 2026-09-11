@@ -4,12 +4,13 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
+import { BRAND } from "@/lib/brand";
 
 const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], display: "swap" });
 const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mypets.lat"),
+  metadataBase: new URL(BRAND.siteUrl),
   title: { default: "MyPets — Quem ajuda animais também merece ajuda.", template: "%s · MyPets" },
   description: "MyPets é uma rede que aproxima quem quer ajudar das pessoas que resgatam, alimentam, tratam e protegem animais todos os dias. Pessoas. Animais. Impacto Real.",
   keywords: ["MyPets", "animais", "protetores", "resgate animal", "adoção", "doação", "impacto social", "FacePets"],
@@ -18,17 +19,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MyPets — Quem ajuda animais também merece ajuda.",
     description: "Uma comunidade. Milhares de histórias. Um impacto que podemos acompanhar. Apoie protetores e animais em Portugal e no Brasil.",
-    url: "https://mypets.lat",
-    siteName: "MyPets",
+    url: BRAND.siteUrl,
+    siteName: BRAND.name,
     type: "website",
     locale: "pt_PT",
-    images: [{ url: "/images/hero.jpg", width: 1440, height: 720, alt: "Protetora a alimentar cães resgatados" }],
+    images: [{ url: BRAND.socialBannerUrl, alt: "MyPets — Pessoas. Animais. Impacto Real." }],
   },
   twitter: {
     card: "summary_large_image",
     title: "MyPets — Quem ajuda animais também merece ajuda.",
     description: "Apoie quem ajuda animais todos os dias. Pessoas. Animais. Impacto Real.",
-    images: ["/images/hero.jpg"],
+    images: [BRAND.socialBannerUrl],
   },
   robots: { index: true, follow: true },
   icons: { icon: "/icon.svg" },
