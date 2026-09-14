@@ -1,13 +1,14 @@
-import { CauseCampaignPage, campaignLandingMetadata } from "@/components/campaigns/cause-campaign-page";
+import { CauseCampaignPage } from "@/components/campaigns/cause-campaign-page";
+import { CampaignStructuredData, campaignSeoMetadata } from "@/components/campaigns/campaign-seo";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ campaign: string }> }) {
   const { campaign } = await params;
-  return campaignLandingMetadata("emergency", campaign);
+  return campaignSeoMetadata("emergency", campaign);
 }
 
 export default async function EmergencyCampaignPage({ params }: { params: Promise<{ campaign: string }> }) {
   const { campaign } = await params;
-  return <CauseCampaignPage segment="emergency" campaignKey={campaign} />;
+  return <><CampaignStructuredData segment="emergency" campaignKey={campaign} /><CauseCampaignPage segment="emergency" campaignKey={campaign} /></>;
 }
