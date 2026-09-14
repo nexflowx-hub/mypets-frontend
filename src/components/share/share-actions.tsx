@@ -19,30 +19,39 @@ type Props = {
   growthCampaignSlug?: string | null;
 };
 
+const campaignPrefixes = new Set(["vet-help", "rescue", "shelter", "emergency"]);
+
 function defaultContent(path: string) {
   if (path.startsWith("/pets/")) return "facepets";
   if (path.startsWith("/protetores/")) return "protector";
-  if (["/vet-help/", "/rescue/", "/shelter/", "/emergency/"].some((prefix) => path.startsWith(prefix))) return "cause_campaign";
+  if ([...campaignPrefixes].some((prefix) => path.startsWith(`/${prefix}/`))) return "cause_campaign";
   return "shared_content";
+}
+
+function inferredCampaign(path: string) {
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length >= 2 && campaignPrefixes.has(parts[0]!)) return parts[1]!;
+  return "community_referral";
 }
 
 export function ShareActions({
   title,
   text,
   path,
-  trackingCampaign = "community_referral",
+  trackingCampaign,
   trackingSource = "community",
   trackingContent,
   growthCampaignSlug = null,
 }: Props) {
   const [copied, setCopied] = React.useState(false);
   const content = trackingContent ?? defaultContent(path);
+  const campaign = trackingCampaign ?? inferredCampaign(path);
 
   const fallbackUrl = (channel: ShareChannel) => {
     const url = new URL(path, window.location.origin);
     url.searchParams.set("utm_source", trackingSource);
     url.searchParams.set("utm_medium", channel);
-    url.searchParams.set("utm_campaign", trackingCampaign);
+    url.searchParams.set("utm_campaign", campaign);
     url.searchParams.set("utm_content", content);
     return url.toString();
   };
@@ -59,7 +68,7 @@ export function ShareActions({
           campaignSlug: growthCampaignSlug,
           source: "member",
           medium: channel,
-          campaign: trackingCampaign,
+          campaign,
           content,
         }),
       });
