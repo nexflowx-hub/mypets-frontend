@@ -26,6 +26,11 @@ jobs:
             "https://www.mypets.lat/projetos/rescue/apoiar"
             "https://www.mypets.lat/projetos/shelter/apoiar"
             "https://www.mypets.lat/projetos/emergency/apoiar"
+            "https://www.mypets.lat/causas/mypets-geral-brl"
+            "https://www.mypets.lat/causas/mypets-vet-help-brl"
+            "https://www.mypets.lat/causas/mypets-rescue-brl"
+            "https://www.mypets.lat/causas/mypets-shelter-brl"
+            "https://www.mypets.lat/causas/mypets-emergency-brl"
             "https://www.mypets.lat/loja"
             "https://www.mypets.lat/guias"
             "https://www.mypets.lat/guias/primeiras-24h"
@@ -34,7 +39,7 @@ jobs:
           for url in "${routes[@]}"; do
             ready=false
             for attempt in $(seq 1 24); do
-              code="$(curl --max-time 20 -sS -o /dev/null -w '%{http_code}' "$url" || true)"
+              code="$(curl -L --max-redirs 5 --max-time 20 -sS -o /dev/null -w '%{http_code}' "$url" || true)"
               echo "attempt=$attempt code=$code $url"
               if [ "$code" -ge 200 ] 2>/dev/null && [ "$code" -lt 400 ]; then
                 ready=true
