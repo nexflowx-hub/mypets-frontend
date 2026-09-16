@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, BadgeCheck, HeartHandshake, ShieldCheck } from "
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { CauseCheckout } from "@/components/payments/cause-checkout";
 import {
   CAMPAIGN_VERTICALS,
   campaignRoute,
@@ -29,6 +30,29 @@ const TRACKING_KEYS = [
   "ref",
 ] as const;
 
+const INTERNAL_FUNDS = {
+  "vet-help": {
+    id: "9a7f1000-0000-4a11-8c01-000000000002",
+    title: "Fundo MyPets Vet Help",
+    text: "Apoio ao MyPets para esta frente temática. O fundo pode sustentar a operação, verificação e iniciativas elegíveis de tratamentos veterinários.",
+  },
+  rescue: {
+    id: "9a7f1000-0000-4a11-8c01-000000000003",
+    title: "Fundo MyPets Rescue",
+    text: "Apoio ao MyPets para esta frente temática. O fundo pode sustentar a operação, verificação e iniciativas elegíveis de resgate e primeiros cuidados.",
+  },
+  shelter: {
+    id: "9a7f1000-0000-4a11-8c01-000000000004",
+    title: "Fundo MyPets Shelter",
+    text: "Apoio ao MyPets para esta frente temática. O fundo pode sustentar a operação, verificação e iniciativas elegíveis de abrigos, lares temporários e protetores.",
+  },
+  emergency: {
+    id: "9a7f1000-0000-4a11-8c01-000000000005",
+    title: "Fundo MyPets Emergency",
+    text: "Apoio ao MyPets para esta frente temática. O fundo pode sustentar a operação, verificação e iniciativas elegíveis de resposta a emergências.",
+  },
+} as const;
+
 type SearchParams = Record<string, string | string[] | undefined>;
 
 export function generateStaticParams() {
@@ -42,7 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!project || !segment) return { title: "Apoiar projeto | MyPets" };
 
   const title = `Apoiar ${project.title} | MyPets`;
-  const description = `Escolha uma causa real de ${project.category.toLowerCase()} e apoie pelo funil seguro MyPets.`;
+  const description = `Apoie diretamente a frente ${project.title} ou escolha uma causa real deste ecossistema.`;
   const canonical = `/projetos/${project.slug}/apoiar`;
 
   return {
@@ -118,14 +142,20 @@ export default async function ProjectSupportPage({
   const [{ slug }, tracking] = await Promise.all([params, searchParams]);
   const project = impactProject(slug);
   const segment = campaignSegmentForProject(slug);
-  if (!project || !segment) notFound();
+  if (!project || !segment || !(slug in INTERNAL_FUNDS)) notFound();
 
   const config = CAMPAIGN_VERTICALS[segment];
+  const fund = INTERNAL_FUNDS[slug as keyof typeof INTERNAL_FUNDS];
   const [allCampaigns, paymentConfig] = await Promise.all([
     getVerticalCampaigns(config.vertical, 24),
     getCampaignConfig(),
   ]);
   const campaigns = allCampaigns.filter(isFinancialCampaign);
+  const fundReady = Boolean(
+    paymentConfig.paymentsLive &&
+    paymentConfig.paymentProvider === "xpayments" &&
+    paymentConfig.paymentCurrencies?.includes("BRL"),
+  );
 
   return (
     <>
@@ -138,20 +168,35 @@ export default async function ProjectSupportPage({
               <ArrowLeft className="h-4 w-4" /> Voltar a {project.title}
             </Link>
             <p className="mt-7 text-xs font-black uppercase tracking-[0.18em] text-coral">{project.category}</p>
-            <h1 className="mt-2 max-w-3xl text-balance text-4xl font-black tracking-tight sm:text-5xl">Apoie uma causa de {project.title}</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-white/70">Este é o link permanente de apoio deste ecossistema. As campanhas reais ativas aparecem aqui automaticamente, sem mudar o endereço que você compartilha em redes sociais, anúncios ou mensagens.</p>
+            <h1 className="mt-2 max-w-3xl text-balance text-4xl font-black tracking-tight sm:text-5xl">Apoie {project.title}</h1>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-white/70">Pode apoiar diretamente o fundo temático MyPets ou escolher uma causa concreta deste ecossistema. O beneficiário fica explícito em cada opção.</p>
             <div className="mt-6 flex flex-wrap gap-2 text-xs font-bold text-white/70">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/8 px-3 py-2"><ShieldCheck className="h-4 w-4 text-emerald-400" /> Pagamento confirmado pelo servidor</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/8 px-3 py-2"><HeartHandshake className="h-4 w-4 text-coral" /> Campanhas reais, sem causas fictícias</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/8 px-3 py-2"><ShieldCheck className="h-4 w-4 text-emerald-400" /> Destino financeiro identificado</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/8 px-3 py-2"><HeartHandshake className="h-4 w-4 text-coral" /> Fundo temático + causas específicas</span>
             </div>
           </div>
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-petrol to-[#183f46] p-6 text-white shadow-lg sm:p-8">
+            <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.15em] text-coral">Apoiar a categoria</p>
+                <h2 className="mt-2 text-3xl font-black">{fund.title}</h2>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-white/70">{fund.text}</p>
+                <p className="mt-2 text-xs font-bold text-white/55">Beneficiário: MyPets · fundo BRL evergreen · separado das campanhas de terceiros.</p>
+              </div>
+              <div className="min-w-[190px]">
+                <CauseCheckout causeId={fund.id} causeTitle={fund.title} currency="BRL" enabled={fundReady} />
+                {!fundReady && <p className="max-w-[230px] text-xs leading-5 text-white/55">O apoio financeiro aparece quando a lane BRL estiver ativa.</p>}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-coral">Causas disponíveis</p>
-              <h2 className="mt-2 text-2xl font-black text-petrol sm:text-3xl">Escolha onde a sua ajuda pode fazer diferença.</h2>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-coral">Causas específicas</p>
+              <h2 className="mt-2 text-2xl font-black text-petrol sm:text-3xl">Ou escolha exatamente qual causa quer apoiar.</h2>
             </div>
             <Link href="/causas" className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-white px-4 text-xs font-black text-petrol transition hover:border-coral/40 hover:text-coral">Ver todas as causas <ArrowRight className="h-4 w-4" /></Link>
           </div>
@@ -159,8 +204,8 @@ export default async function ProjectSupportPage({
           {campaigns.length === 0 ? (
             <div className="mt-7 rounded-3xl border border-border bg-white p-7 text-center sm:p-10">
               <HeartHandshake className="mx-auto h-10 w-10 text-coral" />
-              <h3 className="mt-4 text-2xl font-black text-petrol">Ainda não há uma campanha financeira ativa neste ecossistema.</h3>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">O link já é permanente e pode ser comunicado. Assim que uma causa real for classificada em {config.label}, ela aparecerá aqui automaticamente.</p>
+              <h3 className="mt-4 text-2xl font-black text-petrol">Ainda não há uma campanha financeira específica ativa neste ecossistema.</h3>
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">O fundo temático acima continua disponível. Assim que uma causa real for classificada em {config.label}, ela aparecerá aqui automaticamente.</p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Link href={`/projetos/${project.slug}`} className="inline-flex min-h-11 items-center rounded-full bg-petrol px-5 text-sm font-black text-white">Conhecer o ecossistema</Link>
                 <Link href="/causas" className="inline-flex min-h-11 items-center rounded-full border border-border bg-cream px-5 text-sm font-black text-petrol">Explorar causas ativas</Link>
@@ -208,7 +253,7 @@ export default async function ProjectSupportPage({
                           {currencyReady ? "Doar agora" : "Conhecer a causa"}
                           <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                         </div>
-                        {!currencyReady && <p className="mt-2 text-center text-[10px] font-bold text-muted-foreground">Pagamento online será exibido quando a lane {campaign.currency} estiver certificada.</p>}
+                        {!currencyReady && <p className="mt-2 text-center text-[10px] font-bold text-muted-foreground">Pagamento online será exibido quando a lane {campaign.currency} estiver ativa.</p>}
                       </div>
                     </Link>
                   </article>
