@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, HeartHandshake, PawPrint, Stethoscope, ShieldCheck, Siren, Home, HandHeart } from "lucide-react";
+import { ArrowRight, BookOpenCheck, HeartHandshake, PawPrint, ShoppingBag, Stethoscope, ShieldCheck, Siren, Home, HandHeart } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
@@ -56,6 +56,22 @@ export default function SupportHubPage() {
               <h2 className="mt-5 text-2xl font-black text-petrol">Apoiar o projeto MyPets</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">Ajude a manter e desenvolver a plataforma, a operação de verificação, a tecnologia e a divulgação das causas.</p>
               <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-coral">Conhecer formas de apoiar <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <Link href="/guias" className="group rounded-3xl border border-border bg-white p-6 transition hover:border-coral/35 sm:p-7">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#eef8f7] text-[#0d6e6b]"><BookOpenCheck className="h-5 w-5" /></span>
+              <h2 className="mt-4 text-xl font-black text-petrol">Guias gratuitos MyPets</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Conteúdo prático para resgate, proteção e apoio responsável — útil mesmo para quem ainda não pode contribuir financeiramente.</p>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#0d6e6b]">Abrir guias <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+            </Link>
+
+            <Link href="/loja" className="group rounded-3xl border border-border bg-white p-6 transition hover:border-coral/35 sm:p-7">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-coral/10 text-coral"><ShoppingBag className="h-5 w-5" /></span>
+              <h2 className="mt-4 text-xl font-black text-petrol">Loja MyPets · em preparação</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Estamos a desenhar um modelo em que compras elegíveis alimentam um fundo de impacto com votação e prestação de contas.</p>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-coral">Conhecer o modelo <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
             </Link>
           </div>
 
