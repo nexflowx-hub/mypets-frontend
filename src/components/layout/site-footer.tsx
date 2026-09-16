@@ -41,7 +41,7 @@ export function SiteFooter() {
   const columns: { title: string; links: string[]; hrefs: string[] }[] = [
     { title: dict.footer.navigation, links: dict.footer.navLinks, hrefs: SECTION_IDS },
     { title: dict.footer.institutional, links: dict.footer.instLinks, hrefs: ["/#missao", "/#parceiros", "/#impacto", "/causas", "/projetos", "/"] },
-    { title: dict.footer.help, links: dict.footer.helpLinks, hrefs: ["/join/protetor", "/join/ajudar", "/join/padrinho", "/join/voluntario", "/join/adotar", "/join/projeto"] },
+    { title: dict.footer.help, links: dict.footer.helpLinks, hrefs: ["/preciso-de-apoio", "/apoiar", "/join/padrinho", "/join/voluntario", "/join/adotar", "/join/projeto"] },
   ];
 
   return (

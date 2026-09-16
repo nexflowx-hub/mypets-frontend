@@ -12,7 +12,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useUiStore } from "@/lib/stores";
 import { cn } from "@/lib/utils";
 import { onAuthChanged, readSession } from "@/lib/auth-client";
-import { growthDestination } from "@/lib/growth-navigation";
 
 const OFFICIAL_LOGO = "https://res.cloudinary.com/fnki0ccg/image/upload/v1789145246/Logo_VPT.png";
 
@@ -77,7 +76,7 @@ export function SiteHeader() {
     else setAuthOpen(true);
   };
 
-  const helpNow = () => router.push(growthDestination("/join/ajudar", { campaign: "always_on", cta: "header_cta" }));
+  const helpNow = () => router.push("/apoiar?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=header_cta");
   const search = () => pathname === "/" ? setSearchOpen(true) : router.push("/#historias");
 
   return (
@@ -131,6 +130,8 @@ export function SiteHeader() {
               <SheetHeader className="border-b border-border px-5 py-4 text-left"><SheetTitle asChild><div><MyPetsLogo compact /></div></SheetTitle></SheetHeader>
               <nav className="flex flex-col gap-1 px-3 py-4" aria-label={dict.nav.menu}>
                 {navItems.map((item) => <button key={item.href} onClick={() => go(item.href)} className="rounded-lg px-3 py-3 text-left text-[15px] font-semibold text-ink transition hover:bg-accent hover:text-coral">{item.label}</button>)}
+                <button onClick={() => go("/apoiar")} className="rounded-lg px-3 py-3 text-left text-[15px] font-black text-coral transition hover:bg-accent">Apoiar agora</button>
+                <button onClick={() => go("/preciso-de-apoio")} className="rounded-lg px-3 py-3 text-left text-[15px] font-semibold text-ink transition hover:bg-accent hover:text-coral">Preciso de apoio</button>
                 <a href="https://facepets.org" target="_blank" rel="noopener noreferrer" className="rounded-lg px-3 py-3 text-[15px] font-semibold text-ink transition hover:bg-accent hover:text-coral">FacePets</a>
                 <div className="mt-3 border-t border-border pt-4"><button onClick={() => { setMobileOpen(false); account(); }} className="w-full rounded-lg px-3 py-3 text-left text-[15px] font-semibold text-ink transition hover:bg-accent hover:text-coral">{signedIn ? "Conta / Dashboard" : dict.nav.signIn}</button></div>
               </nav>
