@@ -90,8 +90,6 @@ function pixQrSource(action: NativeAction | null | undefined) {
 }
 
 function preferredNativeMethods(currency: "EUR" | "BRL", country: string | null): NativePaymentMethod[] {
-  // BRL support is PIX-first by design. XPAYMENTS Native S2S returns the action
-  // and MyPets renders the QR/copy-paste instructions itself.
   if (currency === "BRL") return ["pix"];
   if (currency === "EUR" && country === "PT") return ["mb_way", "multibanco"];
   if (currency === "EUR" && country === "ES") return ["bizum"];
@@ -116,7 +114,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   const [donorPhone, setDonorPhone] = React.useState("");
   const [donorDocument, setDonorDocument] = React.useState("");
   const [marketCountry, setMarketCountry] = React.useState<string | null>(null);
-  const [choice, setChoice] = React.useState<PaymentChoice>("checkout");
+  const [choice, setChoice] = React.useState<PaymentChoice>(currency === "BRL" ? "pix" : "checkout");
   const selectionTouched = React.useRef(false);
   const [busy, setBusy] = React.useState(false);
   const [intent, setIntent] = React.useState<CheckoutIntent | null>(null);
@@ -131,6 +129,10 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
     ? Math.round((Number(customAmount.replace(",", ".")) || 0) * 100)
     : amountCents;
   const nativeMethods = React.useMemo(() => preferredNativeMethods(currency, marketCountry), [currency, marketCountry]);
+  const paymentChoices = React.useMemo<PaymentChoice[]>(
+    () => currency === "BRL" ? nativeMethods : [...nativeMethods, "checkout"],
+    [currency, nativeMethods],
+  );
 
   React.useEffect(() => {
     let cancelled = false;
@@ -405,7 +407,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
                 <div>
                   <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Como quer apoiar</p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {[...nativeMethods, "checkout" as const].map((method) => (
+                    {paymentChoices.map((method) => (
                       <button
                         key={method}
                         type="button"
@@ -420,7 +422,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
                     ))}
                   </div>
                   {currency === "BRL" ? (
-                    <p className="mt-2 text-[11px] text-muted-foreground">PIX é iniciado por integração S2S com a XPAYMENTS; o QR Code e o Copia e Cola são exibidos aqui no MyPets.</p>
+                    <p className="mt-2 text-[11px] text-muted-foreground">PIX é iniciado por integração S2S com a XPAYMENTS; o QR Code e o Copia e Cola são exibidos aqui no MyPets. O fluxo BRL não abre checkout hospedado.</p>
                   ) : marketCountry ? (
                     <p className="mt-2 text-[11px] text-muted-foreground">Meios priorizados para {marketCountry}; a disponibilidade final é validada pela Store XPAYMENTS.</p>
                   ) : null}
