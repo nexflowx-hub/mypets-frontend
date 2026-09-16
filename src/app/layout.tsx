@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import { AuthBootstrap } from "@/components/auth/auth-bootstrap";
+import { PublicConversionDock } from "@/components/conversion/public-conversion-dock";
 import { BRAND } from "@/lib/brand";
 
 const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], display: "swap" });
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <LocaleProvider>
           <AuthBootstrap />
           {children}
+          <PublicConversionDock />
         </LocaleProvider>
         <Toaster />
       </body>
