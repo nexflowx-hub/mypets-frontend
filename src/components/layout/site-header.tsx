@@ -26,6 +26,7 @@ function navigation(locale: string): NavItem[] {
       { label: "How to help", href: "/#como-ajudar" },
       { label: "Sponsors", href: "/join/padrinho" },
       { label: "Projects", href: "/projetos" },
+      { label: "Shop", href: "/loja" },
     ];
   }
   return [
@@ -35,6 +36,7 @@ function navigation(locale: string): NavItem[] {
     { label: "Como ajudar", href: "/#como-ajudar" },
     { label: "Padrinhos", href: "/join/padrinho" },
     { label: "Projetos", href: "/projetos" },
+    { label: "Loja", href: "/loja" },
   ];
 }
 
