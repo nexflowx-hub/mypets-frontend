@@ -16,6 +16,35 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  async redirects() {
+    return [
+      {
+        source: "/causas/mypets-geral-brl",
+        destination: "/apoiar/mypets",
+        permanent: true,
+      },
+      {
+        source: "/causas/mypets-vet-help-brl",
+        destination: "/projetos/vet-help/apoiar",
+        permanent: true,
+      },
+      {
+        source: "/causas/mypets-rescue-brl",
+        destination: "/projetos/rescue/apoiar",
+        permanent: true,
+      },
+      {
+        source: "/causas/mypets-shelter-brl",
+        destination: "/projetos/shelter/apoiar",
+        permanent: true,
+      },
+      {
+        source: "/causas/mypets-emergency-brl",
+        destination: "/projetos/emergency/apoiar",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [
