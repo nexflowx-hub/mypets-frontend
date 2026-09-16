@@ -15,7 +15,7 @@ import {
   Smartphone,
   X,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -107,7 +107,6 @@ function methodIcon(method: PaymentChoice) {
 
 export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const presets = React.useMemo(() => amountOptions(currency), [currency]);
   const [open, setOpen] = React.useState(false);
   const [amountCents, setAmountCents] = React.useState(presets[1]);
@@ -244,12 +243,13 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   }, [intent?.id, verifyPayment]);
 
   function tracking() {
+    const params = typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
     return {
-      source: searchParams.get("utm_source"),
-      medium: searchParams.get("utm_medium"),
-      campaign: searchParams.get("utm_campaign"),
-      content: searchParams.get("utm_content"),
-      refCode: searchParams.get("ref"),
+      source: params.get("utm_source"),
+      medium: params.get("utm_medium"),
+      campaign: params.get("utm_campaign"),
+      content: params.get("utm_content"),
+      refCode: params.get("ref"),
     };
   }
 
