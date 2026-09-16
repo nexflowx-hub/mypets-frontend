@@ -3,6 +3,7 @@ import { apiGet } from "@/lib/api";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { HeroSection } from "@/components/sections/hero";
+import { ConversionTrustStrip } from "@/components/conversion/conversion-trust-strip";
 import { GrowthGateway } from "@/components/growth/growth-gateway";
 import { HomeDiscoverySection, type HomeCause } from "@/components/sections/home-discovery-section";
 import { ProjectsSection } from "@/components/sections/projects-section";
@@ -36,7 +37,8 @@ async function getMetrics(): Promise<MetricDTO[]> {
 
 async function getCauses(): Promise<HomeCause[]> {
   try {
-    return (await apiGet<ApiEnvelope<HomeCause[]>>("/causes?limit=8")).data;
+    const rows = (await apiGet<ApiEnvelope<HomeCause[]>>("/causes?limit=16")).data;
+    return rows.filter((cause) => !cause.slug.startsWith("mypets-")).slice(0, 8);
   } catch (error) {
     console.error("[page] failed to load causes from API", error);
     return [];
@@ -70,6 +72,7 @@ export default async function HomePage() {
       <SiteHeader />
       <main className="flex-1 bg-white">
         <HeroSection />
+        <ConversionTrustStrip />
         <GrowthGateway />
         <HomeDiscoverySection causes={causes} stories={stories} />
         <ProjectsSection />
