@@ -35,6 +35,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/apoiar",
     "/apoiar/mypets",
     "/preciso-de-apoio",
+    "/loja",
+    "/guias",
+    "/guias/primeiras-24h",
     "/projetos",
     "/projetos/together-we-feed",
     "/projetos/vet-help",
@@ -61,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...evergreen.map((path, index) => ({
       url: `${BASE}${path}`,
       changeFrequency: "weekly" as const,
-      priority: path === "/apoiar" || path === "/preciso-de-apoio" || path.endsWith("/apoiar") ? 0.9 : index <= 5 ? 0.85 : 0.75,
+      priority: path === "/apoiar" || path === "/preciso-de-apoio" || path.endsWith("/apoiar") ? 0.9 : index <= 8 ? 0.85 : 0.75,
     })),
     ...campaigns.map((url) => ({
       url,
