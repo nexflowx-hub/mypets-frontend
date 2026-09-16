@@ -37,7 +37,7 @@ export default function StorePage() {
             <p className="mt-5 max-w-3xl text-base leading-7 text-white/72 sm:text-lg">Estamos a preparar uma loja em que a contribuição para o impacto é explícita, mensurável e publicada. Não prometemos percentagens vagas de “lucro”: a regra financeira será definida e visível antes do lançamento.</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/apoiar" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-coral px-6 text-sm font-black text-white transition hover:bg-coral-dark">Apoiar agora <ArrowRight className="h-4 w-4" /></Link>
-              <a href="/#newsletter" className="inline-flex min-h-12 items-center rounded-full border border-white/20 bg-white/5 px-6 text-sm font-black text-white transition hover:bg-white/10">Quero saber quando abrir</a>
+              <Link href="/guias" className="inline-flex min-h-12 items-center rounded-full border border-white/20 bg-white/5 px-6 text-sm font-black text-white transition hover:bg-white/10">Conhecer os Guias MyPets</Link>
             </div>
           </div>
         </section>
