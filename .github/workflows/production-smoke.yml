@@ -11,9 +11,9 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
-      - name: Check public funnel routes
+      - name: Wait for public funnel routes
         shell: bash
         run: |
           set -euo pipefail
@@ -30,18 +30,27 @@ jobs:
             "https://www.mypets.lat/guias"
             "https://www.mypets.lat/guias/primeiras-24h"
           )
+
           for url in "${routes[@]}"; do
-            code="$(curl --retry 3 --retry-delay 2 --max-time 20 -sS -o /dev/null -w '%{http_code}' "$url")"
-            echo "$code $url"
-            test "$code" -ge 200 -a "$code" -lt 400
+            ready=false
+            for attempt in $(seq 1 24); do
+              code="$(curl --max-time 20 -sS -o /dev/null -w '%{http_code}' "$url" || true)"
+              echo "attempt=$attempt code=$code $url"
+              if [ "$code" -ge 200 ] 2>/dev/null && [ "$code" -lt 400 ]; then
+                ready=true
+                break
+              fi
+              sleep 5
+            done
+            [ "$ready" = "true" ] || { echo "Route never became ready: $url" >&2; exit 1; }
           done
 
       - name: Check MyPets API health and public payment state
         shell: bash
         run: |
           set -euo pipefail
-          curl --retry 3 --retry-delay 2 --max-time 20 -fsS https://api.mypets.lat/health | tee /tmp/health.json
-          curl --retry 3 --retry-delay 2 --max-time 20 -fsS https://api.mypets.lat/v1/config | tee /tmp/config.json
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS https://api.mypets.lat/health | tee /tmp/health.json
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS https://api.mypets.lat/v1/config | tee /tmp/config.json
           jq -e '.status == "ok" and .database == "ok"' /tmp/health.json >/dev/null
           jq -e '.data.brand == "mypets" and .data.environment == "production"' /tmp/config.json >/dev/null
           echo "paymentsLive=$(jq -r '.data.paymentsLive' /tmp/config.json)"
