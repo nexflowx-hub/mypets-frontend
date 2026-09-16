@@ -90,7 +90,9 @@ function pixQrSource(action: NativeAction | null | undefined) {
 }
 
 function preferredNativeMethods(currency: "EUR" | "BRL", country: string | null): NativePaymentMethod[] {
-  if (currency === "BRL" && country === "BR") return ["pix"];
+  // BRL support is PIX-first by design. XPAYMENTS Native S2S returns the action
+  // and MyPets renders the QR/copy-paste instructions itself.
+  if (currency === "BRL") return ["pix"];
   if (currency === "EUR" && country === "PT") return ["mb_way", "multibanco"];
   if (currency === "EUR" && country === "ES") return ["bizum"];
   return [];
@@ -417,7 +419,11 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
                       </button>
                     ))}
                   </div>
-                  {marketCountry && <p className="mt-2 text-[11px] text-muted-foreground">Meios priorizados para {marketCountry}; a disponibilidade final é validada pela Store XPAYMENTS.</p>}
+                  {currency === "BRL" ? (
+                    <p className="mt-2 text-[11px] text-muted-foreground">PIX é iniciado por integração S2S com a XPAYMENTS; o QR Code e o Copia e Cola são exibidos aqui no MyPets.</p>
+                  ) : marketCountry ? (
+                    <p className="mt-2 text-[11px] text-muted-foreground">Meios priorizados para {marketCountry}; a disponibilidade final é validada pela Store XPAYMENTS.</p>
+                  ) : null}
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
