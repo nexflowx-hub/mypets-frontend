@@ -1,0 +1,49 @@
+name: Production smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check public funnel routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes=(
+            "https://www.mypets.lat/"
+            "https://www.mypets.lat/apoiar"
+            "https://www.mypets.lat/apoiar/mypets"
+            "https://www.mypets.lat/preciso-de-apoio"
+            "https://www.mypets.lat/projetos/vet-help/apoiar"
+            "https://www.mypets.lat/projetos/rescue/apoiar"
+            "https://www.mypets.lat/projetos/shelter/apoiar"
+            "https://www.mypets.lat/projetos/emergency/apoiar"
+            "https://www.mypets.lat/loja"
+            "https://www.mypets.lat/guias"
+            "https://www.mypets.lat/guias/primeiras-24h"
+          )
+          for url in "${routes[@]}"; do
+            code="$(curl --retry 3 --retry-delay 2 --max-time 20 -sS -o /dev/null -w '%{http_code}' "$url")"
+            echo "$code $url"
+            test "$code" -ge 200 -a "$code" -lt 400
+          done
+
+      - name: Check MyPets API health and public payment state
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 3 --retry-delay 2 --max-time 20 -fsS https://api.mypets.lat/health | tee /tmp/health.json
+          curl --retry 3 --retry-delay 2 --max-time 20 -fsS https://api.mypets.lat/v1/config | tee /tmp/config.json
+          jq -e '.status == "ok" and .database == "ok"' /tmp/health.json >/dev/null
+          jq -e '.data.brand == "mypets" and .data.environment == "production"' /tmp/config.json >/dev/null
+          echo "paymentsLive=$(jq -r '.data.paymentsLive' /tmp/config.json)"
+          echo "paymentCurrencies=$(jq -c '.data.paymentCurrencies' /tmp/config.json)"
+          echo "paymentWebhookCurrencies=$(jq -c '.data.paymentWebhookCurrencies' /tmp/config.json)"
