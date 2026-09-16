@@ -7,7 +7,6 @@ import { ArrowRight, HeartHandshake, House, PawPrint, Sprout, UsersRound } from 
 import { useLocale } from "@/lib/i18n/locale-context";
 import { Button } from "@/components/ui/button";
 import { FacePetsPanel } from "./facepets-panel";
-import { growthDestination } from "@/lib/growth-navigation";
 
 const purposeItems = [
   { icon: House, label: "ADOTAR", caption: "É AMOR" },
@@ -68,10 +67,10 @@ export function HeroSection() {
             <motion.p variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }} className="mt-3 max-w-xl text-[15px] font-medium leading-6 text-ink/75 sm:text-base">{copy.subtitle}</motion.p>
 
             <motion.div variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }} className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button onClick={() => router.push(growthDestination("/join/ajudar", { campaign: "always_on", cta: "hero_primary" }))} className="group h-12 rounded-full bg-gradient-to-r from-[#ff7466] to-[#ed554a] px-7 text-[14px] font-extrabold text-white shadow-[0_12px_26px_-12px_rgba(232,79,69,0.75)] hover:from-coral hover:to-coral-dark">
+              <Button onClick={() => router.push("/apoiar?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=hero_primary")} className="group h-12 rounded-full bg-gradient-to-r from-[#ff7466] to-[#ed554a] px-7 text-[14px] font-extrabold text-white shadow-[0_12px_26px_-12px_rgba(232,79,69,0.75)] hover:from-coral hover:to-coral-dark">
                 {copy.primary}<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
-              <button onClick={() => router.push(growthDestination("/join/protetor", { campaign: "need_support", cta: "hero_secondary" }))} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-petrol/15 bg-white/75 px-6 text-sm font-extrabold text-petrol backdrop-blur-sm transition hover:border-coral/40 hover:text-coral">{copy.secondary}</button>
+              <button onClick={() => router.push("/preciso-de-apoio?utm_source=mypets&utm_medium=internal&utm_campaign=need_support&utm_content=hero_secondary")} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-petrol/15 bg-white/75 px-6 text-sm font-extrabold text-petrol backdrop-blur-sm transition hover:border-coral/40 hover:text-coral">{copy.secondary}</button>
             </motion.div>
 
             <motion.div variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }} className="mt-7 grid max-w-2xl grid-cols-3 gap-3 sm:grid-cols-5">
