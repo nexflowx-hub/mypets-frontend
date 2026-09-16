@@ -180,7 +180,7 @@ export function trackedProjectFunnel(project: ImpactProject, source = "project_p
 }
 
 export function internalProjectFunnel(project: ImpactProject, intent: "request" | "support", source = "project_page") {
-  const base = intent === "request" ? "/join/projeto" : "/join/ajudar";
+  const base = intent === "request" ? "/join/projeto" : `/projetos/${project.slug}/apoiar`;
   const params = new URLSearchParams({
     utm_source: "mypets",
     utm_medium: "internal",

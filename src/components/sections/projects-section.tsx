@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Clock3 } from "lucide-react";
+import { ArrowRight, BadgeCheck, Clock3, HeartHandshake } from "lucide-react";
 import { impactProjects } from "@/lib/impact-projects";
 import {
   CAMPAIGN_VERTICALS,
@@ -26,6 +26,17 @@ async function verticalProjects(): Promise<VerticalProject[]> {
       return { ...project, campaignSegment, campaigns };
     }),
   );
+}
+
+function supportGatewayHref(projectSlug: string) {
+  const params = new URLSearchParams({
+    utm_source: "mypets",
+    utm_medium: "internal",
+    utm_campaign: projectSlug.replaceAll("-", "_"),
+    utm_content: "home_projects",
+    intent: "support",
+  });
+  return `/projetos/${projectSlug}/apoiar?${params.toString()}`;
 }
 
 export async function ProjectsSection() {
@@ -62,6 +73,7 @@ export async function ProjectsSection() {
           <div className="grid gap-3 sm:grid-cols-2">
             {verticals.map((project) => {
               const liveCampaigns = project.campaigns.filter((campaign) => campaign.campaignKey);
+              const supportHref = supportGatewayHref(project.slug);
               return (
                 <article key={project.slug} className="overflow-hidden rounded-2xl border border-border bg-white transition hover:-translate-y-0.5 hover:border-coral/30 hover:shadow-md">
                   <Link href={`/projetos/${project.slug}`} className="group block">
@@ -81,10 +93,18 @@ export async function ProjectsSection() {
                     </div>
                   </Link>
 
-                  {liveCampaigns.length > 0 && project.campaignSegment && (
-                    <div className="border-t border-border/70 px-4 py-3">
-                      <p className="text-[9px] font-black uppercase tracking-[0.12em] text-muted-foreground">Apoiar agora</p>
-                      <div className="mt-2 flex flex-col gap-1.5">
+                  <div className="border-t border-border/70 px-4 py-3">
+                    <Link
+                      href={supportHref}
+                      className="group/support flex min-h-10 items-center justify-center gap-2 rounded-xl bg-coral px-4 text-[11px] font-black text-white transition hover:bg-coral-dark"
+                    >
+                      <HeartHandshake className="h-4 w-4" />
+                      Apoiar agora
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/support:translate-x-1" />
+                    </Link>
+
+                    {liveCampaigns.length > 0 && project.campaignSegment && (
+                      <div className="mt-2.5 flex flex-col gap-1.5">
                         {liveCampaigns.slice(0, 2).map((campaign) => (
                           <Link
                             key={campaign.id}
@@ -96,8 +116,8 @@ export async function ProjectsSection() {
                           </Link>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </article>
               );
             })}
