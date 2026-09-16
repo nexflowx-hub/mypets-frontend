@@ -32,7 +32,8 @@ type Envelope<T> = { data: T };
 
 async function causes() {
   try {
-    return (await apiGet<Envelope<Cause[]>>("/causes?limit=36")).data;
+    const rows = (await apiGet<Envelope<Cause[]>>("/causes?limit=36")).data;
+    return rows.filter((cause) => !cause.slug.startsWith("mypets-"));
   } catch {
     return [];
   }
@@ -48,19 +49,30 @@ export default async function CausesPage() {
           <div className="mx-auto max-w-7xl">
             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-coral">Causas MyPets</p>
             <h1 className="mt-4 max-w-4xl text-balance text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">Ajuda concreta, histórias acompanháveis e pessoas reais no terreno.</h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">Cada causa liga um protetor, animais, necessidades, atualizações e formas de participar — financeiras ou não.</p>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">Aqui mostramos causas concretas de protetores e projetos. Os fundos próprios do MyPets ficam identificados separadamente na área Apoiar.</p>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-          <Link href="/projetos/together-we-feed" className="group mb-8 flex flex-col justify-between gap-5 rounded-3xl bg-petrol p-6 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg sm:flex-row sm:items-center sm:p-7">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">Primeiro projeto apoiado pelo MyPets</p>
-              <h2 className="mt-2 text-2xl font-extrabold">Together We Feed</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">Alimentação e apoio imediato para animais em situação de vulnerabilidade, com um funil dedicado de captação.</p>
-            </div>
-            <span className="inline-flex shrink-0 items-center gap-2 text-sm font-extrabold">Conhecer projeto <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
-          </Link>
+          <div className="mb-8 grid gap-4 md:grid-cols-2">
+            <Link href="/apoiar" className="group flex flex-col justify-between gap-5 rounded-3xl bg-[#fff0ee] p-6 ring-1 ring-[#ffe0db] transition hover:-translate-y-0.5 hover:shadow-lg sm:p-7">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">Fundos MyPets</p>
+                <h2 className="mt-2 text-2xl font-extrabold text-petrol">Apoiar o MyPets ou uma frente temática</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Apoio institucional e fundos Vet Help, Rescue, Shelter e Emergency ficam separados das causas de terceiros.</p>
+              </div>
+              <span className="inline-flex items-center gap-2 text-sm font-extrabold text-coral">Abrir Apoiar <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+            </Link>
+
+            <Link href="/projetos/together-we-feed" className="group flex flex-col justify-between gap-5 rounded-3xl bg-petrol p-6 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg sm:p-7">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">Primeiro projeto apoiado pelo MyPets</p>
+                <h2 className="mt-2 text-2xl font-extrabold">Together We Feed</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">Alimentação e apoio imediato para animais em situação de vulnerabilidade, com um funil dedicado de captação.</p>
+              </div>
+              <span className="inline-flex items-center gap-2 text-sm font-extrabold">Conhecer projeto <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+            </Link>
+          </div>
 
           {rows.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-border bg-white p-10 text-center">
