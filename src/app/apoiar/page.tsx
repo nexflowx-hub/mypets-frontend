@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpenCheck, HeartHandshake, PawPrint, ShoppingBag, Stethoscope, ShieldCheck, Siren, Home, HandHeart } from "lucide-react";
+import { ArrowRight, BadgeCheck, BookOpenCheck, HeartHandshake, PawPrint, ShoppingBag, Stethoscope, ShieldCheck, Siren, Home, HandHeart, Utensils } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
@@ -27,11 +27,17 @@ export default function SupportHubPage() {
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-coral">Apoiar</p>
             <h1 className="mt-3 max-w-4xl text-balance text-4xl font-black tracking-tight sm:text-5xl">Escolha onde a sua ajuda pode fazer mais diferença.</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-white/70">O MyPets organiza causas reais por necessidade. Pode apoiar uma causa concreta, um vertical de impacto ou o próprio projeto MyPets.</p>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-white/70">O MyPets organiza causas reais por necessidade. Pode apoiar um projeto ativo, uma causa concreta, um vertical de impacto ou o próprio projeto MyPets.</p>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          <Link href="/projetos/together-we-feed?utm_source=mypets&utm_medium=internal&utm_campaign=always_on_support&utm_content=food_active_project" className="group mb-5 grid gap-5 overflow-hidden rounded-3xl bg-petrol p-6 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-8 md:grid-cols-[auto_1fr_auto] md:items-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-coral"><Utensils className="h-7 w-7" /></span>
+            <div><span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/85"><BadgeCheck className="h-3.5 w-3.5 text-emerald-400" /> Projeto ativo</span><h2 className="mt-3 text-2xl font-black">Alimentação · Together We Feed</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">O primeiro projeto real apoiado pelo ecossistema MyPets, dedicado a alimentação e apoio imediato a animais em situação de vulnerabilidade.</p></div>
+            <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-5 text-sm font-black text-white">Conhecer e apoiar <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+          </Link>
+
           <div className="grid gap-4 md:grid-cols-2">
             {options.map(({ title, text, href, icon: Icon }) => (
               <Link key={href} href={`${href}?utm_source=mypets&utm_medium=internal&utm_campaign=always_on_support&utm_content=support_hub`} className="group rounded-3xl border border-border bg-white p-6 transition hover:-translate-y-1 hover:border-coral/35 hover:shadow-lg sm:p-7">
