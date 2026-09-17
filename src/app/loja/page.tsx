@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { Storefront } from "@/components/store/storefront";
+import { StoreMarketNotice } from "@/components/store/store-market-notice";
 
 export const metadata: Metadata = {
   title: "Loja MyPets | Tudo para o mundo pet",
@@ -22,6 +23,7 @@ export default function StorePage() {
     <>
       <SiteHeader />
       <main className="min-h-screen bg-cream pt-[72px]">
+        <StoreMarketNotice />
         <Storefront />
       </main>
       <SiteFooter />
