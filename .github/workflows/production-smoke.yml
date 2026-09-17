@@ -13,12 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: Wait for public funnel routes
+      - name: Wait for public funnel and SEO routes
         shell: bash
         run: |
           set -euo pipefail
           routes=(
             "https://www.mypets.lat/"
+            "https://www.mypets.lat/sobre"
+            "https://www.mypets.lat/robots.txt"
+            "https://www.mypets.lat/sitemap.xml"
+            "https://www.mypets.lat/manifest.webmanifest"
             "https://www.mypets.lat/apoiar"
             "https://www.mypets.lat/apoiar/mypets"
             "https://www.mypets.lat/preciso-de-apoio"
@@ -49,6 +53,17 @@ jobs:
             done
             [ "$ready" = "true" ] || { echo "Route never became ready: $url" >&2; exit 1; }
           done
+
+      - name: Validate robots and sitemap essentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS https://www.mypets.lat/robots.txt -o /tmp/robots.txt
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS https://www.mypets.lat/sitemap.xml -o /tmp/sitemap.xml
+          grep -Fq "Sitemap: https://mypets.lat/sitemap.xml" /tmp/robots.txt
+          grep -Fq "https://mypets.lat/sobre" /tmp/sitemap.xml
+          grep -Fq "https://mypets.lat/causas" /tmp/sitemap.xml
+          echo "SEO discovery endpoints validated"
 
       - name: Check MyPets API health and public payment state
         shell: bash
