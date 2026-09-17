@@ -16,6 +16,15 @@ const SOCIALS = [
 
 const SECTION_IDS = ["/#historias", "/#como-ajudar", "/causas", "/projetos", "/join/padrinho", "/#impacto"];
 
+const LEGAL_LINKS = [
+  ["69.093.616/0001-50 MyPets Brasil", "/institucional#brasil"],
+  ["MyPets Europe", "/institucional#europe"],
+  ["Termos", "/legal/termos"],
+  ["Privacidade", "/legal/privacidade"],
+  ["Cookies", "/legal/cookies"],
+  ["Loja", "/legal/loja"],
+] as const;
+
 export function SiteFooter() {
   const { dict, locale, setLocale } = useLocale();
   const { toast } = useToast();
@@ -74,8 +83,12 @@ export function SiteFooter() {
 
         <div className="mt-8 flex flex-wrap justify-start gap-2 lg:justify-end">{dict.footer.countries.map((c) => <LocalePill key={c.locale} label={c.label} flag={c.flag} active={locale === c.locale} onClick={() => setLocale(c.locale)} />)}</div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10.5px] text-white/45"><span className="font-bold text-white/60">{dict.footer.poweredBy}</span><span>{dict.footer.companyNumber}</span><a href="https://humanimpact.tech" target="_blank" rel="noopener noreferrer" className="font-semibold text-white/55 transition hover:text-coral">{dict.footer.companySite}</a></div>
+        <nav aria-label="Informação legal e operadores" className="mt-6 flex flex-wrap gap-x-4 gap-y-2 border-t border-white/10 pt-5 text-[10.5px] text-white/50">
+          {LEGAL_LINKS.map(([label, href]) => <a key={href} href={href} className="transition hover:text-coral">{label}</a>)}
+        </nav>
+
+        <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10.5px] text-white/40"><span>Plataforma tecnológica MyPets</span><a href="/institucional#tecnologia" className="font-semibold text-white/55 transition hover:text-coral">estrutura e operadores</a></div>
           <p className={cn("font-hand rotate-[-1deg] text-[18px] text-white/68")}>{dict.footer.motto} <span aria-hidden>♡</span></p>
         </div>
       </div>
