@@ -26,6 +26,7 @@ jobs:
             "https://www.mypets.lat/apoiar"
             "https://www.mypets.lat/apoiar/mypets"
             "https://www.mypets.lat/preciso-de-apoio"
+            "https://www.mypets.lat/preciso-de-apoio/publicar"
             "https://www.mypets.lat/projetos/vet-help/apoiar"
             "https://www.mypets.lat/projetos/rescue/apoiar"
             "https://www.mypets.lat/projetos/shelter/apoiar"
@@ -63,6 +64,7 @@ jobs:
           grep -Fq "Sitemap: https://mypets.lat/sitemap.xml" /tmp/robots.txt
           grep -Fq "https://mypets.lat/sobre" /tmp/sitemap.xml
           grep -Fq "https://mypets.lat/causas" /tmp/sitemap.xml
+          grep -Fq "https://mypets.lat/preciso-de-apoio/publicar" /tmp/sitemap.xml
           echo "SEO discovery endpoints validated"
 
       - name: Check MyPets API health and public payment state
