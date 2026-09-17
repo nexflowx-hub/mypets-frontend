@@ -8,7 +8,7 @@ export const LEGAL_ENTITIES = {
   BR: {
     key: "BR" as const,
     displayName: "MyPets Brasil",
-    legalName: process.env.NEXT_PUBLIC_MYPETS_BR_LEGAL_NAME ?? "69.093.616 MICAELA GOMES DE JESUS",
+    legalName: process.env.NEXT_PUBLIC_MYPETS_BR_LEGAL_NAME || "69.093.616 MICAELA GOMES DE JESUS",
     taxIdLabel: "CNPJ",
     taxId: "69.093.616/0001-50",
     addressLines: brAddress.length > 0 ? brAddress : [
@@ -18,8 +18,8 @@ export const LEGAL_ENTITIES = {
       "Brasil",
     ],
     email: "contact@mypets.lat",
-    phone: process.env.NEXT_PUBLIC_MYPETS_BR_PHONE ?? "+55 (62) 99619-7224",
-    whatsappUrl: process.env.NEXT_PUBLIC_MYPETS_BR_WHATSAPP_URL ?? "https://wa.me/5562996197224",
+    phone: process.env.NEXT_PUBLIC_MYPETS_BR_PHONE || "+55 (62) 99619-7224",
+    whatsappUrl: process.env.NEXT_PUBLIC_MYPETS_BR_WHATSAPP_URL || "https://wa.me/5562996197224",
     role:
       "Operador comercial brasileiro da marca MyPets para ofertas identificadas como vendidas no Brasil.",
     publicLabel: "69.093.616/0001-50 MyPets Brasil",
