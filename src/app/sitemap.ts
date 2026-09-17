@@ -64,6 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/apoiar",
     "/apoiar/mypets",
     "/preciso-de-apoio",
+    "/preciso-de-apoio/publicar",
     "/loja",
     "/guias",
     "/guias/primeiras-24h",
@@ -95,9 +96,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority:
         path === "/sobre" || path === "/institucional" ? 0.9 :
-        path === "/apoiar" || path === "/preciso-de-apoio" || path.endsWith("/apoiar") ? 0.9 :
+        path === "/apoiar" || path === "/preciso-de-apoio" || path === "/preciso-de-apoio/publicar" || path.endsWith("/apoiar") ? 0.9 :
         path.startsWith("/legal/") ? 0.65 :
-        index <= 15 ? 0.85 : 0.75,
+        index <= 16 ? 0.85 : 0.75,
     })),
     ...causes,
     ...campaigns.map((url) => ({
