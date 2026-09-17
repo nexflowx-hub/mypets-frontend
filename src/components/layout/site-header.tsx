@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, Menu, X, ChevronDown, Globe, UserRound, Heart } from "lucide-react";
+import { Search, Menu, X, ChevronDown, Globe, UserRound } from "lucide-react";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { LOCALES, LOCALE_META, type Locale } from "@/lib/i18n/dictionaries";
 import { MyPetsLogo } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
+import { PremiumSupportLink } from "@/components/conversion/premium-support-cta";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useUiStore } from "@/lib/stores";
@@ -78,7 +78,6 @@ export function SiteHeader() {
     else setAuthOpen(true);
   };
 
-  const helpNow = () => router.push("/apoiar/mypets?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=header_quick_support");
   const search = () => pathname === "/" ? setSearchOpen(true) : router.push("/#historias");
 
   return (
@@ -106,10 +105,13 @@ export function SiteHeader() {
             <UserRound className="h-4 w-4" />{signedIn ? "Conta" : dict.nav.signIn}
           </button>
 
-          <Button onClick={helpNow} className="h-10 shrink-0 rounded-full bg-gradient-to-r from-[#ff7466] to-[#ed554a] px-4 text-[13px] font-extrabold text-white shadow-[0_8px_20px_-9px_rgba(232,79,69,0.75)] hover:from-coral hover:to-coral-dark sm:px-5">
-            <Heart className="mr-1.5 h-4 w-4" />
-            <span className="hidden sm:inline">Apoiar agora</span><span className="sm:hidden">Apoiar</span>
-          </Button>
+          <PremiumSupportLink
+            href="/apoiar/mypets?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=header_quick_support"
+            label={locale === "en" ? "Support now" : "Apoiar agora"}
+            compact
+            showArrow={false}
+            className="shrink-0"
+          />
 
           <DropdownMenu>
             <DropdownMenuTrigger aria-label="Idioma / Language" className="hidden h-9 items-center gap-1 rounded-full px-2 text-[12px] font-bold text-ink/65 transition hover:text-coral 2xl:flex">

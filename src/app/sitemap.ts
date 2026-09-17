@@ -4,6 +4,7 @@ import { apiGet } from "@/lib/api";
 const BASE = "https://mypets.lat";
 
 type CampaignItem = { campaignKey: string | null; vertical: string };
+type CauseItem = { slug: string; updatedAt?: string | null };
 type Envelope<T> = { data: T };
 
 const verticalRoutes = [
@@ -27,6 +28,25 @@ async function campaignUrls() {
     }),
   );
   return groups.flat();
+}
+
+async function causeEntries(): Promise<MetadataRoute.Sitemap> {
+  try {
+    const response = await apiGet<Envelope<CauseItem[]>>("/causes?limit=50");
+    return response.data
+      .filter((cause) => cause.slug && !cause.slug.startsWith("mypets-"))
+      .map((cause) => {
+        const lastModified = cause.updatedAt ? new Date(cause.updatedAt) : undefined;
+        return {
+          url: `${BASE}/causas/${encodeURIComponent(cause.slug)}`,
+          changeFrequency: "daily" as const,
+          priority: 0.9,
+          ...(lastModified && !Number.isNaN(lastModified.getTime()) ? { lastModified } : {}),
+        };
+      });
+  } catch {
+    return [];
+  }
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -57,7 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/join/projeto",
     "/join/encontrei-um-animal",
   ];
-  const campaigns = await campaignUrls();
+  const [campaigns, causes] = await Promise.all([campaignUrls(), causeEntries()]);
 
   return [
     { url: BASE, changeFrequency: "weekly", priority: 1 },
@@ -66,6 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: path === "/apoiar" || path === "/preciso-de-apoio" || path.endsWith("/apoiar") ? 0.9 : index <= 8 ? 0.85 : 0.75,
     })),
+    ...causes,
     ...campaigns.map((url) => ({
       url,
       changeFrequency: "daily" as const,

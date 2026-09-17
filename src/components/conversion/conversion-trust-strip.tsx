@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, LockKeyhole, ShieldCheck, WalletCards } from "lucide-react";
+import { ArrowRight, BadgeCheck, LockKeyhole, WalletCards } from "lucide-react";
+import { PremiumSupportLink } from "@/components/conversion/premium-support-cta";
 
 const trustItems = [
   {
@@ -10,7 +11,7 @@ const trustItems = [
   {
     icon: LockKeyhole,
     title: "Pagamento protegido",
-    text: "O fluxo financeiro é processado através da infraestrutura segura XPAYMENTS.",
+    text: "No Brasil, o apoio em BRL é direcionado para Pix e processado pela infraestrutura XPAYMENTS.",
   },
   {
     icon: WalletCards,
@@ -37,10 +38,13 @@ export function ConversionTrustStrip() {
           ))}
 
           <div className="flex flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
-            <Link href="/apoiar/mypets?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=trust_strip_primary" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-5 text-sm font-black text-white shadow-[0_10px_24px_-12px_rgba(232,79,69,0.7)] transition hover:bg-coral-dark">
-              <ShieldCheck className="h-4 w-4" /> Apoiar agora
-            </Link>
-            <Link href="/causas?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=trust_strip_causes" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-white px-5 text-sm font-black text-petrol transition hover:border-coral/40 hover:text-coral">
+            <PremiumSupportLink
+              href="/apoiar/mypets?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=trust_strip_primary"
+              label="Apoiar agora"
+              detail="Pix no Brasil"
+              className="min-w-[164px]"
+            />
+            <Link href="/causas?utm_source=mypets&utm_medium=internal&utm_campaign=always_on&utm_content=trust_strip_causes" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-border bg-white px-5 text-sm font-black text-petrol transition hover:border-coral/40 hover:text-coral">
               Escolher causa <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
