@@ -10,12 +10,13 @@ import {
   Landmark,
   Loader2,
   LockKeyhole,
-  QrCode,
   ShieldCheck,
   Smartphone,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PremiumSupportButton } from "@/components/conversion/premium-support-cta";
+import { PixBrand } from "@/components/payments/pix-brand";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -48,7 +49,7 @@ type Props = {
 };
 
 const methodLabel: Record<PaymentChoice, string> = {
-  pix: "PIX",
+  pix: "Pix",
   mb_way: "MB WAY",
   multibanco: "Multibanco",
   bizum: "Bizum",
@@ -74,6 +75,30 @@ function validEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function cpfDigits(value: string) {
+  return value.replace(/\D/g, "").slice(0, 11);
+}
+
+function formatCpf(value: string) {
+  const digits = cpfDigits(value);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
+function validCpf(value: string) {
+  const digits = cpfDigits(value);
+  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
+  const numbers = digits.split("").map(Number);
+  const digit = (length: number) => {
+    const sum = numbers.slice(0, length).reduce((total, number, index) => total + number * (length + 1 - index), 0);
+    const remainder = (sum * 10) % 11;
+    return remainder === 10 ? 0 : remainder;
+  };
+  return digit(9) === numbers[9] && digit(10) === numbers[10];
+}
+
 function actionValue(action: NativeAction | null | undefined, ...keys: string[]) {
   for (const key of keys) {
     const value = action?.[key];
@@ -90,8 +115,6 @@ function pixQrSource(action: NativeAction | null | undefined) {
 }
 
 function preferredNativeMethods(currency: "EUR" | "BRL", country: string | null): NativePaymentMethod[] {
-  // BRL support is PIX-first by design. XPAYMENTS Native S2S returns the action
-  // and MyPets renders the QR/copy-paste instructions itself.
   if (currency === "BRL") return ["pix"];
   if (currency === "EUR" && country === "PT") return ["mb_way", "multibanco"];
   if (currency === "EUR" && country === "ES") return ["bizum"];
@@ -99,7 +122,7 @@ function preferredNativeMethods(currency: "EUR" | "BRL", country: string | null)
 }
 
 function methodIcon(method: PaymentChoice) {
-  if (method === "pix") return <QrCode className="h-4 w-4" />;
+  if (method === "pix") return <PixBrand className="h-4 w-auto" />;
   if (method === "mb_way" || method === "bizum") return <Smartphone className="h-4 w-4" />;
   if (method === "multibanco") return <Landmark className="h-4 w-4" />;
   return <CreditCard className="h-4 w-4" />;
@@ -107,6 +130,7 @@ function methodIcon(method: PaymentChoice) {
 
 export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props) {
   const router = useRouter();
+  const brazilPixOnly = currency === "BRL";
   const presets = React.useMemo(() => amountOptions(currency), [currency]);
   const [open, setOpen] = React.useState(false);
   const [amountCents, setAmountCents] = React.useState(presets[1]);
@@ -115,8 +139,9 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   const [donorEmail, setDonorEmail] = React.useState("");
   const [donorPhone, setDonorPhone] = React.useState("");
   const [donorDocument, setDonorDocument] = React.useState("");
+  const [payerOwnershipConfirmed, setPayerOwnershipConfirmed] = React.useState(false);
   const [marketCountry, setMarketCountry] = React.useState<string | null>(null);
-  const [choice, setChoice] = React.useState<PaymentChoice>("checkout");
+  const [choice, setChoice] = React.useState<PaymentChoice>(brazilPixOnly ? "pix" : "checkout");
   const selectionTouched = React.useRef(false);
   const [busy, setBusy] = React.useState(false);
   const [intent, setIntent] = React.useState<CheckoutIntent | null>(null);
@@ -133,6 +158,10 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   const nativeMethods = React.useMemo(() => preferredNativeMethods(currency, marketCountry), [currency, marketCountry]);
 
   React.useEffect(() => {
+    if (brazilPixOnly) {
+      setChoice("pix");
+      return;
+    }
     let cancelled = false;
     void fetch("/api/market", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
@@ -145,7 +174,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
       })
       .catch(() => undefined);
     return () => { cancelled = true; };
-  }, [currency]);
+  }, [brazilPixOnly, currency]);
 
   const paymentKey = React.useCallback((method: PaymentChoice) => {
     if (!idempotencyKeys.current[method]) idempotencyKeys.current[method] = crypto.randomUUID();
@@ -263,7 +292,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
       return false;
     }
     if (requireName && !donorName.trim()) {
-      setError("Indique o nome do pagador para este meio de pagamento.");
+      setError("Indique o nome do titular pagador para continuar.");
       return false;
     }
     if (requireEmail && !donorEmail.trim()) {
@@ -290,6 +319,11 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   }
 
   async function startCheckout() {
+    if (brazilPixOnly) {
+      setChoice("pix");
+      setError("No Brasil, os apoios em reais são processados por Pix.");
+      return;
+    }
     if (!enabled || !validateCommon()) return;
     setBusy(true);
     setError(null);
@@ -314,9 +348,15 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   async function startNative(method: NativePaymentMethod) {
     const requiresEmail = method !== "pix";
     if (!enabled || !validateCommon(true, requiresEmail)) return;
-    if (method === "pix" && !/^\D*\d(?:\D*\d){10}(?:\D*\d{3})?\D*$/.test(donorDocument)) {
-      setError("Informe um CPF ou CNPJ válido do pagador para gerar o PIX.");
-      return;
+    if (method === "pix") {
+      if (!validCpf(donorDocument)) {
+        setError("Informe um CPF válido do titular da conta que fará o Pix.");
+        return;
+      }
+      if (!payerOwnershipConfirmed) {
+        setError("Confirme que o CPF informado pertence ao titular da conta que realizará o Pix.");
+        return;
+      }
     }
     if ((method === "mb_way" || method === "bizum") && !donorPhone.trim()) {
       setError(`Informe o número de telefone associado ao ${methodLabel[method]}.`);
@@ -333,7 +373,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
         donorName: donorName.trim() || null,
         donorEmail: donorEmail.trim() || null,
         donorPhone: donorPhone.trim() || null,
-        donorDocument: donorDocument.trim() || null,
+        donorDocument: method === "pix" ? cpfDigits(donorDocument) : donorDocument.trim() || null,
         ...tracking(),
       });
       setIntent(data);
@@ -345,6 +385,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   }
 
   async function startSelected() {
+    if (brazilPixOnly) return startNative("pix");
     if (choice === "checkout") return startCheckout();
     return startNative(choice);
   }
@@ -357,9 +398,12 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} className="min-h-12 rounded-xl bg-white px-5 text-sm font-extrabold text-petrol hover:bg-white/90">
-        <Heart className="mr-2 h-4 w-4 fill-coral text-coral" /> {triggerLabel}
-      </Button>
+      <PremiumSupportButton
+        onClick={() => setOpen(true)}
+        label={triggerLabel}
+        detail={brazilPixOnly ? "Pix no Brasil" : "pagamento seguro"}
+        className="min-w-[162px]"
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
@@ -372,11 +416,15 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
         >
           {!intent ? (
             <div>
-              <div className="bg-petrol px-6 py-6 text-white">
-                <DialogHeader className="text-left">
-                  <DialogTitle className="text-xl font-extrabold text-white">Apoiar {causeTitle}</DialogTitle>
-                  <DialogDescription className="text-sm text-white/65">
-                    Escolha o valor e o meio de pagamento. O MyPets mantém a origem da campanha para medir o impacto do funil.
+              <div className="relative overflow-hidden bg-petrol px-6 py-6 text-white">
+                <div aria-hidden className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[#32bcad]/10 blur-2xl" />
+                <DialogHeader className="relative text-left">
+                  {brazilPixOnly && <div className="mb-4 inline-flex w-fit items-center rounded-xl bg-white px-3 py-2"><PixBrand className="h-6 w-auto" /></div>}
+                  <DialogTitle className="text-xl font-extrabold text-white">{brazilPixOnly ? `Apoiar com Pix · ${causeTitle}` : `Apoiar ${causeTitle}`}</DialogTitle>
+                  <DialogDescription className="text-sm leading-6 text-white/65">
+                    {brazilPixOnly
+                      ? "Escolha o valor, identifique o titular pagador e gere o QR Code ou Pix Copia e Cola sem sair do MyPets."
+                      : "Escolha o valor e o meio de pagamento. O MyPets mantém a origem da campanha para medir o impacto do funil."}
                   </DialogDescription>
                 </DialogHeader>
               </div>
@@ -404,50 +452,95 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
 
                 <div>
                   <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Como quer apoiar</p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {[...nativeMethods, "checkout" as const].map((method) => (
-                      <button
-                        key={method}
-                        type="button"
-                        onClick={() => { selectionTouched.current = true; setChoice(method); setError(null); }}
-                        className={cn(
-                          "flex min-h-12 items-center gap-2 rounded-xl border px-4 text-left text-sm font-extrabold transition",
-                          choice === method ? "border-coral bg-coral/5 text-coral" : "border-border text-petrol hover:border-coral/40",
-                        )}
-                      >
-                        {methodIcon(method)} {methodLabel[method]}
-                      </button>
-                    ))}
-                  </div>
-                  {currency === "BRL" ? (
-                    <p className="mt-2 text-[11px] text-muted-foreground">PIX é iniciado por integração S2S com a XPAYMENTS; o QR Code e o Copia e Cola são exibidos aqui no MyPets.</p>
+                  {brazilPixOnly ? (
+                    <div className="mt-3 flex items-center justify-between gap-4 rounded-2xl border border-[#32bcad]/30 bg-[#f2fbfa] p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-12 min-w-16 items-center justify-center rounded-xl bg-white px-2 ring-1 ring-black/5"><PixBrand className="h-6 w-auto" /></span>
+                        <div><p className="text-sm font-black text-petrol">Pix</p><p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">Instantâneo · QR Code + Copia e Cola</p></div>
+                      </div>
+                      <span className="rounded-full bg-[#32bcad]/12 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-[#147f75]">Brasil</span>
+                    </div>
+                  ) : (
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {[...nativeMethods, "checkout" as const].map((method) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => { selectionTouched.current = true; setChoice(method); setError(null); }}
+                          className={cn(
+                            "flex min-h-12 items-center gap-2 rounded-xl border px-4 text-left text-sm font-extrabold transition",
+                            choice === method ? "border-coral bg-coral/5 text-coral" : "border-border text-petrol hover:border-coral/40",
+                          )}
+                        >
+                          {methodIcon(method)} {methodLabel[method]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {brazilPixOnly ? (
+                    <p className="mt-2 text-[11px] leading-5 text-muted-foreground">O Pix é criado via integração S2S com a XPAYMENTS e apresentado diretamente no MyPets. O pagamento só é considerado concluído após confirmação financeira.</p>
                   ) : marketCountry ? (
                     <p className="mt-2 text-[11px] text-muted-foreground">Meios priorizados para {marketCountry}; a disponibilidade final é validada pela Store XPAYMENTS.</p>
                   ) : null}
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} />
-                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} />
+                  <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
+                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
                 </div>
 
-                {(choice === "mb_way" || choice === "bizum") && (
+                {(choice === "mb_way" || choice === "bizum") && !brazilPixOnly && (
                   <Input value={donorPhone} onChange={(event) => setDonorPhone(event.target.value)} inputMode="tel" placeholder={choice === "mb_way" ? "Telemóvel +351" : "Móvel +34"} maxLength={40} />
                 )}
-                {choice === "pix" && (
-                  <Input value={donorDocument} onChange={(event) => setDonorDocument(event.target.value)} inputMode="numeric" placeholder="CPF ou CNPJ do pagador" maxLength={18} />
+                {brazilPixOnly && (
+                  <div className="rounded-2xl border border-border bg-[#fbfcfc] p-4">
+                    <label htmlFor={`pix-cpf-${causeId}`} className="text-xs font-extrabold text-petrol">CPF do titular da conta pagadora</label>
+                    <Input
+                      id={`pix-cpf-${causeId}`}
+                      className="mt-2 bg-white"
+                      value={donorDocument}
+                      onChange={(event) => { setDonorDocument(formatCpf(event.target.value)); setPayerOwnershipConfirmed(false); setError(null); }}
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="000.000.000-00"
+                      maxLength={14}
+                      aria-describedby={`pix-cpf-help-${causeId}`}
+                    />
+                    <p id={`pix-cpf-help-${causeId}`} className="mt-2 text-[11px] leading-5 text-muted-foreground">Informe o CPF da pessoa titular da conta bancária que efetivamente fará este Pix. O documento é enviado à XPAYMENTS como identificação do pagador.</p>
+                    <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl bg-[#eef8f7] p-3 text-[11px] font-semibold leading-5 text-petrol">
+                      <input
+                        type="checkbox"
+                        checked={payerOwnershipConfirmed}
+                        onChange={(event) => { setPayerOwnershipConfirmed(event.target.checked); setError(null); }}
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-[#32bcad]"
+                      />
+                      <span>Confirmo que o CPF informado pertence ao titular da conta que realizará o Pix.</span>
+                    </label>
+                  </div>
                 )}
 
                 {error && <p className="rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p>}
 
-                <Button onClick={() => void startSelected()} disabled={busy || effectiveAmount < 100 || effectiveAmount > 5_000_000} className="h-12 w-full rounded-xl bg-coral font-extrabold text-white hover:bg-coral-dark">
-                  {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LockKeyhole className="mr-2 h-4 w-4" />}
-                  {methodLabel[choice]} · {money(effectiveAmount, currency)}
-                </Button>
+                {brazilPixOnly ? (
+                  <button
+                    type="button"
+                    onClick={() => void startSelected()}
+                    disabled={busy || effectiveAmount < 100 || effectiveAmount > 5_000_000}
+                    className="group flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-petrol px-4 font-extrabold text-white shadow-[0_14px_30px_-17px_rgba(16,32,42,0.75)] transition hover:-translate-y-0.5 hover:bg-[#15323d] disabled:pointer-events-none disabled:opacity-50"
+                  >
+                    {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <span className="flex h-8 items-center rounded-lg bg-white px-2"><PixBrand className="h-5 w-auto" /></span>}
+                    <span>{busy ? "Gerando Pix seguro…" : `Gerar Pix · ${money(effectiveAmount, currency)}`}</span>
+                  </button>
+                ) : (
+                  <Button onClick={() => void startSelected()} disabled={busy || effectiveAmount < 100 || effectiveAmount > 5_000_000} className="h-12 w-full rounded-xl bg-coral font-extrabold text-white hover:bg-coral-dark">
+                    {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LockKeyhole className="mr-2 h-4 w-4" />}
+                    {methodLabel[choice]} · {money(effectiveAmount, currency)}
+                  </Button>
+                )}
 
                 <div className="flex items-start gap-2 rounded-xl bg-sand/60 px-3 py-3 text-[11px] leading-relaxed text-muted-foreground">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  <span>Pagamento orquestrado pela XPAYMENTS. Métodos locais usam API S2S; cartão e wallets permanecem em superfície segura do provedor. Criar um pagamento nunca é tratado como confirmação.</span>
+                  <span>{brazilPixOnly ? "O MyPets não considera a geração do QR Code como pagamento concluído. A confirmação depende do estado financeiro recebido da XPAYMENTS." : "Pagamento orquestrado pela XPAYMENTS. Métodos locais usam API S2S; cartão e wallets permanecem em superfície segura do provedor. Criar um pagamento nunca é tratado como confirmação."}</span>
                 </div>
               </div>
             </div>
@@ -529,14 +622,21 @@ function NativePending({
   return (
     <div className="min-h-[470px] p-6">
       <div className="flex items-start justify-between gap-3">
-        <div><p className="text-xs font-extrabold uppercase tracking-wide text-coral">{method ? methodLabel[method] : "Pagamento"}</p><h2 className="mt-1 text-xl font-extrabold text-petrol">{money(intent.amountCents, intent.currency)}</h2></div>
+        <div>
+          {method === "pix" ? <PixBrand className="h-7 w-auto" /> : <p className="text-xs font-extrabold uppercase tracking-wide text-coral">{method ? methodLabel[method] : "Pagamento"}</p>}
+          <h2 className="mt-2 text-xl font-extrabold text-petrol">{money(intent.amountCents, intent.currency)}</h2>
+        </div>
         <button type="button" onClick={onClose} aria-label="Fechar" className="rounded-lg p-2 text-muted-foreground hover:bg-sand"><X className="h-4 w-4" /></button>
       </div>
 
       {method === "pix" && (
-        <div className="mt-6 space-y-4 text-center">
-          {qrSource && <img src={qrSource} alt="QR Code PIX" className="mx-auto h-52 w-52 rounded-xl border border-border bg-white object-contain p-2" />}
-          {pixCode && <><p className="text-xs text-muted-foreground">PIX Copia e Cola</p><div className="break-all rounded-xl bg-sand/70 p-3 text-left text-xs text-petrol">{pixCode}</div><Button type="button" variant="outline" onClick={onCopy} className="w-full rounded-xl">{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copiado" : "Copiar código PIX"}</Button></>}
+        <div className="mt-5 space-y-4 text-center">
+          <div className="rounded-2xl border border-[#32bcad]/25 bg-[#f4fbfa] p-4">
+            <p className="text-sm font-black text-petrol">Escaneie no app do seu banco</p>
+            <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Use a conta de titularidade correspondente ao CPF informado no passo anterior.</p>
+            {qrSource && <img src={qrSource} alt="QR Code Pix" className="mx-auto mt-4 h-52 w-52 rounded-xl border border-border bg-white object-contain p-2" />}
+          </div>
+          {pixCode && <><p className="text-xs font-bold text-muted-foreground">Pix Copia e Cola</p><div className="break-all rounded-xl bg-sand/70 p-3 text-left text-xs text-petrol">{pixCode}</div><Button type="button" variant="outline" onClick={onCopy} className="w-full rounded-xl">{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copiado" : "Copiar código Pix"}</Button></>}
         </div>
       )}
 
@@ -555,7 +655,7 @@ function NativePending({
 
       <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">{verifying || intent.status === "PENDING" || intent.status === "PROCESSING" ? <Loader2 className="h-4 w-4 animate-spin text-coral" /> : null}<span>{verifying ? "A confirmar…" : "Aguardando confirmação segura"}</span></div>
       {error && <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">{error}</p>}
-      <Button type="button" variant="ghost" onClick={onRetry} className="mt-5 w-full rounded-xl text-petrol">Escolher outro meio</Button>
+      <Button type="button" variant="ghost" onClick={onRetry} className="mt-5 w-full rounded-xl text-petrol">{method === "pix" ? "Gerar novo Pix" : "Escolher outro meio"}</Button>
     </div>
   );
 }
