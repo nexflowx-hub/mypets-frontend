@@ -40,7 +40,7 @@ export function SiteFooter() {
 
   const columns: { title: string; links: string[]; hrefs: string[] }[] = [
     { title: dict.footer.navigation, links: dict.footer.navLinks, hrefs: SECTION_IDS },
-    { title: dict.footer.institutional, links: dict.footer.instLinks, hrefs: ["/#missao", "/#parceiros", "/#impacto", "/causas", "/projetos", "/"] },
+    { title: dict.footer.institutional, links: dict.footer.instLinks, hrefs: ["/sobre", "/sobre#parceiros", "/sobre#transparencia", "/guias", "/sobre#imprensa", "/sobre#contato"] },
     { title: dict.footer.help, links: dict.footer.helpLinks, hrefs: ["/preciso-de-apoio", "/apoiar", "/join/padrinho", "/join/voluntario", "/join/adotar", "/join/projeto"] },
   ];
 
