@@ -12,18 +12,22 @@ const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin"], display: 
 
 export const metadata: Metadata = {
   metadataBase: new URL(BRAND.siteUrl),
+  applicationName: "MyPets",
   title: { default: "MyPets — Quem ajuda animais também merece ajuda.", template: "%s · MyPets" },
-  description: "MyPets é uma rede que aproxima quem quer ajudar das pessoas que resgatam, alimentam, tratam e protegem animais todos os dias. Pessoas. Animais. Impacto Real.",
-  keywords: ["MyPets", "animais", "protetores", "resgate animal", "adoção", "doação", "impacto social", "FacePets"],
-  authors: [{ name: "HUMAN IMPACT TECH LTD" }],
-  alternates: { canonical: "/" },
+  description: "MyPets conecta pessoas, protetores, ONGs e projetos para apoiar resgates, tratamentos, alimentação, abrigo e adoção responsável de animais.",
+  keywords: ["MyPets", "ajuda animal", "proteção animal", "protetores de animais", "ONG animal", "resgate animal", "adoção responsável", "doação para animais", "Pix para causas animais", "FacePets"],
+  authors: [{ name: "HUMAN IMPACT TECH LTD", url: "https://humanimpact.tech" }],
+  creator: "HUMAN IMPACT TECH LTD",
+  publisher: "MyPets",
+  category: "animal welfare",
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "MyPets — Quem ajuda animais também merece ajuda.",
-    description: "Uma comunidade. Milhares de histórias. Um impacto que podemos acompanhar. Apoie protetores e animais em Portugal e no Brasil.",
-    url: BRAND.siteUrl,
+    description: "Uma comunidade para aproximar quem quer ajudar de quem resgata, alimenta, trata e protege animais todos os dias.",
     siteName: BRAND.name,
     type: "website",
     locale: "pt_PT",
+    alternateLocale: ["pt_BR", "en_US"],
     images: [{ url: BRAND.socialBannerUrl, alt: "MyPets — Pessoas. Animais. Impacto Real." }],
   },
   twitter: {
@@ -32,7 +36,19 @@ export const metadata: Metadata = {
     description: "Apoie quem ajuda animais todos os dias. Pessoas. Animais. Impacto Real.",
     images: [BRAND.socialBannerUrl],
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  referrer: "strict-origin-when-cross-origin",
+  formatDetection: { telephone: false, address: false, email: false },
   icons: { icon: "/icon.svg" },
 };
 
