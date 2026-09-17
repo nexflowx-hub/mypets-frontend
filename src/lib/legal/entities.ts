@@ -1,21 +1,18 @@
 export type LegalEntityKey = "BR" | "UK";
 
+const splitAddress = (value?: string) => value?.split("|").map((item) => item.trim()).filter(Boolean) ?? [];
+
 export const LEGAL_ENTITIES = {
   BR: {
     key: "BR" as const,
     displayName: "MyPets Brasil",
-    legalName: "69.093.616 MICAELA GOMES DE JESUS",
+    legalName: process.env.NEXT_PUBLIC_MYPETS_BR_LEGAL_NAME ?? "",
     taxIdLabel: "CNPJ",
     taxId: "69.093.616/0001-50",
-    addressLines: [
-      "Avenida João Florentino, 9 — Quadra 2",
-      "Residencial Araguaia",
-      "Anápolis — GO, CEP 75071-430",
-      "Brasil",
-    ],
+    addressLines: splitAddress(process.env.NEXT_PUBLIC_MYPETS_BR_ADDRESS),
     email: "contact@mypets.lat",
-    phone: "+55 (62) 99619-7224",
-    whatsappUrl: "https://wa.me/5562996197224",
+    phone: process.env.NEXT_PUBLIC_MYPETS_BR_PHONE ?? "",
+    whatsappUrl: process.env.NEXT_PUBLIC_MYPETS_BR_WHATSAPP_URL ?? "",
     role:
       "Operador comercial brasileiro da marca MyPets para ofertas identificadas como vendidas no Brasil.",
     publicLabel: "69.093.616/0001-50 MyPets Brasil",
