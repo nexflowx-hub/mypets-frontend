@@ -21,27 +21,27 @@ type Cause = {
   summary: string | null;
   story: string | null;
   country: string;
-  region: string | null;
+  region?: string | null;
   city: string | null;
   primaryImage: string | null;
   supportMode: string;
   targetAmountCents: number | null;
   raisedAmountCents: number;
   currency: string | null;
-  beneficiaryKind: "PROTECTOR" | "MYPETS" | "COMMUNITY" | string;
-  causeType: string | null;
-  verificationStatus: string;
-  fundraisingStatus: string;
-  intakeSource: string;
+  beneficiaryKind?: "PROTECTOR" | "MYPETS" | "COMMUNITY" | string;
+  causeType?: string | null;
+  verificationStatus?: string;
+  fundraisingStatus?: string;
+  intakeSource?: string;
   protector: { id: string; slug: string; displayName: string; verification: string; city: string | null; country: string } | null;
   pets: Array<{ id: string; facepetsId: string; name: string; status: string; primaryImage: string | null }>;
   needs: Array<{ id: string; type: string; title: string; description: string | null; supportMode: string; targetAmountCents: number | null; raisedAmountCents: number; currency: string | null; status: string }>;
   updates: Array<{ id: string; title: string | null; body: string; imageUrl: string | null; createdAt: string }>;
   followers: number;
   sponsors: number;
-  submittedSocialLinks: SubmittedSocialLink[];
-  submittedMedia: Array<{ type?: string; url?: string; caption?: string | null }>;
-  publicWhatsapp: string | null;
+  submittedSocialLinks?: SubmittedSocialLink[];
+  submittedMedia?: Array<{ type?: string; url?: string; caption?: string | null }>;
+  publicWhatsapp?: string | null;
 };
 
 type SocialData = {
@@ -100,7 +100,8 @@ export default async function CausePage({ params }: { params: Promise<{ slug: st
 
   const sponsorHref = `/join/padrinho?v=social&cause_id=${encodeURIComponent(cause.id)}&src_cta=cause_sponsor&utm_source=mypets&utm_medium=internal&utm_campaign=cause_${encodeURIComponent(cause.slug)}`;
   const paymentCurrency = cause.currency === "EUR" || cause.currency === "BRL" ? cause.currency : null;
-  const financialCause = cause.supportMode !== "NON_FINANCIAL" && cause.fundraisingStatus === "ENABLED" && Boolean(paymentCurrency);
+  const fundraisingAllowed = cause.fundraisingStatus == null ? true : cause.fundraisingStatus === "ENABLED";
+  const financialCause = cause.supportMode !== "NON_FINANCIAL" && fundraisingAllowed && Boolean(paymentCurrency);
   const checkoutEnabled = Boolean(
     financialCause &&
     config.paymentsLive &&
