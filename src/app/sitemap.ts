@@ -52,6 +52,14 @@ async function causeEntries(): Promise<MetadataRoute.Sitemap> {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const evergreen = [
     "/sobre",
+    "/institucional",
+    "/legal/termos",
+    "/legal/privacidade",
+    "/legal/cookies",
+    "/legal/loja",
+    "/legal/entregas",
+    "/legal/reembolsos",
+    "/legal/apoios",
     "/causas",
     "/apoiar",
     "/apoiar/mypets",
@@ -86,9 +94,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE}${path}`,
       changeFrequency: "weekly" as const,
       priority:
-        path === "/sobre" ? 0.9 :
+        path === "/sobre" || path === "/institucional" ? 0.9 :
         path === "/apoiar" || path === "/preciso-de-apoio" || path.endsWith("/apoiar") ? 0.9 :
-        index <= 9 ? 0.85 : 0.75,
+        path.startsWith("/legal/") ? 0.65 :
+        index <= 15 ? 0.85 : 0.75,
     })),
     ...causes,
     ...campaigns.map((url) => ({
