@@ -1,7 +1,7 @@
 import { CauseCampaignPage } from "@/components/campaigns/cause-campaign-page";
 import { CampaignStructuredData, campaignSeoMetadata } from "@/components/campaigns/campaign-seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export async function generateMetadata({ params }: { params: Promise<{ campaign: string }> }) {
   const { campaign } = await params;
