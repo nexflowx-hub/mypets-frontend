@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { CauseCheckout } from "@/components/payments/cause-checkout";
-import { getCampaignConfig } from "@/lib/campaign-landings";
+import { getCampaignCause, getCampaignConfig } from "@/lib/campaign-landings";
 import { impactProject, impactProjects, internalProjectFunnel, trackedProjectFunnel } from "@/lib/impact-projects";
 
 const TWF_FUND_BRL_CAUSE_ID = "9a7f1000-0000-4a11-8c01-000000000006";
@@ -43,8 +43,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const funnel = trackedProjectFunnel(project);
   const active = project.status === "active";
   const isTogetherWeFeed = project.slug === "together-we-feed";
-  const paymentConfig = isTogetherWeFeed ? await getCampaignConfig() : null;
+  const [paymentConfig, twfFund] = isTogetherWeFeed
+    ? await Promise.all([
+        getCampaignConfig(),
+        getCampaignCause("mypets-together-we-feed-brl"),
+      ])
+    : [null, null];
   const twfFundReady = Boolean(
+    twfFund?.id === TWF_FUND_BRL_CAUSE_ID &&
     paymentConfig?.paymentsLive &&
     paymentConfig.paymentProvider === "xpayments" &&
     paymentConfig.paymentCurrencies?.includes("BRL"),
