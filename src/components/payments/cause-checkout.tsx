@@ -195,6 +195,15 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
     setIframeReady(false);
   }, [intent?.sessionId]);
 
+  React.useEffect(() => {
+    if (!paid || !open) return;
+    const timer = window.setTimeout(() => {
+      setOpen(false);
+      resetCheckout();
+    }, 4200);
+    return () => window.clearTimeout(timer);
+  }, [open, paid, resetCheckout]);
+
   const applyStatus = React.useCallback((status: string | undefined) => {
     if (status === "SUCCEEDED") {
       setPaid(true);
@@ -246,7 +255,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
       }
     }
     void reconcileSilently();
-    const timer = window.setInterval(() => void reconcileSilently(), 5000);
+    const timer = window.setInterval(() => void reconcileSilently(), 2000);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
@@ -548,8 +557,9 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
             <div className="flex min-h-[420px] flex-col items-center justify-center px-8 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50"><Heart className="h-8 w-8 fill-emerald-600 text-emerald-600" /></div>
               <h2 className="mt-5 text-2xl font-extrabold text-petrol">Apoio confirmado. Obrigado!</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">A XPAYMENTS confirmou o pagamento e o progresso da causa foi atualizado.</p>
-              <Button onClick={() => { setOpen(false); resetCheckout(); }} className="mt-6 bg-petrol text-white hover:bg-petrol-light">Voltar à causa</Button>
+              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">O pagamento foi confirmado pelo servidor. Obrigado por apoiar {causeTitle}.</p>
+              <p className="mt-2 text-xs font-semibold text-emerald-700">Esta janela fecha automaticamente em alguns segundos.</p>
+              <Button onClick={() => { setOpen(false); resetCheckout(); }} className="mt-6 bg-petrol text-white hover:bg-petrol-light">Fechar agora</Button>
             </div>
           ) : hasEmbeddedCheckout ? (
             <div className="flex h-full flex-col bg-cream">
@@ -584,6 +594,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
                 });
               }}
               onClose={() => setOpen(false)}
+              onVerify={() => void verifyPayment(intent.id)}
               onRetry={() => { resetCheckout(); setOpen(true); }}
             />
           )}
@@ -601,6 +612,7 @@ function NativePending({
   copied,
   onCopy,
   onClose,
+  onVerify,
   onRetry,
 }: {
   intent: CheckoutIntent;
@@ -610,6 +622,7 @@ function NativePending({
   copied: boolean;
   onCopy: () => void;
   onClose: () => void;
+  onVerify: () => void;
   onRetry: () => void;
 }) {
   const action = intent.action ?? {};
@@ -653,9 +666,15 @@ function NativePending({
 
       {redirect && <a href={redirect} target="_blank" rel="noopener noreferrer" className="mt-5 flex min-h-12 items-center justify-center rounded-xl bg-coral px-4 text-sm font-extrabold text-white">Continuar pagamento <ExternalLink className="ml-2 h-4 w-4" /></a>}
 
-      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">{verifying || intent.status === "PENDING" || intent.status === "PROCESSING" ? <Loader2 className="h-4 w-4 animate-spin text-coral" /> : null}<span>{verifying ? "A confirmar…" : "Aguardando confirmação segura"}</span></div>
+      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">{verifying || intent.status === "PENDING" || intent.status === "PROCESSING" ? <Loader2 className="h-4 w-4 animate-spin text-coral" /> : null}<span>{verifying ? "A confirmar o pagamento…" : "Aguardando confirmação financeira"}</span></div>
+      {method === "pix" && (
+        <Button type="button" variant="outline" onClick={onVerify} disabled={verifying} className="mt-4 w-full rounded-xl border-[#32bcad]/40 text-petrol hover:bg-[#f2fbfa]">
+          {verifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4 text-[#147f75]" />}
+          {verifying ? "Verificando…" : "Já paguei · verificar agora"}
+        </Button>
+      )}
       {error && <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">{error}</p>}
-      <Button type="button" variant="ghost" onClick={onRetry} className="mt-5 w-full rounded-xl text-petrol">{method === "pix" ? "Gerar novo Pix" : "Escolher outro meio"}</Button>
+      <Button type="button" variant="ghost" onClick={onRetry} className="mt-3 w-full rounded-xl text-petrol">{method === "pix" ? "Gerar novo Pix" : "Escolher outro meio"}</Button>
     </div>
   );
 }

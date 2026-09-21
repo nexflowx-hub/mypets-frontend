@@ -6,7 +6,11 @@ import { ArrowRight, BadgeCheck, CheckCircle2, ExternalLink, HeartHandshake, Meg
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
+import { CauseCheckout } from "@/components/payments/cause-checkout";
+import { getCampaignCause, getCampaignConfig } from "@/lib/campaign-landings";
 import { impactProject, impactProjects, internalProjectFunnel, trackedProjectFunnel } from "@/lib/impact-projects";
+
+const TWF_FUND_BRL_CAUSE_ID = "9a7f1000-0000-4a11-8c01-000000000006";
 
 export function generateStaticParams() {
   return impactProjects().map((project) => ({ slug: project.slug }));
@@ -38,6 +42,19 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
   const funnel = trackedProjectFunnel(project);
   const active = project.status === "active";
+  const isTogetherWeFeed = project.slug === "together-we-feed";
+  const [paymentConfig, twfFund] = isTogetherWeFeed
+    ? await Promise.all([
+        getCampaignConfig(),
+        getCampaignCause("mypets-together-we-feed-brl"),
+      ])
+    : [null, null];
+  const twfFundReady = Boolean(
+    twfFund?.id === TWF_FUND_BRL_CAUSE_ID &&
+    paymentConfig?.paymentsLive &&
+    paymentConfig.paymentProvider === "xpayments" &&
+    paymentConfig.paymentCurrencies?.includes("BRL"),
+  );
   const heroImage = project.media?.hero ?? project.image;
   const remoteHero = heroImage.startsWith("http://") || heroImage.startsWith("https://");
   const ecosystem = project.ecosystem;
@@ -61,9 +78,17 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
               <p className="mt-5 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">{ecosystem?.headline ?? project.summary}</p>
               {ecosystem && <p className="mt-3 max-w-2xl text-sm leading-6 text-white/58">{ecosystem.lead}</p>}
 
-              <div className="mt-7 flex flex-wrap gap-3">
-                {active && project.publicUrl ? (
-                  <a href={project.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-coral px-6 text-sm font-extrabold text-white transition hover:bg-coral-dark">Visitar Together We Feed <ExternalLink className="h-4 w-4" /></a>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                {isTogetherWeFeed && twfFundReady && (
+                  <CauseCheckout
+                    causeId={TWF_FUND_BRL_CAUSE_ID}
+                    causeTitle="Together We Feed"
+                    currency="BRL"
+                    enabled
+                  />
+                )}
+                {isTogetherWeFeed && project.publicUrl ? (
+                  <a href={funnel ?? project.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 bg-white/8 px-6 text-sm font-extrabold text-white transition hover:bg-white/14">Site Together We Feed <ExternalLink className="h-4 w-4" /></a>
                 ) : active && funnel ? (
                   <a href={funnel} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-coral px-6 text-sm font-extrabold text-white transition hover:bg-coral-dark">Apoiar este projeto <ExternalLink className="h-4 w-4" /></a>
                 ) : ecosystem && supportHref ? (
@@ -71,6 +96,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                 ) : null}
                 {ecosystem && requestHref ? <Link href={requestHref} className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 bg-white/8 px-6 text-sm font-extrabold text-white transition hover:bg-white/14">{ecosystem.requestLabel}</Link> : <Link href="/projetos" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 text-sm font-extrabold text-white transition hover:bg-white/10">Ver todos os projetos</Link>}
               </div>
+              {isTogetherWeFeed && (
+                <p className="mt-3 max-w-2xl text-xs leading-5 text-white/55">
+                  O apoio direto é recebido pelo MyPets e contabilizado separadamente para a frente Together We Feed.
+                </p>
+              )}
             </div>
 
             <div className="relative min-h-72 overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/10 sm:min-h-96">
@@ -129,7 +159,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
               <section className="overflow-hidden rounded-3xl border border-border bg-white">
                 <div className="p-6 sm:p-8"><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">Conheça o projeto</p><h2 className="mt-2 text-2xl font-extrabold text-petrol">Veja a apresentação do Together We Feed</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">O mesmo conteúdo audiovisual utilizado pelo projeto Together We Feed, apresentado aqui dentro do ecossistema MyPets.</p></div>
                 <div className="bg-petrol"><video controls playsInline preload="metadata" poster={project.media.video.poster} className="aspect-video w-full bg-petrol object-cover" aria-label={project.media.video.title}><source src={project.media.video.src} type="video/mp4" />O seu navegador não suporta reprodução de vídeo HTML5.</video></div>
-                {project.publicUrl && <div className="flex flex-col gap-3 border-t border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:px-8"><p className="text-sm font-semibold text-petrol">Quer conhecer a campanha completa ou apoiar diretamente?</p><a href={project.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-5 text-sm font-extrabold text-white transition hover:bg-coral-dark">Abrir twf-help.vercel.app <ExternalLink className="h-4 w-4" /></a></div>}
+                {project.publicUrl && <div className="flex flex-col gap-3 border-t border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:px-8"><p className="text-sm font-semibold text-petrol">Quer conhecer o projeto no seu site?</p><a href={funnel ?? project.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-5 text-sm font-extrabold text-white transition hover:bg-coral-dark">Site Together We Feed <ExternalLink className="h-4 w-4" /></a></div>}
               </section>
             )}
 
@@ -152,8 +182,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             {ecosystem && supportHref && requestHref && <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-border"><p className="text-xs font-black uppercase tracking-[0.14em] text-muted-foreground">Escolha o seu caminho</p><Link href={supportHref} className="mt-4 flex min-h-11 items-center justify-center rounded-full bg-coral px-4 text-center text-sm font-black text-white">{ecosystem.supportLabel}</Link><Link href={requestHref} className="mt-2 flex min-h-11 items-center justify-center rounded-full border border-border bg-cream px-4 text-center text-sm font-black text-petrol">{ecosystem.requestLabel}</Link></div>}
 
             {active && project.publicUrl && <a href={project.publicUrl} target="_blank" rel="noopener noreferrer" className="group block rounded-3xl bg-coral p-6 text-white transition hover:-translate-y-0.5 hover:bg-coral-dark"><p className="text-xs font-bold text-white/75">Site do projeto</p><p className="mt-1 text-lg font-extrabold">Together We Feed</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold">Visitar agora <ExternalLink className="h-4 w-4 transition group-hover:translate-x-1" /></span></a>}
-
-            {project.sourceRepository && <a href={project.sourceRepository} target="_blank" rel="noopener noreferrer" className="group block rounded-3xl border border-border bg-white p-6 text-petrol transition hover:-translate-y-0.5 hover:border-coral/30"><p className="text-xs font-bold text-muted-foreground">Projeto técnico</p><p className="mt-1 font-extrabold">Repositório TogetherWeFeed</p><span className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-coral">Ver no GitHub <ExternalLink className="h-3.5 w-3.5" /></span></a>}
 
             <Link href="/projetos" className="group flex items-center justify-between gap-4 rounded-3xl bg-petrol p-6 text-white transition hover:-translate-y-0.5"><div><p className="text-xs font-bold text-white/60">MyPets Impact</p><p className="mt-1 font-extrabold">Ver todos os ecossistemas</p></div><ArrowRight className="h-5 w-5 shrink-0 transition group-hover:translate-x-1" /></Link>
           </aside>

@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { CauseCheckout } from "@/components/payments/cause-checkout";
-import { getCampaignConfig } from "@/lib/campaign-landings";
+import { getCampaignCause, getCampaignConfig } from "@/lib/campaign-landings";
 
 export const revalidate = 10;
 
@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 const MYPETS_GENERAL_BRL_CAUSE_ID = "9a7f1000-0000-4a11-8c01-000000000001";
+const TWF_FUND_BRL_CAUSE_ID = "9a7f1000-0000-4a11-8c01-000000000006";
 
 const options = [
   { title: "Tratamentos veterinários", text: "Consultas, exames, cirurgias, medicamentos e recuperação.", href: "/projetos/vet-help/apoiar", icon: Stethoscope },
@@ -25,7 +26,10 @@ const options = [
 ];
 
 export default async function SupportHubPage() {
-  const paymentConfig = await getCampaignConfig();
+  const [paymentConfig, twfFund] = await Promise.all([
+    getCampaignConfig(),
+    getCampaignCause("mypets-together-we-feed-brl"),
+  ]);
   const myPetsBrReady = Boolean(
     paymentConfig.paymentsLive &&
     paymentConfig.paymentProvider === "xpayments" &&
@@ -60,11 +64,19 @@ export default async function SupportHubPage() {
             </div>
           </div>
 
-          <Link href="/projetos/together-we-feed?utm_source=mypets&utm_medium=internal&utm_campaign=always_on_support&utm_content=food_active_project" className="group mb-5 grid gap-5 overflow-hidden rounded-3xl bg-petrol p-6 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-8 md:grid-cols-[auto_1fr_auto] md:items-center">
+          <div className="mb-5 grid gap-5 overflow-hidden rounded-3xl bg-petrol p-6 text-white shadow-sm sm:p-8 md:grid-cols-[auto_1fr_auto] md:items-center">
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-coral"><Utensils className="h-7 w-7" /></span>
-            <div><span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/85"><BadgeCheck className="h-3.5 w-3.5 text-emerald-400" /> Projeto ativo</span><h2 className="mt-3 text-2xl font-black">Alimentação · Together We Feed</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">O primeiro projeto real apoiado pelo ecossistema MyPets, dedicado a alimentação e apoio imediato a animais em situação de vulnerabilidade.</p></div>
-            <span className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-5 text-sm font-black text-white">Conhecer e apoiar <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
-          </Link>
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/85"><BadgeCheck className="h-3.5 w-3.5 text-emerald-400" /> Projeto ativo</span>
+              <h2 className="mt-3 text-2xl font-black">Alimentação · Together We Feed</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">O primeiro projeto real apoiado pelo ecossistema MyPets, dedicado a alimentação e apoio imediato a animais em situação de vulnerabilidade.</p>
+              <p className="mt-2 text-xs font-bold text-white/50">Apoio direto recebido pelo MyPets e contabilizado separadamente para a frente Together We Feed.</p>
+            </div>
+            <div className="flex min-w-[190px] flex-col gap-2">
+              {myPetsBrReady && twfFund?.id === TWF_FUND_BRL_CAUSE_ID && <CauseCheckout causeId={TWF_FUND_BRL_CAUSE_ID} causeTitle="Together We Feed" currency="BRL" enabled />}
+              <Link href="/projetos/together-we-feed?utm_source=mypets&utm_medium=internal&utm_campaign=always_on_support&utm_content=food_active_project" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/8 px-5 text-sm font-black text-white transition hover:bg-white/14">Conhecer projeto <ArrowRight className="h-4 w-4" /></Link>
+            </div>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             {options.map(({ title, text, href, icon: Icon }) => (
