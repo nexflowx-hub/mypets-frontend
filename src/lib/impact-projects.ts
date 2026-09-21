@@ -27,17 +27,16 @@ export type ImpactProject = {
   image: string;
   funnelUrl?: string;
   publicUrl?: string;
-  sourceRepository?: string;
   media?: ImpactProjectMedia;
   ecosystem?: ImpactProjectEcosystem;
 };
 
-function togetherWeFeedUrl() {
-  return process.env.NEXT_PUBLIC_TWF_URL?.trim() || "https://twf-help.vercel.app";
-}
-
-const TWF_PUBLIC_URL = "https://twf-help.vercel.app";
-const TWF_MEDIA = `${TWF_PUBLIC_URL}/media/images`;
+const TWF_SITE_PATH = "/go/together-we-feed";
+const TWF_MEDIA_ORIGIN =
+  process.env.TWF_MEDIA_ORIGIN?.trim() ||
+  process.env.NEXT_PUBLIC_TWF_URL?.trim() ||
+  "";
+const TWF_MEDIA = TWF_MEDIA_ORIGIN ? `${TWF_MEDIA_ORIGIN.replace(/\/$/, "")}/media/images` : "";
 
 export function impactProjects(): ImpactProject[] {
   return [
@@ -49,21 +48,20 @@ export function impactProjects(): ImpactProject[] {
       summary: "Alimentação e apoio imediato para animais em situação de vulnerabilidade.",
       description: "Together We Feed é o primeiro projeto real apoiado dentro do ecossistema MyPets. O projeto mantém o seu próprio funil de captação, enquanto o MyPets funciona como camada de descoberta, confiança, acompanhamento e ligação com a comunidade.",
       status: "active",
-      image: `${TWF_MEDIA}/hero-desktop.webp`,
-      funnelUrl: togetherWeFeedUrl(),
-      publicUrl: TWF_PUBLIC_URL,
-      sourceRepository: "https://github.com/nexflowx-hub/TogetherWeFeed",
+      image: TWF_MEDIA ? `${TWF_MEDIA}/hero-desktop.webp` : "/images/cta-dog.jpg",
+      funnelUrl: TWF_SITE_PATH,
+      publicUrl: TWF_SITE_PATH,
       media: {
-        hero: `${TWF_MEDIA}/hero-desktop.webp`,
-        gallery: [
+        hero: TWF_MEDIA ? `${TWF_MEDIA}/hero-desktop.webp` : "/images/cta-dog.jpg",
+        gallery: TWF_MEDIA ? [
           { src: `${TWF_MEDIA}/missao-impacto.webp`, alt: "A missão e o impacto do Together We Feed" },
           { src: `${TWF_MEDIA}/historias-01.webp`, alt: "História de impacto do Together We Feed" },
           { src: `${TWF_MEDIA}/historias-02.webp`, alt: "Animais apoiados pelo Together We Feed" },
           { src: `${TWF_MEDIA}/historias-03.webp`, alt: "Apoio alimentar a animais em situação de vulnerabilidade" },
           { src: `${TWF_MEDIA}/historias-04.webp`, alt: "História acompanhada pelo Together We Feed" },
           { src: `${TWF_MEDIA}/historias-05.webp`, alt: "Impacto do apoio Together We Feed" },
-        ],
-        video: { src: "https://hopeheaart.com/pt/media/videos/apresentacao.mp4", poster: `${TWF_MEDIA}/video-poster.webp`, title: "Apresentação Together We Feed" },
+        ] : undefined,
+        video: TWF_MEDIA ? { src: "https://hopeheaart.com/pt/media/videos/apresentacao.mp4", poster: `${TWF_MEDIA}/video-poster.webp`, title: "Apresentação Together We Feed" } : undefined,
       },
     },
     {
@@ -168,12 +166,13 @@ export function impactProject(slug: string) {
 export function trackedProjectFunnel(project: ImpactProject, source = "project_page") {
   if (!project.funnelUrl) return null;
   try {
-    const url = new URL(project.funnelUrl);
+    const internal = project.funnelUrl.startsWith("/");
+    const url = new URL(project.funnelUrl, "https://mypets.lat");
     url.searchParams.set("utm_source", "mypets");
     url.searchParams.set("utm_medium", "referral");
     url.searchParams.set("utm_campaign", project.slug.replaceAll("-", "_"));
     url.searchParams.set("utm_content", source);
-    return url.toString();
+    return internal ? `${url.pathname}${url.search}` : url.toString();
   } catch {
     return project.funnelUrl;
   }
