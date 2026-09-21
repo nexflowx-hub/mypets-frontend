@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { CauseCheckout } from "@/components/payments/cause-checkout";
-import { getCampaignConfig } from "@/lib/campaign-landings";
+import { getCampaignCause, getCampaignConfig } from "@/lib/campaign-landings";
 
 export const revalidate = 10;
 
@@ -26,7 +26,10 @@ const options = [
 ];
 
 export default async function SupportHubPage() {
-  const paymentConfig = await getCampaignConfig();
+  const [paymentConfig, twfFund] = await Promise.all([
+    getCampaignConfig(),
+    getCampaignCause("mypets-together-we-feed-brl"),
+  ]);
   const myPetsBrReady = Boolean(
     paymentConfig.paymentsLive &&
     paymentConfig.paymentProvider === "xpayments" &&
@@ -70,7 +73,7 @@ export default async function SupportHubPage() {
               <p className="mt-2 text-xs font-bold text-white/50">Apoio direto recebido pelo MyPets e contabilizado separadamente para a frente Together We Feed.</p>
             </div>
             <div className="flex min-w-[190px] flex-col gap-2">
-              {myPetsBrReady && <CauseCheckout causeId={TWF_FUND_BRL_CAUSE_ID} causeTitle="Together We Feed" currency="BRL" enabled />}
+              {myPetsBrReady && twfFund?.id === TWF_FUND_BRL_CAUSE_ID && <CauseCheckout causeId={TWF_FUND_BRL_CAUSE_ID} causeTitle="Together We Feed" currency="BRL" enabled />}
               <Link href="/projetos/together-we-feed?utm_source=mypets&utm_medium=internal&utm_campaign=always_on_support&utm_content=food_active_project" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/8 px-5 text-sm font-black text-white transition hover:bg-white/14">Conhecer projeto <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
