@@ -5,14 +5,8 @@ export const dynamic = "force-dynamic";
 export function GET(request: NextRequest) {
   const configuredTarget =
     process.env.TWF_SITE_URL?.trim() ||
-    process.env.NEXT_PUBLIC_TWF_URL?.trim();
-
-  if (!configuredTarget) {
-    return NextResponse.redirect(
-      new URL("/projetos/together-we-feed", request.url),
-      307,
-    );
-  }
+    process.env.NEXT_PUBLIC_TWF_URL?.trim() ||
+    "https://twf-help.vercel.app";
 
   let target: URL;
   try {
