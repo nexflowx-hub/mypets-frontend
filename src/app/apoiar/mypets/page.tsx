@@ -11,7 +11,7 @@ export const revalidate = 10;
 
 export const metadata: Metadata = {
   title: "Apoiar o MyPets | MyPets",
-  description: "Apoie diretamente a tecnologia, a operação e a divulgação do ecossistema MyPets.",
+  description: "Ajude o MyPets a continuar vivo, crescer e ampliar a capacidade de descobrir, verificar e apoiar causas animais reais.",
   alternates: { canonical: "/apoiar/mypets" },
 };
 
@@ -58,9 +58,9 @@ export default async function SupportMyPetsPage() {
           <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
             <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-coral">Apoie a infraestrutura do impacto</p>
-                <h1 className="mt-4 max-w-4xl text-balance text-4xl font-black leading-[1.04] tracking-tight sm:text-5xl">Ajude o MyPets a levar mais causas reais às pessoas certas.</h1>
-                <p className="mt-5 max-w-3xl text-base leading-7 text-white/72">Este apoio tem o MyPets como beneficiário. Ele financia tecnologia, verificação, atendimento, conteúdo, distribuição e operação do ecossistema, separado contabilmente das causas de terceiros.</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-coral">Campanha permanente de sustentação</p>
+                <h1 className="mt-4 max-w-4xl text-balance text-4xl font-black leading-[1.04] tracking-tight sm:text-5xl">Ajude o MyPets a continuar vivo — e a colocar mais ajuda onde ela faz diferença.</h1>
+                <p className="mt-5 max-w-3xl text-base leading-7 text-white/72">O MyPets precisa de estrutura para descobrir projetos, verificar responsáveis, criar campanhas, manter tecnologia, atender a comunidade e ampliar a distribuição das causas. Este apoio tem o próprio MyPets como beneficiário e é contabilmente separado dos fundos de terceiros.</p>
               </div>
               <div className="min-w-[210px]">
                 <CauseCheckout causeId={MYPETS_GENERAL_BRL_CAUSE_ID} causeTitle="o MyPets" currency="BRL" enabled={paymentReady} />
@@ -82,6 +82,53 @@ export default async function SupportMyPetsPage() {
               </div>
             </div>
           </div>
+
+          <section className="mt-6">
+            <div className="mb-5">
+              <p className="text-xs font-black uppercase tracking-[0.15em] text-coral">O que o seu apoio mantém vivo</p>
+              <h2 className="mt-2 text-2xl font-black text-petrol sm:text-3xl">Uma infraestrutura pequena pode multiplicar o alcance de muitas causas.</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {[
+                ["Tecnologia e infraestrutura", "Site, API, base de dados, checkout, segurança, monitorização e ferramentas de operação.", ShieldCheck],
+                ["Verificação e triagem", "Análise de projetos, contacto com responsáveis, organização de evidências e redução de risco.", HeartHandshake],
+                ["Conteúdo e distribuição", "Páginas, criativos, campanhas, descoberta e distribuição para que boas causas sejam encontradas.", Megaphone],
+                ["Operação e comunidade", "Atendimento, acompanhamento, parcerias e capacidade de transformar pedidos em ações concretas.", UsersRound],
+              ].map(([title, text, Icon]) => {
+                const ItemIcon = Icon as typeof ShieldCheck;
+                return (
+                  <article key={title as string} className="rounded-3xl border border-border bg-white p-6">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-coral/10 text-coral"><ItemIcon className="h-5 w-5" /></span>
+                    <h3 className="mt-4 text-lg font-black text-petrol">{title as string}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{text as string}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="mt-8 rounded-[2rem] bg-petrol p-6 text-white sm:p-8">
+            <p className="text-xs font-black uppercase tracking-[0.15em] text-coral">O impacto já tem nomes</p>
+            <h2 className="mt-2 max-w-3xl text-2xl font-black sm:text-3xl">Projetos que ajudam a explicar por que o MyPets precisa existir.</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-white/65">A estrutura do MyPets pode dar visibilidade, organização e uma rota segura de apoio a iniciativas muito diferentes entre si.</p>
+
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <Link href="/projetos/together-we-feed" className="group rounded-3xl border border-white/10 bg-white/7 p-6 transition hover:bg-white/10">
+                <p className="text-xs font-black uppercase tracking-wide text-coral">Alimentação · projeto integrado</p>
+                <h3 className="mt-2 text-2xl font-black">Together We Feed</h3>
+                <p className="mt-2 text-sm leading-6 text-white/65">Uma frente dedicada à alimentação e ao apoio imediato de animais em situação de vulnerabilidade, já integrada ao ecossistema MyPets.</p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-white">Conhecer projeto <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+              </Link>
+
+              <Link href="/projetos/petskids" className="group rounded-3xl border border-white/10 bg-white/7 p-6 transition hover:bg-white/10">
+                <p className="text-xs font-black uppercase tracking-wide text-coral">Centro-Oeste do Brasil · em integração</p>
+                <h3 className="mt-2 text-2xl font-black">PetsKids</h3>
+                <p className="mt-2 text-sm leading-6 text-white/65">Duas crianças transformam pequenas compras de ração em cuidado direto para cães em situação de rua, distribuindo alimento na própria comunidade.</p>
+                <p className="mt-3 text-xs leading-5 text-white/50">Por envolver menores, dados pessoais não são expostos e não há repasse financeiro direto a crianças. Nesta fase, o apoio financeiro é recebido e gerido pelo MyPets.</p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-white">Conhecer PetsKids <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span>
+              </Link>
+            </div>
+          </section>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {paths.map(({ title, text, href, cta, icon: Icon }) => (
