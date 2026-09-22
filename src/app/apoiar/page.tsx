@@ -78,6 +78,17 @@ export default async function SupportHubPage() {
             </div>
           </div>
 
+          <div className="mb-6 grid gap-5 overflow-hidden rounded-3xl border border-[#d8ecea] bg-[#eef8f7] p-6 sm:p-8 md:grid-cols-[auto_1fr_auto] md:items-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-[#0d6e6b]"><PawPrint className="h-7 w-7" /></span>
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#0d6e6b]"><HeartHandshake className="h-3.5 w-3.5" /> Projeto em integração</span>
+              <h2 className="mt-3 text-2xl font-black text-petrol">Alimentação comunitária · PetsKids</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Duas crianças do Centro-Oeste transformam pequenas compras de ração em cuidado direto para cães em situação de rua na própria comunidade.</p>
+              <p className="mt-2 text-xs font-bold text-petrol/55">Por envolver menores, o MyPets não expõe dados pessoais nem faz repasses diretos a crianças. O apoio financeiro nesta fase passa pelo fundo institucional MyPets.</p>
+            </div>
+            <Link href="/projetos/petskids?utm_source=mypets&utm_medium=internal&utm_campaign=always_on_support&utm_content=petskids" className="inline-flex min-h-11 min-w-[190px] items-center justify-center gap-2 rounded-full bg-[#0d6e6b] px-5 text-sm font-black text-white">Conhecer PetsKids <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             {options.map(({ title, text, href, icon: Icon }) => (
               <Link key={href} href={`${href}?utm_source=mypets&utm_medium=internal&utm_campaign=always_on_support&utm_content=support_hub`} className="group rounded-3xl border border-border bg-white p-6 transition hover:-translate-y-1 hover:border-coral/35 hover:shadow-lg sm:p-7">
