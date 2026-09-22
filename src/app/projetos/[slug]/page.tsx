@@ -90,7 +90,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                 {isTogetherWeFeed && project.publicUrl ? (
                   <a href={funnel ?? project.publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 bg-white/8 px-6 text-sm font-extrabold text-white transition hover:bg-white/14">Site Together We Feed <ExternalLink className="h-4 w-4" /></a>
                 ) : active && funnel ? (
-                  <a href={funnel} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-coral px-6 text-sm font-extrabold text-white transition hover:bg-coral-dark">Apoiar este projeto <ExternalLink className="h-4 w-4" /></a>
+                  <a href={funnel} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-coral px-6 text-sm font-extrabold text-white transition hover:bg-coral-dark">{project.supportLabel ?? "Apoiar este projeto"} <ExternalLink className="h-4 w-4" /></a>
                 ) : ecosystem && supportHref ? (
                   <Link href={supportHref} className="inline-flex min-h-12 items-center gap-2 rounded-full bg-coral px-6 text-sm font-extrabold text-white transition hover:bg-coral-dark">{ecosystem.supportLabel} <ArrowRight className="h-4 w-4" /></Link>
                 ) : null}
@@ -99,6 +99,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
               {isTogetherWeFeed && (
                 <p className="mt-3 max-w-2xl text-xs leading-5 text-white/55">
                   O apoio direto é recebido pelo MyPets e contabilizado separadamente para a frente Together We Feed.
+                </p>
+              )}
+              {project.fundingNotice && (
+                <p className="mt-3 max-w-2xl rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs leading-5 text-white/65">
+                  {project.fundingNotice}
                 </p>
               )}
             </div>
