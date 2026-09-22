@@ -27,6 +27,8 @@ jobs:
             "https://www.mypets.lat/apoiar/mypets"
             "https://www.mypets.lat/preciso-de-apoio"
             "https://www.mypets.lat/preciso-de-apoio/publicar"
+            "https://www.mypets.lat/projetos/apresentar"
+            "https://www.mypets.lat/projetos/petskids"
             "https://www.mypets.lat/projetos/vet-help/apoiar"
             "https://www.mypets.lat/projetos/rescue/apoiar"
             "https://www.mypets.lat/projetos/shelter/apoiar"
@@ -81,6 +83,15 @@ jobs:
           echo "paymentCurrencies=$(jq -c '.data.paymentCurrencies' /tmp/config.json)"
           echo "paymentWebhookCurrencies=$(jq -c '.data.paymentWebhookCurrencies' /tmp/config.json)"
 
+      - name: Prove cause intake DB round-trip in production
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS -X POST https://api.mypets.lat/v1/cause-intake/readiness | tee /tmp/intake-readiness.json
+          jq -e '.data.status == "ready" and .data.databaseRoundTrip == true and .data.rolledBack == true' /tmp/intake-readiness.json >/dev/null
+          jq -e '.data.checks | index("causes") and index("cause_intake_submissions") and index("cause_promotion_queue")' /tmp/intake-readiness.json >/dev/null
+          echo "Production cause intake database path validated"
+
       - name: Verify public cause intake form is rendered
         shell: bash
         run: |
@@ -89,6 +100,9 @@ jobs:
           grep -Fq "Nome do projeto / causa" /tmp/intake.html
           grep -Fq "Mensagem principal para o site MyPets" /tmp/intake.html
           grep -Fq "A sua história pode encontrar quem quer ajudar" /tmp/intake.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/projetos/apresentar -o /tmp/project-intake.html
+          grep -Fq "O seu projeto ajuda animais" /tmp/project-intake.html
+          grep -Fq "Projetos conduzidos por menores" /tmp/project-intake.html
           if grep -Fq "Sincronização final" /tmp/intake.html; then
             echo "Cause intake page unexpectedly rendered the rollout fallback" >&2
             exit 1
