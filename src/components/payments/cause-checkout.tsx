@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { apiUrl } from "@/lib/api";
 import { getValidSession } from "@/lib/auth-client";
+import { recordGrowthEvent } from "@/lib/growth";
 import { cn } from "@/lib/utils";
 
 type NativePaymentMethod = "pix" | "mb_way" | "multibanco" | "bizum";
@@ -311,6 +312,27 @@ export function CauseCheckout({
     };
   }
 
+  function openCheckout() {
+    const attribution = tracking();
+    if (typeof window !== "undefined") {
+      void recordGrowthEvent({
+        eventName: "SUPPORT_STARTED",
+        source: attribution.source,
+        medium: attribution.medium,
+        campaign: attribution.campaign,
+        content: attribution.content,
+        landingPath: `${window.location.pathname}${window.location.search}`.slice(0, 500),
+        metadata: {
+          causeId,
+          causeTitle,
+          currency,
+          presentation,
+        },
+      });
+    }
+    setOpen(true);
+  }
+
   function validateCommon(requireName = false, requireEmail = false) {
     if (effectiveAmount < 100 || effectiveAmount > 5_000_000) {
       setError("Escolha um valor válido para continuar.");
@@ -451,7 +473,7 @@ export function CauseCheckout({
           </div>
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={openCheckout}
             className="mt-4 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-[0_16px_32px_-18px_rgba(16,185,129,.85)] transition hover:-translate-y-0.5 hover:bg-emerald-600"
           >
             <Heart className="h-5 w-5" />
@@ -465,7 +487,7 @@ export function CauseCheckout({
         </div>
       ) : (
         <PremiumSupportButton
-          onClick={() => setOpen(true)}
+          onClick={openCheckout}
           label={triggerLabel}
           detail={brazilPixOnly ? "Pix no Brasil" : "pagamento seguro"}
           className="min-w-[162px]"
