@@ -46,6 +46,12 @@ type Props = {
   causeTitle: string;
   currency: "EUR" | "BRL";
   enabled: boolean;
+  presentation?: "button" | "campaign";
+  defaultAmountCents?: number;
+  campaignEyebrow?: string;
+  campaignTitle?: string;
+  campaignDescription?: string;
+  campaignClassName?: string;
 };
 
 const methodLabel: Record<PaymentChoice, string> = {
@@ -128,12 +134,26 @@ function methodIcon(method: PaymentChoice) {
   return <CreditCard className="h-4 w-4" />;
 }
 
-export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props) {
+export function CauseCheckout({
+  causeId,
+  causeTitle,
+  currency,
+  enabled,
+  presentation = "button",
+  defaultAmountCents,
+  campaignEyebrow = "Faça parte desta causa",
+  campaignTitle = "Escolha quanto quer colocar em movimento hoje",
+  campaignDescription = "O valor escolhido abre o pagamento seguro já preparado para esta contribuição.",
+  campaignClassName,
+}: Props) {
   const router = useRouter();
   const brazilPixOnly = currency === "BRL";
   const presets = React.useMemo(() => amountOptions(currency), [currency]);
+  const initialAmount = defaultAmountCents && defaultAmountCents >= 100 && defaultAmountCents <= 5_000_000
+    ? defaultAmountCents
+    : presets[1];
   const [open, setOpen] = React.useState(false);
-  const [amountCents, setAmountCents] = React.useState(presets[1]);
+  const [amountCents, setAmountCents] = React.useState(initialAmount);
   const [customAmount, setCustomAmount] = React.useState("");
   const [donorName, setDonorName] = React.useState("");
   const [donorEmail, setDonorEmail] = React.useState("");
@@ -407,12 +427,50 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
 
   return (
     <>
-      <PremiumSupportButton
-        onClick={() => setOpen(true)}
-        label={triggerLabel}
-        detail={brazilPixOnly ? "Pix no Brasil" : "pagamento seguro"}
-        className="min-w-[162px]"
-      />
+      {presentation === "campaign" ? (
+        <div className={cn("rounded-[1.75rem] border border-white/10 bg-white p-5 text-petrol shadow-2xl shadow-black/15 sm:p-6", campaignClassName)}>
+          <p className="text-[10px] font-black uppercase tracking-[0.17em] text-emerald-700">{campaignEyebrow}</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-petrol sm:text-2xl">{campaignTitle}</h2>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">{campaignDescription}</p>
+          <div className="mt-5 grid grid-cols-4 gap-2">
+            {presets.map((cents) => (
+              <button
+                key={cents}
+                type="button"
+                onClick={() => { setAmountCents(cents); setCustomAmount(""); setError(null); }}
+                className={cn(
+                  "min-h-11 rounded-xl border px-2 text-xs font-black transition sm:text-sm",
+                  !customAmount && amountCents === cents
+                    ? "border-petrol bg-petrol text-white shadow-sm"
+                    : "border-border bg-[#f7fafb] text-petrol hover:border-petrol/35",
+                )}
+              >
+                {money(cents, currency)}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="mt-4 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-[0_16px_32px_-18px_rgba(16,185,129,.85)] transition hover:-translate-y-0.5 hover:bg-emerald-600"
+          >
+            <Heart className="h-5 w-5" />
+            {intent ? "Retomar apoio" : `Quero ajudar agora · ${money(amountCents, currency)}`}
+          </button>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-semibold text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5"><LockKeyhole className="h-3.5 w-3.5 text-emerald-700" /> Pagamento seguro</span>
+            {brazilPixOnly && <span className="inline-flex items-center gap-1.5"><PixBrand className="h-3.5 w-auto" /> Pix no Brasil</span>}
+            <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-700" /> Confirmação pelo servidor</span>
+          </div>
+        </div>
+      ) : (
+        <PremiumSupportButton
+          onClick={() => setOpen(true)}
+          label={triggerLabel}
+          detail={brazilPixOnly ? "Pix no Brasil" : "pagamento seguro"}
+          className="min-w-[162px]"
+        />
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
