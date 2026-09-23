@@ -18,6 +18,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
+import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
 import { CauseCheckout } from "@/components/payments/cause-checkout";
 import { getCampaignConfig } from "@/lib/campaign-landings";
 
@@ -127,6 +128,7 @@ export default async function HelpMyPetsCampaignPage() {
 
   return (
     <main className="min-h-screen bg-[#f7f8f4] text-petrol">
+      <CampaignLandingTracker variant="donation_high_conversion_v1" />
       <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link href="/" aria-label="MyPets">
