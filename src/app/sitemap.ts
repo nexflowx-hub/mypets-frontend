@@ -62,6 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/legal/apoios",
     "/causas",
     "/apoiar",
+    "/ajudar",
     "/apoiar/mypets",
     "/preciso-de-apoio",
     "/preciso-de-apoio/publicar",
