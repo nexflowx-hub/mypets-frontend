@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Heart, LockKeyhole, PawPrint, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Heart, LockKeyhole, PawPrint, ShieldCheck, Sparkles } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
 import { CampaignShareButton } from "@/components/conversion/campaign-share-button";
@@ -41,18 +41,18 @@ export default async function EbookRacaoCampaignPage() {
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol">
-      <CampaignLandingTracker variant="ebook_racao_v1" />
+      <CampaignLandingTracker variant="ebook_racao_1kg_v1" />
 
       <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link href="/" aria-label="MyPets"><MyPetsLogo /></Link>
+          <div aria-label="MyPets"><MyPetsLogo /></div>
           <div className="flex items-center gap-3">
             <span className="hidden items-center gap-2 text-[11px] font-bold text-muted-foreground sm:inline-flex">
               <LockKeyhole className="h-3.5 w-3.5 text-emerald-700" /> Participação segura
             </span>
-            <Link href="/ajudar" className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-white px-4 text-xs font-black text-petrol">
-              <ArrowLeft className="h-3.5 w-3.5" /> Outras formas de ajudar
-            </Link>
+            <a href="#como-funciona" className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-white px-4 text-xs font-black text-petrol">
+              Como funciona
+            </a>
           </div>
         </div>
       </header>
@@ -67,10 +67,10 @@ export default async function EbookRacaoCampaignPage() {
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_470px] lg:items-center lg:px-8 lg:py-16">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
-              <BookOpen className="h-3.5 w-3.5" /> Campanha solidária MyPets
+              <BookOpen className="h-3.5 w-3.5" /> 1 eBook = 1 kg de ração
             </span>
             <h1 className="mt-6 max-w-3xl text-balance text-5xl font-black leading-[.95] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
-              1 eBook <span className="text-emerald-300">= Ração.</span>
+              Escolha um guia. <span className="text-emerald-300">Coloque 1 kg de ração</span> numa tigela.
             </h1>
             <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/78">
               Escolha um guia útil para si e transforme a participação em alimento. <strong className="text-white">R$ 12,90 = 1 eBook digital = 1 kg de ração a financiar.</strong>
@@ -153,7 +153,7 @@ export default async function EbookRacaoCampaignPage() {
         </div>
       </section>
 
-      <section className="bg-petrol text-white">
+      <section id="como-funciona" className="scroll-mt-24 bg-petrol text-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:px-8 lg:py-16">
           <div className="relative min-h-[350px] overflow-hidden rounded-[2rem]">
             <Image src="/images/cta-dog.jpg" alt="Cão representando a campanha de alimentação MyPets" fill sizes="(min-width:1024px) 42vw, 100vw" className="object-cover" />
