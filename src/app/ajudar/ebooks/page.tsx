@@ -109,7 +109,7 @@ export default async function EbookRacaoCampaignPage() {
       <section className="border-b border-border bg-white">
         <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
           {[
-            ["Participação, não catálogo de loja", "O conteúdo digital funciona como recompensa de agradecimento e o apoio tem o MyPets como beneficiário."],
+            ["Apoio + recompensa digital", "O apoio tem o MyPets como beneficiário financeiro e o conteúdo digital é a recompensa desta campanha."],
             ["Valor simples", "R$ 12,90 por guia selecionado. Cada unidade confirmada corresponde a 1 kg."],
             ["Destino identificado", "A campanha mede separadamente a origem, os materiais escolhidos e o apoio confirmado."],
             ["Compromisso por peso", "Participações confirmadas preservam 1 kg. O preço pode ser revisto apenas para novas participações se o custo de aquisição variar."],
@@ -196,7 +196,7 @@ export default async function EbookRacaoCampaignPage() {
         <h2 className="mt-3 text-center text-3xl font-black tracking-tight">Antes de participar, saiba exatamente o que está a fazer.</h2>
         <div className="mt-7 space-y-3">
           {[
-            ["Estou comprando um eBook?", "A experiência é apresentada pelo MyPets como participação solidária com recompensa digital. O apoio financeiro tem o MyPets como beneficiário; o enquadramento fiscal e documental da campanha deve permanecer coerente com a estrutura jurídica utilizada pelo MyPets."],
+            ["Como funciona esta participação?", "O apoio financeiro desta campanha tem o MyPets como beneficiário e inclui uma recompensa digital. O tratamento fiscal, documental e de consumo deve permanecer coerente com a estrutura jurídica e os termos aplicáveis ao MyPets; a página não usa o nome da campanha para alterar esse enquadramento."],
             ["Quanto custa cada participação?", "Cada eBook selecionado acrescenta R$ 12,90 ao apoio. Um guia = R$ 12,90 e 1 kg; três = R$ 38,70 e 3 kg; a coleção completa = R$ 64,50 e 5 kg."],
             ["Como o MyPets garante 1 kg?", "A unidade da campanha é o peso, não uma estimativa visual. Cada R$ 12,90 confirmado cria o compromisso de financiar 1 kg. Se o custo de aquisição subir, o MyPets preserva os kg já confirmados e pode ajustar o valor apenas para participações futuras."],
             ["Quando recebo o eBook?", "O acesso aparece depois de o backend confirmar o pagamento. Gerar o QR Code não desbloqueia a etapa de agradecimento."],
