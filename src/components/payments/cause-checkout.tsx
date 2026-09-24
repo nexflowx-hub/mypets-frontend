@@ -396,7 +396,7 @@ export function CauseCheckout({
   function recordPostSupportAction(action: "ebook_access" | "whatsapp_delivery" | "whatsapp_community" | "facebook_group") {
     const attribution = tracking();
     void recordGrowthEvent({
-      eventName: "POST_SUPPORT_ACTION",
+      eventName: "SHARE_CLICK",
       source: attribution.source,
       medium: attribution.medium,
       campaign: attribution.campaign,
@@ -407,6 +407,7 @@ export function CauseCheckout({
         causeTitle,
         currency,
         paymentIntentId: intent?.id ?? null,
+        surface: "post_support",
         action,
       },
     });
