@@ -216,7 +216,10 @@ export function CampaignAdmin() {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 border-b border-border pb-7 lg:flex-row lg:items-end lg:justify-between">
         <div><p className="text-xs font-extrabold uppercase tracking-[0.18em] text-coral">MyPets Growth</p><h1 className="mt-2 text-3xl font-extrabold text-petrol">Campanhas e verticais</h1><p className="mt-2 max-w-3xl text-sm text-muted-foreground">Transforme uma causa real numa landing de aquisição sem duplicar dados, checkout ou confirmação financeira.</p></div>
-        <Button variant="outline" className="rounded-xl" onClick={() => void load()}><RefreshCw className="mr-2 h-4 w-4" />Atualizar</Button>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/growth" className="inline-flex min-h-10 items-center rounded-xl border border-border bg-white px-4 text-sm font-black text-petrol transition hover:border-coral/40">Growth performance</Link>
+          <Button variant="outline" className="rounded-xl" onClick={() => void load()}><RefreshCw className="mr-2 h-4 w-4" />Atualizar</Button>
+        </div>
       </div>
 
       <div className="mt-6 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
