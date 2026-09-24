@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CheckCircle2, Facebook, Heart, LockKeyhole, MessageCircle, PawPrint, PlayCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Facebook, Heart, LockKeyhole, MessageCircle, PawPrint, PlayCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
 import { CampaignShareButton } from "@/components/conversion/campaign-share-button";
@@ -250,7 +250,7 @@ export default async function EbookRacaoCampaignPage() {
               <div className="flex items-center justify-between gap-4 px-5 py-4 text-white">
                 <div>
                   <p className="text-xs font-black">{campaignVideoUrl ? "Vídeo oficial da campanha" : "Narrativa visual da campanha"}</p>
-                  <p className="mt-1 text-[10px] text-white/55">{campaignVideoUrl ? "Veja, entenda e partilhe em menos de 1 minuto." : "O player de vídeo assume este espaço automaticamente quando o media oficial for configurado."}</p>
+                  <p className="mt-1 text-[10px] text-white/55">{campaignVideoUrl ? "Veja, entenda e partilhe em menos de 1 minuto." : "Escolher, confirmar, garantir alimento e acompanhar - sem números ou entregas inventadas."}</p>
                 </div>
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10"><PlayCircle className="h-5 w-5 text-emerald-300" /></span>
               </div>
