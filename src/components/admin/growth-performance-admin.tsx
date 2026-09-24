@@ -196,6 +196,34 @@ export function GrowthPerformanceAdmin() {
     { label: "Partilhas", value: totals?.shareClicks ?? 0, detail: "Landing + pós-doação", icon: Share2 },
   ];
 
+
+  const funnelStages = totals ? [
+    {
+      id: "landing-support",
+      label: "Landing → checkout",
+      rate: totals.landingToSupportPct,
+      denominator: totals.landingViews,
+      action: "Trabalhar hero, promessa, prova, valor pré-selecionado e CTA acima da dobra.",
+    },
+    {
+      id: "support-intent",
+      label: "Checkout → Pix",
+      rate: totals.supportToDonationStartedPct,
+      denominator: totals.supportStarted,
+      action: "Rever fricção do formulário, CPF/titular, copy de confiança e seleção de valor.",
+    },
+    {
+      id: "intent-complete",
+      label: "Pix → confirmado",
+      rate: totals.donationCompletionPct,
+      denominator: totals.donationStarted,
+      action: "Auditar provider, QR/Copia e Cola, reconciliação, tempo de confirmação e feedback pós-pagamento.",
+    },
+  ].filter((stage) => stage.denominator > 0) : [];
+  const bottleneck = funnelStages.length > 0
+    ? [...funnelStages].sort((a, b) => a.rate - b.rate)[0]
+    : null;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-5 border-b border-border pb-7 lg:flex-row lg:items-end lg:justify-between">
@@ -273,6 +301,30 @@ export function GrowthPerformanceAdmin() {
           </article>
         ))}
       </div>
+
+      <section className="mt-6 rounded-3xl border border-border bg-white p-5 sm:p-6">
+        <div className="grid gap-5 lg:grid-cols-[.72fr_1.28fr] lg:items-center">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-coral">Diagnóstico automático</p>
+            <h2 className="mt-1 text-xl font-black text-petrol">Onde o funil está perdendo mais gente?</h2>
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">Leitura puramente baseada nas taxas desta janela; não usa benchmark externo.</p>
+          </div>
+          {bottleneck ? (
+            <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-100">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wide text-amber-700">Maior gargalo observado</p>
+                  <p className="mt-1 text-xl font-black text-amber-950">{bottleneck.label}</p>
+                </div>
+                <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-amber-900 shadow-sm">{bottleneck.rate}%</span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-amber-950/75">{bottleneck.action}</p>
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-sand/60 p-5 text-sm font-semibold text-muted-foreground">Ainda não há eventos suficientes para localizar um gargalo. Primeiro valide o tracking e gere tráfego real.</div>
+          )}
+        </div>
+      </section>
 
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         <article className="rounded-3xl bg-petrol p-6 text-white">
