@@ -6,12 +6,15 @@ import {
   Copy,
   CreditCard,
   ExternalLink,
+  Facebook,
   Heart,
   Landmark,
   Loader2,
   LockKeyhole,
+  MessageCircle,
   ShieldCheck,
   Smartphone,
+  Users,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -61,6 +64,11 @@ type Props = {
   successActionHref?: string;
   successActionLabel?: string;
   requireEmail?: boolean;
+  successHeadline?: string;
+  successDescription?: string;
+  successWhatsappUrl?: string;
+  successCommunityWhatsappUrl?: string;
+  successFacebookGroupUrl?: string;
   successShareText?: string;
   successShareUrl?: string;
 };
@@ -116,6 +124,17 @@ function validCpf(value: string) {
   return digit(9) === numbers[9] && digit(10) === numbers[10];
 }
 
+function whatsappMessageUrl(baseUrl: string | undefined, text: string) {
+  if (!baseUrl) return null;
+  try {
+    const url = new URL(baseUrl);
+    url.searchParams.set("text", text);
+    return url.toString();
+  } catch {
+    return baseUrl;
+  }
+}
+
 function actionValue(action: NativeAction | null | undefined, ...keys: string[]) {
   for (const key of keys) {
     const value = action?.[key];
@@ -164,6 +183,11 @@ export function CauseCheckout({
   successActionHref,
   successActionLabel = "Aceder ao conteúdo",
   requireEmail = false,
+  successHeadline = "Apoio confirmado. Obrigado!",
+  successDescription,
+  successWhatsappUrl,
+  successCommunityWhatsappUrl,
+  successFacebookGroupUrl,
   successShareText = "Eu apoiei o MyPets. Se esta causa também fizer sentido para você, conheça e compartilhe.",
   successShareUrl,
 }: Props) {
