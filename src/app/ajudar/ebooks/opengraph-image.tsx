@@ -13,7 +13,7 @@ export default function Image() {
         <div style={{ position: "absolute", inset: 0, display: "flex", background: "linear-gradient(90deg, rgba(7,25,17,.98) 0%, rgba(7,25,17,.88) 52%, rgba(7,25,17,.42) 100%)" }} />
         <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "center", width: "760px", padding: "64px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "20px", fontWeight: 800, color: "#86efac" }}>MyPets · campanha solidária</div>
-          <div style={{ marginTop: "26px", fontSize: "88px", fontWeight: 900, lineHeight: .95, letterSpacing: "-4px" }}>1 eBook <span style={{ color: "#86efac" }}>= Ração.</span></div>
+          <div style={{ marginTop: "26px", fontSize: "82px", fontWeight: 900, lineHeight: .95, letterSpacing: "-4px" }}>1 eBook <span style={{ color: "#86efac" }}>= 1 kg.</span></div>
           <div style={{ marginTop: "28px", fontSize: "28px", lineHeight: 1.35, color: "rgba(255,255,255,.82)" }}>Escolha um guia digital e transforme R$ 12,90 em 1 kg de ração a financiar.</div>
           <div style={{ marginTop: "34px", display: "flex", width: "fit-content", borderRadius: "999px", background: "#22c55e", padding: "16px 26px", fontSize: "20px", fontWeight: 800 }}>R$ 12,90 · 1 kg · mypets.lat/ajudar/ebooks</div>
         </div>
