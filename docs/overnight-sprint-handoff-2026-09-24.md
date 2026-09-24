@@ -30,6 +30,9 @@ Executar como root:
 
 ```bash
 cd /srv/apps/mypets/api
+git fetch --prune origin main
+git checkout main
+git merge --ff-only origin/main
 bash deploy/growth-performance-v18.sh
 ```
 
