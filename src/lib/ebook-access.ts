@@ -9,6 +9,7 @@ type Receipt = {
   status: string;
   amountCents: number;
   currency: string;
+  rewardKeys?: string[];
 };
 
 export async function validateEbookReceipt(receipt: string | null | undefined) {
