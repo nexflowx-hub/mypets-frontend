@@ -313,6 +313,7 @@ export function CauseCheckout({
       campaign: params.get("utm_campaign"),
       content: params.get("utm_content"),
       refCode: params.get("ref"),
+      landingPath: typeof window === "undefined" ? null : (window.location.pathname + window.location.search).slice(0, 500),
     };
   }
 
