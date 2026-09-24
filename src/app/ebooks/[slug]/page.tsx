@@ -37,6 +37,9 @@ export default async function EbookPage({
   if (!ebook) notFound();
   const payment = await validateEbookReceipt(query.receipt);
   if (!payment) redirect("/ajudar/ebooks?access=required");
+  if (!(payment.rewardKeys ?? []).includes(slug)) {
+    redirect(`/ebooks/colecao?receipt=${encodeURIComponent(query.receipt!)}`);
+  }
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol print:bg-white">
