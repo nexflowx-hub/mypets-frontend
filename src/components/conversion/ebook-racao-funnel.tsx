@@ -278,6 +278,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
                 enabled
                 presentation="campaign"
                 lockedAmountCents={amountCents}
+                rewardKeys={selectedEbooks.map((ebook) => ebook.slug)}
                 campaignEyebrow="Participação solidária"
                 campaignTitle={`${selectedEbooks.length} ${selectedEbooks.length === 1 ? "eBook" : "eBooks"} · ${impactLabel}`}
                 campaignDescription="Depois da confirmação financeira, terá acesso imediato à coleção digital selecionada."
