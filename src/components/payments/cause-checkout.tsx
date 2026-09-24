@@ -341,9 +341,14 @@ export function CauseCheckout({
   async function shareConfirmedSupport() {
     if (typeof window === "undefined") return;
     const attribution = tracking();
-    const target = successShareUrl
-      ? new URL(successShareUrl, window.location.origin).toString()
-      : `${window.location.origin}${window.location.pathname}?utm_source=whatsapp&utm_medium=share&utm_campaign=mypets_support_share&utm_content=post_donation`;
+    const targetUrl = new URL(successShareUrl || window.location.pathname, window.location.origin);
+    if (!targetUrl.searchParams.has("utm_source")) targetUrl.searchParams.set("utm_source", "share");
+    if (!targetUrl.searchParams.has("utm_medium")) targetUrl.searchParams.set("utm_medium", "referral");
+    if (!targetUrl.searchParams.has("utm_campaign")) {
+      targetUrl.searchParams.set("utm_campaign", targetUrl.pathname.includes("petskids") ? "petskids_story" : "mypets_support");
+    }
+    targetUrl.searchParams.set("utm_content", "post_donation");
+    const target = targetUrl.toString();
     const text = `${successShareText}\n\n${target}`;
 
     void recordGrowthEvent({
