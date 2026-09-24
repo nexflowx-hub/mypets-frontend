@@ -136,3 +136,41 @@ O PetsKids permanece projeto em integração:
 1. A sessão de desenvolvimento atual não possui acesso SSH à VPS.
 2. O conector Vercel não está autorizado ao scope da equipa, embora o status de deployment seja obtido via GitHub.
 3. Não iniciar mídia paga antes do teste Pix real confirmado de ponta a ponta.
+
+
+## Adições do último sprint
+
+Antes do rollout final, o frontend recebeu mais três melhorias de conversão/operação:
+
+1. **Outro valor no card principal de apoio**
+   - o utilizador pode escolher R$20 / R$50 / R$100 / R$200 ou introduzir outro valor sem abrir primeiro o modal;
+   - o valor escolhido segue diretamente para o checkout.
+
+2. **Launch readiness no Growth Admin**
+   - mostra ambiente, PAYMENTS_LIVE, BRL, PIX S2S, modo de finalidade e cause intake;
+   - alerta visual quando BRL está em modo degradado;
+   - reduz o risco de ligar tráfego pago com a lane financeira incompleta.
+
+3. **Diagnóstico automático do funil**
+   - compara Landing → Checkout, Checkout → Pix e Pix → Confirmado;
+   - identifica o pior estágio observado na janela atual;
+   - sugere a classe de problema a investigar sem usar benchmarks externos.
+
+4. **Export CSV**
+   - o breakdown por source / medium / campaign / creative / landing pode ser exportado diretamente em `/admin/growth`.
+
+## Tracking e distribuição
+
+O funil final está estruturado para:
+
+`LANDING_VIEW → SUPPORT_STARTED → DONATION_STARTED → DONATION_COMPLETED → SHARE_CLICK`
+
+As duas landings preservam UTM e `landingPath` até ao payment intent e aos eventos server-side.
+
+## Issue operacional
+
+O rollout da VPS está formalizado em:
+
+- backend issue **#20 — PROD rollout — MyPets Growth v18 + unlock frontend #31**
+
+Este é o único bloqueio operacional conhecido para promover o pacote completo para produção.
