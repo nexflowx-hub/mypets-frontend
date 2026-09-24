@@ -574,6 +574,12 @@ export function CauseCheckout({
   const successHrefWithReceipt = successActionHref && intent?.id
     ? `${successActionHref}${successActionHref.includes("?") ? "&" : "?"}receipt=${encodeURIComponent(intent.id)}`
     : successActionHref;
+  const successWhatsappHref = intent?.id
+    ? whatsappMessageUrl(
+        successWhatsappUrl,
+        `Olá! Participei da campanha MyPets 1 eBook = 1 kg e o pagamento já foi confirmado. Meu recibo MyPets é ${intent.id}. Quero receber meus eBooks pelo WhatsApp.`,
+      )
+    : null;
   const nativeMethod = intent?.paymentMethod && intent.paymentMethod !== "checkout" ? intent.paymentMethod as NativePaymentMethod : null;
 
   return (
@@ -750,6 +756,9 @@ export function CauseCheckout({
                   <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
                   <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para receber os eBooks" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
                 </div>
+                {brazilPixOnly && successWhatsappUrl && (
+                  <p className="-mt-1 text-[10px] leading-4 text-muted-foreground">Email opcional. Depois da confirmação pode abrir os eBooks imediatamente ou pedir o envio pelo WhatsApp.</p>
+                )}
 
                 {(choice === "mb_way" || choice === "bizum") && !brazilPixOnly && (
                   <Input value={donorPhone} onChange={(event) => setDonorPhone(event.target.value)} inputMode="tel" placeholder={choice === "mb_way" ? "Telemóvel +351" : "Móvel +34"} maxLength={40} />
@@ -809,19 +818,34 @@ export function CauseCheckout({
           ) : paid ? (
             <div className="flex min-h-[420px] flex-col items-center justify-center px-8 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50"><Heart className="h-8 w-8 fill-emerald-600 text-emerald-600" /></div>
-              <h2 className="mt-5 text-2xl font-extrabold text-petrol">Apoio confirmado. Obrigado!</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">O pagamento foi confirmado pelo servidor. Obrigado por apoiar {causeTitle}.</p>
-              <p className="mt-2 text-xs font-semibold text-emerald-700">O apoio está confirmado. Se quiser ampliar o alcance, partilhe a campanha com alguém que também se importa.</p>
-              <div className={cn("mt-6 grid w-full max-w-md gap-2", successHrefWithReceipt ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+              <h2 className="mt-5 text-2xl font-extrabold text-petrol">{successHeadline}</h2>
+              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{successDescription ?? `O pagamento foi confirmado pelo servidor. Obrigado por apoiar ${causeTitle}.`}</p>
+              <p className="mt-2 text-xs font-semibold text-emerald-700">Agora escolha como quer continuar: conteúdo, WhatsApp, comunidade ou partilha.</p>
+              <div className="mt-6 grid w-full max-w-lg gap-2 sm:grid-cols-2">
                 {successHrefWithReceipt && (
-                  <a href={successHrefWithReceipt} className="inline-flex min-h-10 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
+                  <a href={successHrefWithReceipt} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
                     {successActionLabel}
                   </a>
                 )}
-                <Button onClick={() => void shareConfirmedSupport()} className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+                {successWhatsappHref && (
+                  <a href={successWhatsappHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 text-sm font-black text-white">
+                    <MessageCircle className="h-4 w-4" /> Receber no WhatsApp
+                  </a>
+                )}
+                {successCommunityWhatsappUrl && (
+                  <a href={successCommunityWhatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-black text-emerald-800">
+                    <Users className="h-4 w-4" /> Comunidade WhatsApp
+                  </a>
+                )}
+                {successFacebookGroupUrl && (
+                  <a href={successFacebookGroupUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-black text-blue-800">
+                    <Facebook className="h-4 w-4" /> Grupo Facebook
+                  </a>
+                )}
+                <Button onClick={() => void shareConfirmedSupport()} className="min-h-11 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
                   <Heart className="mr-2 h-4 w-4 fill-white" /> Partilhar
                 </Button>
-                <Button onClick={() => { setOpen(false); resetCheckout(); }} variant="outline" className="rounded-xl border-border text-petrol">Fechar</Button>
+                <Button onClick={() => { setOpen(false); resetCheckout(); }} variant="outline" className="min-h-11 rounded-xl border-border text-petrol">Fechar</Button>
               </div>
             </div>
           ) : hasEmbeddedCheckout ? (
