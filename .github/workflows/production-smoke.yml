@@ -144,8 +144,8 @@ jobs:
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/ebooks?utm_source=github-actions&utm_medium=smoke&utm_campaign=ebook_racao" -o /tmp/ebooks.html
           grep -Fq "1 eBook" /tmp/ebooks.html
-          grep -Fq "R$ 9,90" /tmp/ebooks.html
-          grep -Fq "cota de alimentação" /tmp/ebooks.html
+          grep -Fq "R$ 12,90" /tmp/ebooks.html
+          grep -Fq "1 kg de ração" /tmp/ebooks.html
           grep -Fq "Cuidados Essenciais" /tmp/ebooks.html
           grep -Fq "Treino Gentil" /tmp/ebooks.html
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/ebooks/opengraph-image -o /tmp/ebooks-og.png
@@ -153,4 +153,7 @@ jobs:
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ebooks/cuidados-essenciais -o /tmp/ebook-reader.html
           grep -Fq "Cuidados Essenciais com o Seu Cão" /tmp/ebook-reader.html
           grep -Fq "Guardar / imprimir em PDF" /tmp/ebook-reader.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ebooks/colecao?books=cuidados-essenciais,treino-gentil" -o /tmp/ebook-collection.html
+          grep -Fq "Os seus guias estão aqui" /tmp/ebook-collection.html
+          grep -Fq "Treino Gentil" /tmp/ebook-collection.html
           echo "Ebook-to-feed funnel and reader validated"
