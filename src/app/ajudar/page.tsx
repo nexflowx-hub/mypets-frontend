@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
+import { CampaignShareButton, ShareFallbackNote } from "@/components/conversion/campaign-share-button";
 import { CauseCheckout } from "@/components/payments/cause-checkout";
 import { getCampaignConfig } from "@/lib/campaign-landings";
 
@@ -371,6 +372,21 @@ export default async function HelpMyPetsCampaignPage() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="border-y border-border bg-[#eef8f2]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">Ajuda também pode ser alcance</p>
+            <h2 className="mt-2 text-2xl font-black text-petrol">Não pode apoiar financeiramente hoje?</h2>
+            <div className="mt-2"><ShareFallbackNote /></div>
+          </div>
+          <CampaignShareButton
+            sharePath="/go/ajudar"
+            shareText="Conheça o MyPets: uma plataforma que procura ligar projetos reais de proteção animal a pessoas dispostas a ajudar."
+            label="Partilhar o MyPets"
+          />
         </div>
       </section>
 
