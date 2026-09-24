@@ -40,8 +40,9 @@ export function CampaignShareButton({
       try {
         await navigator.share({ title: "MyPets", text: shareText, url: target.toString() });
         return;
-      } catch {
-        // Use WhatsApp as the broad fallback.
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        // Use WhatsApp as the broad fallback when native sharing is unavailable.
       }
     }
     const message = `${shareText}\n\n${target.toString()}`;
