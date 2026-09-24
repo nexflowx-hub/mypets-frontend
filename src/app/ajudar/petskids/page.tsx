@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
+import { CampaignShareButton, ShareFallbackNote } from "@/components/conversion/campaign-share-button";
 import { CauseCheckout } from "@/components/payments/cause-checkout";
 import { getCampaignConfig } from "@/lib/campaign-landings";
 
@@ -178,6 +179,21 @@ export default async function PetsKidsCampaignPage() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="border-y border-border bg-[#eef8f2]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">Faça a história circular</p>
+            <h2 className="mt-2 text-2xl font-black text-petrol">Nem todo apoio precisa começar com dinheiro.</h2>
+            <div className="mt-2"><ShareFallbackNote /></div>
+          </div>
+          <CampaignShareButton
+            sharePath="/go/petskids"
+            shareText="Conheça o PetsKids: duas crianças do Centro-Oeste transformando pequenas compras de ração em cuidado para cães em situação de rua."
+            label="Partilhar o PetsKids"
+          />
         </div>
       </section>
 
