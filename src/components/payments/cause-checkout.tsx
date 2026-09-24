@@ -57,6 +57,7 @@ type Props = {
   lockedAmountCents?: number;
   trackingCampaignOverride?: string;
   trackingContentOverride?: string;
+  rewardKeys?: string[];
   successActionHref?: string;
   successActionLabel?: string;
   requireEmail?: boolean;
@@ -159,6 +160,7 @@ export function CauseCheckout({
   lockedAmountCents,
   trackingCampaignOverride,
   trackingContentOverride,
+  rewardKeys,
   successActionHref,
   successActionLabel = "Aceder ao conteúdo",
   requireEmail = false,
@@ -483,6 +485,7 @@ export function CauseCheckout({
         frequency: "ONE_TIME",
         donorName: donorName.trim() || null,
         donorEmail: donorEmail.trim() || null,
+        rewardKeys,
         ...tracking(),
       });
       if (!data.embedUrl) throw new Error("Não foi possível abrir o checkout seguro.");
@@ -523,6 +526,7 @@ export function CauseCheckout({
         donorEmail: donorEmail.trim() || null,
         donorPhone: donorPhone.trim() || null,
         donorDocument: method === "pix" ? cpfDigits(donorDocument) : donorDocument.trim() || null,
+        rewardKeys,
         ...tracking(),
       });
       setIntent(data);
