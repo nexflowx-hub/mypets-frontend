@@ -1,5 +1,5 @@
-export const SOLIDARITY_EBOOK_UNIT_CENTS = 990;
-export const FEED_EQUIVALENT_GRAMS: number | null = null;
+export const SOLIDARITY_EBOOK_UNIT_CENTS = 1290;
+export const FEED_EQUIVALENT_GRAMS = 1000;
 
 export type SolidarityEbook = {
   slug: string;
