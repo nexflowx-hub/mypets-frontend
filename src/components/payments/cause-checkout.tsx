@@ -342,14 +342,44 @@ export function CauseCheckout({
   async function shareConfirmedSupport() {
     if (typeof window === "undefined") return;
     const attribution = tracking();
-    const targetUrl = new URL(successShareUrl || window.location.pathname, window.location.origin);
+    const campaignName = (successShareUrl || window.location.pathname).includes("petskids") ? "petskids_story" : "mypets_support";
+    const destinationPath = successShareUrl || window.location.pathname;
+    const targetUrl = new URL(destinationPath, window.location.origin);
     if (!targetUrl.searchParams.has("utm_source")) targetUrl.searchParams.set("utm_source", "share");
     if (!targetUrl.searchParams.has("utm_medium")) targetUrl.searchParams.set("utm_medium", "referral");
-    if (!targetUrl.searchParams.has("utm_campaign")) {
-      targetUrl.searchParams.set("utm_campaign", targetUrl.pathname.includes("petskids") ? "petskids_story" : "mypets_support");
-    }
+    if (!targetUrl.searchParams.has("utm_campaign")) targetUrl.searchParams.set("utm_campaign", campaignName);
     targetUrl.searchParams.set("utm_content", "post_donation");
-    const target = targetUrl.toString();
+
+    let target = targetUrl.toString();
+    let personalized = false;
+    const session = await getValidSession().catch(() => null);
+    if (session?.access_token) {
+      try {
+        const response = await fetch(apiUrl("/growth/share-links"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            destinationPath,
+            source: "mypets",
+            medium: "share",
+            campaign: campaignName,
+            content: "post_donation",
+          }),
+        });
+        const body = (await response.json().catch(() => ({}))) as { data?: { path?: string } };
+        if (response.ok && body.data?.path) {
+          target = new URL(body.data.path, window.location.origin).toString();
+          personalized = true;
+        }
+      } catch {
+        // Referral creation must never block sharing.
+      }
+    }
+
     const text = `${successShareText}\n\n${target}`;
 
     void recordGrowthEvent({
@@ -364,6 +394,7 @@ export function CauseCheckout({
         causeTitle,
         currency,
         shareTarget: target,
+        personalized,
         surface: "post_donation",
       },
     });
@@ -372,8 +403,8 @@ export function CauseCheckout({
       try {
         await navigator.share({ title: "MyPets", text: successShareText, url: target });
         return;
-      } catch {
-        // Fall through to WhatsApp when native sharing is cancelled or unavailable.
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
       }
     }
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
