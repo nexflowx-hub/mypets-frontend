@@ -335,7 +335,7 @@ export default async function EbookRacaoCampaignPage() {
 
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <p className="text-center text-xs font-black uppercase tracking-[.16em] text-emerald-700">Perguntas importantes</p>
-        <h2 className="mt-3 text-center text-3xl font-black tracking-tight">Antes de participar, saiba exatamente o que está a fazer.</h2>
+        <h2 className="mt-3 text-center text-3xl font-black tracking-tight">Antes de participar, saiba exatamente como a campanha funciona.</h2>
         <div className="mt-7 space-y-3">
           {[
             ["Como funciona esta participação?", "O pagamento é um apoio financeiro ao MyPets com uma recompensa digital. O valor, o beneficiário e o compromisso de 1 kg são mostrados antes do Pix. A página não apresenta esta contribuição como doação dedutível de imposto."],
