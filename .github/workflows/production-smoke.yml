@@ -26,6 +26,8 @@ jobs:
             "https://www.mypets.lat/apoiar"
             "https://www.mypets.lat/ajudar"
             "https://www.mypets.lat/ajudar/opengraph-image"
+            "https://www.mypets.lat/ajudar/petskids"
+            "https://www.mypets.lat/ajudar/petskids/opengraph-image"
             "https://www.mypets.lat/apoiar/mypets"
             "https://www.mypets.lat/preciso-de-apoio"
             "https://www.mypets.lat/preciso-de-apoio/publicar"
@@ -69,6 +71,7 @@ jobs:
           grep -Fq "https://mypets.lat/sobre" /tmp/sitemap.xml
           grep -Fq "https://mypets.lat/causas" /tmp/sitemap.xml
           grep -Fq "https://mypets.lat/ajudar" /tmp/sitemap.xml
+          grep -Fq "https://mypets.lat/ajudar/petskids" /tmp/sitemap.xml
           grep -Fq "https://mypets.lat/preciso-de-apoio/publicar" /tmp/sitemap.xml
           echo "SEO discovery endpoints validated"
 
@@ -126,4 +129,9 @@ jobs:
           grep -Fq "Perguntas frequentes" /tmp/help.html
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/opengraph-image -o /tmp/help-og.png
           test -s /tmp/help-og.png
-          echo "High-conversion donation landing and social preview validated"
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/petskids?utm_source=github-actions&utm_medium=smoke&utm_campaign=petskids" -o /tmp/petskids-help.html
+          grep -Fq "Duas crianças começaram com" /tmp/petskids-help.html
+          grep -Fq "O beneficiário financeiro desta página é o MyPets" /tmp/petskids-help.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/petskids/opengraph-image -o /tmp/petskids-og.png
+          test -s /tmp/petskids-og.png
+          echo "High-conversion donation landings and social previews validated"
