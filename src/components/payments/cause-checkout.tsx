@@ -59,6 +59,7 @@ type Props = {
   trackingContentOverride?: string;
   successActionHref?: string;
   successActionLabel?: string;
+  requireEmail?: boolean;
   successShareText?: string;
   successShareUrl?: string;
 };
@@ -160,6 +161,7 @@ export function CauseCheckout({
   trackingContentOverride,
   successActionHref,
   successActionLabel = "Aceder ao conteúdo",
+  requireEmail = false,
   successShareText = "Eu apoiei o MyPets. Se esta causa também fizer sentido para você, conheça e compartilhe.",
   successShareUrl,
 }: Props) {
@@ -471,7 +473,7 @@ export function CauseCheckout({
       setError("No Brasil, os apoios em reais são processados por Pix.");
       return;
     }
-    if (!enabled || !validateCommon()) return;
+    if (!enabled || !validateCommon(false, requireEmail)) return;
     setBusy(true);
     setError(null);
     try {
@@ -493,7 +495,7 @@ export function CauseCheckout({
   }
 
   async function startNative(method: NativePaymentMethod) {
-    const requiresEmail = method !== "pix";
+    const requiresEmail = method !== "pix" || requireEmail;
     if (!enabled || !validateCommon(true, requiresEmail)) return;
     if (method === "pix") {
       if (!validCpf(donorDocument)) {
@@ -541,6 +543,9 @@ export function CauseCheckout({
 
   const triggerLabel = paid ? "Apoio confirmado" : intent ? "Retomar apoio" : "Apoiar agora";
   const hasEmbeddedCheckout = Boolean(intent?.embedUrl);
+  const successHrefWithReceipt = successActionHref && intent?.id
+    ? `${successActionHref}${successActionHref.includes("?") ? "&" : "?"}receipt=${encodeURIComponent(intent.id)}`
+    : successActionHref;
   const nativeMethod = intent?.paymentMethod && intent.paymentMethod !== "checkout" ? intent.paymentMethod as NativePaymentMethod : null;
 
   return (
@@ -715,7 +720,7 @@ export function CauseCheckout({
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
-                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
+                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para receber os eBooks" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
                 </div>
 
                 {(choice === "mb_way" || choice === "bizum") && !brazilPixOnly && (
@@ -779,9 +784,9 @@ export function CauseCheckout({
               <h2 className="mt-5 text-2xl font-extrabold text-petrol">Apoio confirmado. Obrigado!</h2>
               <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">O pagamento foi confirmado pelo servidor. Obrigado por apoiar {causeTitle}.</p>
               <p className="mt-2 text-xs font-semibold text-emerald-700">O apoio está confirmado. Se quiser ampliar o alcance, partilhe a campanha com alguém que também se importa.</p>
-              <div className={cn("mt-6 grid w-full max-w-md gap-2", successActionHref ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
-                {successActionHref && (
-                  <a href={successActionHref} className="inline-flex min-h-10 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
+              <div className={cn("mt-6 grid w-full max-w-md gap-2", successHrefWithReceipt ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+                {successHrefWithReceipt && (
+                  <a href={successHrefWithReceipt} className="inline-flex min-h-10 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
                     {successActionLabel}
                   </a>
                 )}
