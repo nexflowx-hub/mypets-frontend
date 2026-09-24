@@ -134,6 +134,9 @@ export function GrowthPerformanceAdmin() {
 
   const totals = data?.totals;
   const brl = data?.amounts.find((item) => item.currency === "BRL");
+  const confirmedKg = path.startsWith("/ajudar/ebooks")
+    ? Math.round((brl?.amountCents ?? 0) / 1290)
+    : null;
   const launchLinks = [
     {
       id: "meta-institutional",
@@ -144,6 +147,11 @@ export function GrowthPerformanceAdmin() {
       id: "meta-petskids",
       label: "Meta · PetsKids",
       url: "https://mypets.lat/ajudar/petskids?utm_source=meta&utm_medium=paid_social&utm_campaign=petskids_story_br&utm_content=pk_story_01",
+    },
+    {
+      id: "meta-ebook-1kg",
+      label: "Meta · 1 eBook = 1 kg",
+      url: "https://mypets.lat/ajudar/ebooks?utm_source=meta&utm_medium=paid_social&utm_campaign=ebook_racao_1kg_br&utm_content=er_1kg_01",
     },
     {
       id: "instagram-organic",
@@ -242,7 +250,7 @@ export function GrowthPerformanceAdmin() {
             <option value={1}>24 horas</option><option value={3}>3 dias</option><option value={7}>7 dias</option><option value={14}>14 dias</option><option value={30}>30 dias</option><option value={90}>90 dias</option>
           </select>
           <select value={path} onChange={(event) => setPath(event.target.value)} className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-bold text-petrol">
-            <option value="/ajudar">Todas /ajudar</option><option value="/ajudar/petskids">PetsKids</option><option value="">Todo o Growth</option>
+            <option value="/ajudar">Todas /ajudar</option><option value="/ajudar/petskids">PetsKids</option><option value="/ajudar/ebooks">1 eBook = 1 kg</option><option value="">Todo o Growth</option>
           </select>
           <div className="flex gap-2">
             <Button variant="outline" className="h-11 flex-1 rounded-xl" disabled={busy} onClick={() => void load()}>
@@ -326,7 +334,7 @@ export function GrowthPerformanceAdmin() {
         </div>
       </section>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
+      <div className={`mt-4 grid gap-4 ${confirmedKg !== null ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
         <article className="rounded-3xl bg-petrol p-6 text-white">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-white/55">Conversão final</p>
           <p className="mt-2 text-4xl font-black">{totals?.landingToDonationPct ?? 0}%</p>
@@ -342,6 +350,13 @@ export function GrowthPerformanceAdmin() {
           <p className="mt-2 text-3xl font-black text-petrol">{data?.windowDays ?? days} dias</p>
           <p className="mt-2 truncate text-sm text-muted-foreground">{data?.path ?? "Todo o Growth"}</p>
         </article>
+        {confirmedKg !== null && (
+          <article className="rounded-3xl border border-emerald-100 bg-emerald-50 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Ração confirmada</p>
+            <p className="mt-2 text-3xl font-black text-emerald-950">{confirmedKg.toLocaleString("pt-BR")} kg</p>
+            <p className="mt-2 text-sm text-emerald-900/65">Derivado apenas de DONATION_COMPLETED desta landing a R$ 12,90/kg.</p>
+          </article>
+        )}
       </div>
 
       <section className="mt-8 rounded-3xl border border-border bg-white p-5 sm:p-6">

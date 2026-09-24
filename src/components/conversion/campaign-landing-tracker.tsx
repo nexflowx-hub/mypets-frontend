@@ -18,6 +18,12 @@ export function CampaignLandingTracker({ variant }: { variant: string }) {
         utmTerm: params.get("utm_term"),
         utmId: params.get("utm_id"),
         sourcePlatform: params.get("utm_source_platform"),
+        gclid: params.get("gclid"),
+        gbraid: params.get("gbraid"),
+        wbraid: params.get("wbraid"),
+        fbclid: params.get("fbclid"),
+        msclkid: params.get("msclkid"),
+        ttclid: params.get("ttclid"),
       },
     });
   }, [variant]);
