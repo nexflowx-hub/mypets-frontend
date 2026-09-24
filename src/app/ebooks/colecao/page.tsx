@@ -24,14 +24,16 @@ export default async function EbookCollectionPage({
   const payment = await validateEbookReceipt(params.receipt);
   if (!payment) redirect("/ajudar/ebooks?access=required");
 
+  const entitledSlugs = (payment.rewardKeys ?? []).filter((slug) => Boolean(solidarityEbookBySlug[slug]));
+  if (entitledSlugs.length === 0) redirect("/ajudar/ebooks?access=invalid");
+
   const requested = (params.books ?? "")
     .split(",")
     .map((value) => value.trim())
-    .filter(Boolean);
+    .filter((slug) => entitledSlugs.includes(slug));
 
-  const selected = requested.length
-    ? requested.map((slug) => solidarityEbookBySlug[slug]).filter(Boolean)
-    : solidarityEbooks;
+  const selectedSlugs = requested.length ? requested : entitledSlugs;
+  const selected = selectedSlugs.map((slug) => solidarityEbookBySlug[slug]).filter(Boolean);
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol">
