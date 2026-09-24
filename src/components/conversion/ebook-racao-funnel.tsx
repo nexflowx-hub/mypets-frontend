@@ -141,7 +141,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
 
       {step === 1 && (
         <div className="mt-6">
-          <p className="text-sm font-black">Qual guia seria mais útil para si hoje?</p>
+          <p className="text-sm font-black">Qual guia seria mais útil para você hoje?</p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">Uma pergunta, uma recomendação. No próximo passo pode mudar a escolha ou ampliar para 3 ou 5 kg.</p>
           <div className="mt-4 space-y-2">
             {intents.map((item) => (
@@ -178,7 +178,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
       {step === 2 && (
         <div className="mt-6">
           <div className="rounded-2xl bg-emerald-50 p-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">Recomendado para si</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">Recomendado para você</p>
             <p className="mt-1 text-base font-black text-emerald-950">{solidarityEbooks.find((ebook) => ebook.slug === recommendedSlug)?.title}</p>
             <p className="mt-1 text-xs leading-5 text-emerald-900/65">Comece com 1 kg ou aumente o gesto. Cada eBook adicional acrescenta exatamente mais 1 kg à participação.</p>
           </div>
@@ -273,7 +273,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
             <div className="flex items-start gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700"><Scale className="h-5 w-5" /></span>
               <div>
-                <p className="text-base font-black text-emerald-950">Está a financiar {impactLabel}.</p>
+                <p className="text-base font-black text-emerald-950">Você está garantindo {impactLabel}.</p>
                 <p className="mt-1 text-[11px] leading-5 text-emerald-900/65">O compromisso da campanha é por peso: cada unidade confirmada de {money(SOLIDARITY_EBOOK_UNIT_CENTS)} garante 1 kg. Se o custo de compra variar, o MyPets completa a diferença necessária para preservar os kg já confirmados e pode rever o valor apenas para novas participações.</p>
               </div>
             </div>
@@ -357,9 +357,11 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
                 rewardKeys={selectedEbooks.map((ebook) => ebook.slug)}
                 campaignEyebrow="Participação solidária"
                 campaignTitle={`${selectedEbooks.length} ${selectedEbooks.length === 1 ? "eBook" : "eBooks"} · ${impactLabel}`}
-                campaignDescription={topUpCents > 0 ? `Total ${money(selectedSupportTotal)}: ${money(amountCents)} garante ${impactLabel} e ${money(topUpCents)} reforça o projeto.` : "Depois da confirmação financeira, terá acesso imediato à coleção digital selecionada."}
+                campaignDescription={topUpCents > 0 ? `Total ${money(selectedSupportTotal)}: ${money(amountCents)} garante ${impactLabel} e ${money(topUpCents)} reforça o projeto.` : "Depois da confirmação financeira, seus eBooks serão liberados imediatamente."}
                 successActionHref={collectionHref}
                 successActionLabel={selectedEbooks.length > 1 ? "Abrir meus eBooks" : "Abrir meu eBook"}
+                requireEmail
+                successShareCampaign="ebook_racao"
                 successHeadline={`Conseguimos — ${kg} ${kg === 1 ? "kg garantido" : "kg garantidos"}.`}
                 successDescription={topUpCents > 0 ? `Pagamento confirmado: ${impactLabel} garantidos e mais ${money(topUpCents)} de reforço livre para a campanha.` : `Pagamento confirmado: ${impactLabel} garantidos. Os seus eBooks já estão liberados.`}
                 successWhatsappUrl={BRAND.whatsappSupportUrl}
