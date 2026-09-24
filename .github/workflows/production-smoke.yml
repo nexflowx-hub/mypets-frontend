@@ -28,6 +28,8 @@ jobs:
             "https://www.mypets.lat/ajudar/opengraph-image"
             "https://www.mypets.lat/ajudar/petskids"
             "https://www.mypets.lat/ajudar/petskids/opengraph-image"
+            "https://www.mypets.lat/ajudar/ebooks"
+            "https://www.mypets.lat/ajudar/ebooks/opengraph-image"
             "https://www.mypets.lat/apoiar/mypets"
             "https://www.mypets.lat/preciso-de-apoio"
             "https://www.mypets.lat/preciso-de-apoio/publicar"
@@ -135,3 +137,20 @@ jobs:
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/petskids/opengraph-image -o /tmp/petskids-og.png
           test -s /tmp/petskids-og.png
           echo "High-conversion donation landings and social previews validated"
+
+      - name: Verify ebook-to-feed funnel
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/ebooks?utm_source=github-actions&utm_medium=smoke&utm_campaign=ebook_racao" -o /tmp/ebooks.html
+          grep -Fq "1 eBook" /tmp/ebooks.html
+          grep -Fq "R$ 9,90" /tmp/ebooks.html
+          grep -Fq "cota de alimentação" /tmp/ebooks.html
+          grep -Fq "Cuidados Essenciais" /tmp/ebooks.html
+          grep -Fq "Treino Gentil" /tmp/ebooks.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/ebooks/opengraph-image -o /tmp/ebooks-og.png
+          test -s /tmp/ebooks-og.png
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ebooks/cuidados-essenciais -o /tmp/ebook-reader.html
+          grep -Fq "Cuidados Essenciais com o Seu Cão" /tmp/ebook-reader.html
+          grep -Fq "Guardar / imprimir em PDF" /tmp/ebook-reader.html
+          echo "Ebook-to-feed funnel and reader validated"
