@@ -9,6 +9,7 @@ import {
   solidarityEbooks,
   SOLIDARITY_EBOOK_UNIT_CENTS,
 } from "@/lib/solidarity-ebooks";
+import { BRAND } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 const EBOOK_RACAO_BRL_CAUSE_ID = "9a7f1000-0000-4a11-8c01-000000000007";
@@ -39,6 +40,8 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
   const [interest, setInterest] = React.useState("care");
   const [selected, setSelected] = React.useState<string[]>([recommendationMap.care]);
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
+  const [supportTotalCents, setSupportTotalCents] = React.useState<number | null>(null);
+  const [customSupportTotal, setCustomSupportTotal] = React.useState("");
   const recommendedSlug = recommendationMap[interest];
   const amountCents = solidarityAmountCents(selected.length || 1);
 
@@ -46,6 +49,11 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
     if (step !== 1) return;
     setSelected([recommendedSlug]);
   }, [recommendedSlug, step]);
+
+  React.useEffect(() => {
+    setSupportTotalCents(null);
+    setCustomSupportTotal("");
+  }, [amountCents]);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -85,6 +93,21 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
   const selectedEbooks = solidarityEbooks.filter((ebook) => selected.includes(ebook.slug));
   const kg = Math.max(1, selectedEbooks.length);
   const impactLabel = `${kg} ${kg === 1 ? "kg" : "kg"} de ração`;
+  const firstRoundedTarget = Math.ceil(amountCents / 1000) * 1000;
+  const supportTargets = [...new Set([
+    Math.max(amountCents, firstRoundedTarget),
+    Math.max(amountCents, firstRoundedTarget + 1000),
+    Math.max(amountCents, firstRoundedTarget + 3000),
+  ])].filter((value) => value > amountCents);
+  const customParsedCents = customSupportTotal.trim()
+    ? Math.round((Number(customSupportTotal.replace(",", ".")) || 0) * 100)
+    : 0;
+  const selectedSupportTotal = customParsedCents >= amountCents
+    ? customParsedCents
+    : supportTotalCents && supportTotalCents >= amountCents
+      ? supportTotalCents
+      : amountCents;
+  const topUpCents = Math.max(0, selectedSupportTotal - amountCents);
   const collectionHref = `/ebooks/colecao?books=${encodeURIComponent(selectedEbooks.map((ebook) => ebook.slug).join(","))}&via=apoio-confirmado`;
 
   return (
@@ -265,6 +288,59 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
             ))}
           </div>
 
+          <div className="mt-4 rounded-2xl border border-emerald-100 bg-white p-4">
+            <p className="text-xs font-black text-petrol">Quer reforçar o apoio?</p>
+            <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Opcional. O valor base continua a garantir exatamente {kg} kg e {selectedEbooks.length} {selectedEbooks.length === 1 ? "eBook" : "eBooks"}. Qualquer valor acima disso reforça o fundo de alimentação e a operação da campanha, sem criar eBooks ou kg adicionais automaticamente.</p>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <button
+                type="button"
+                onClick={() => { setSupportTotalCents(amountCents); setCustomSupportTotal(""); }}
+                className={cn(
+                  "min-h-12 rounded-xl border px-3 text-xs font-black transition",
+                  selectedSupportTotal === amountCents && !customSupportTotal ? "border-petrol bg-petrol text-white" : "border-border bg-[#f8faf9] text-petrol",
+                )}
+              >
+                {money(amountCents)}
+                <span className="mt-0.5 block text-[9px] font-semibold opacity-60">valor base</span>
+              </button>
+              {supportTargets.map((target, index) => (
+                <button
+                  key={target}
+                  type="button"
+                  onClick={() => { setSupportTotalCents(target); setCustomSupportTotal(""); }}
+                  className={cn(
+                    "min-h-12 rounded-xl border px-3 text-xs font-black transition",
+                    selectedSupportTotal === target && !customSupportTotal ? "border-emerald-600 bg-emerald-50 text-emerald-900" : "border-border bg-[#f8faf9] text-petrol",
+                  )}
+                >
+                  {money(target)}
+                  <span className="mt-0.5 block text-[9px] font-semibold opacity-60">{index === 0 ? "arredondar" : `+${money(target - amountCents)}`}</span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3">
+              <label htmlFor="ebook-support-total" className="text-[10px] font-black uppercase tracking-wide text-muted-foreground">Ou escolha outro valor total</label>
+              <div className="mt-1 flex items-center rounded-xl border border-border bg-[#f8faf9] px-3">
+                <span className="text-xs font-black text-petrol">R$</span>
+                <input
+                  id="ebook-support-total"
+                  inputMode="decimal"
+                  value={customSupportTotal}
+                  onChange={(event) => { setCustomSupportTotal(event.target.value); setSupportTotalCents(null); }}
+                  placeholder={(amountCents / 100).toFixed(2).replace(".", ",")}
+                  className="h-11 w-full bg-transparent px-2 text-sm font-black text-petrol outline-none"
+                />
+              </div>
+              {customSupportTotal && customParsedCents < amountCents && (
+                <p className="mt-1 text-[10px] font-semibold text-amber-700">O valor total não pode ser inferior a {money(amountCents)}.</p>
+              )}
+            </div>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-emerald-50 px-3 py-2.5">
+              <span className="text-[10px] font-bold text-emerald-900/70">{topUpCents > 0 ? `Base ${money(amountCents)} + reforço ${money(topUpCents)}` : "Sem reforço adicional"}</span>
+              <span className="text-sm font-black text-emerald-950">Total {money(selectedSupportTotal)}</span>
+            </div>
+          </div>
+
           <div className="mt-4 rounded-xl bg-sand/55 p-3 text-[10px] leading-5 text-muted-foreground">
             <strong className="text-petrol">Como é contado:</strong> o pagamento é um apoio ao fundo MyPets desta campanha. O eBook é a recompensa digital. QR Code gerado não conta; a unidade só é considerada confirmada quando o backend recebe/reconcilia o estado financeiro como concluído.
           </div>
@@ -277,14 +353,18 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
                 currency="BRL"
                 enabled
                 presentation="campaign"
-                lockedAmountCents={amountCents}
+                lockedAmountCents={selectedSupportTotal}
                 rewardKeys={selectedEbooks.map((ebook) => ebook.slug)}
                 campaignEyebrow="Participação solidária"
                 campaignTitle={`${selectedEbooks.length} ${selectedEbooks.length === 1 ? "eBook" : "eBooks"} · ${impactLabel}`}
-                campaignDescription="Depois da confirmação financeira, terá acesso imediato à coleção digital selecionada."
+                campaignDescription={topUpCents > 0 ? `Total ${money(selectedSupportTotal)}: ${money(amountCents)} garante ${impactLabel} e ${money(topUpCents)} reforça o projeto.` : "Depois da confirmação financeira, terá acesso imediato à coleção digital selecionada."}
                 successActionHref={collectionHref}
                 successActionLabel={selectedEbooks.length > 1 ? "Abrir meus eBooks" : "Abrir meu eBook"}
-                requireEmail
+                successHeadline={`Conseguimos — ${kg} ${kg === 1 ? "kg garantido" : "kg garantidos"}.`}
+                successDescription={topUpCents > 0 ? `Pagamento confirmado: ${impactLabel} garantidos e mais ${money(topUpCents)} de reforço livre para a campanha.` : `Pagamento confirmado: ${impactLabel} garantidos. Os seus eBooks já estão liberados.`}
+                successWhatsappUrl={BRAND.whatsappSupportUrl}
+                successCommunityWhatsappUrl={BRAND.whatsappCommunityUrl}
+                successFacebookGroupUrl={BRAND.facebookGroupUrl}
                 successShareText={`Participei da campanha 1 eBook = 1 kg do MyPets e ajudei a garantir ${impactLabel}. Também recebi ${selectedEbooks.length === 1 ? "um guia digital" : "a minha coleção de guias digitais"} sobre cães.`}
                 successShareUrl="/ajudar/ebooks"
               />
