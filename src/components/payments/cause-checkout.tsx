@@ -53,6 +53,8 @@ type Props = {
   campaignTitle?: string;
   campaignDescription?: string;
   campaignClassName?: string;
+  successShareText?: string;
+  successShareUrl?: string;
 };
 
 const methodLabel: Record<PaymentChoice, string> = {
@@ -146,6 +148,8 @@ export function CauseCheckout({
   campaignTitle = "Escolha quanto quer colocar em movimento hoje",
   campaignDescription = "O valor escolhido abre o pagamento seguro já preparado para esta contribuição.",
   campaignClassName,
+  successShareText = "Eu apoiei o MyPets. Se esta causa também fizer sentido para você, conheça e compartilhe.",
+  successShareUrl,
 }: Props) {
   const router = useRouter();
   const brazilPixOnly = currency === "BRL";
@@ -331,6 +335,41 @@ export function CauseCheckout({
       });
     }
     setOpen(true);
+  }
+
+  async function shareConfirmedSupport() {
+    if (typeof window === "undefined") return;
+    const attribution = tracking();
+    const target = successShareUrl
+      ? new URL(successShareUrl, window.location.origin).toString()
+      : `${window.location.origin}${window.location.pathname}?utm_source=whatsapp&utm_medium=share&utm_campaign=mypets_support_share&utm_content=post_donation`;
+    const text = `${successShareText}\n\n${target}`;
+
+    void recordGrowthEvent({
+      eventName: "SHARE_CLICK",
+      source: attribution.source,
+      medium: attribution.medium,
+      campaign: attribution.campaign,
+      content: attribution.content,
+      landingPath: `${window.location.pathname}${window.location.search}`.slice(0, 500),
+      metadata: {
+        causeId,
+        causeTitle,
+        currency,
+        shareTarget: target,
+        surface: "post_donation",
+      },
+    });
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "MyPets", text: successShareText, url: target });
+        return;
+      } catch {
+        // Fall through to WhatsApp when native sharing is cancelled or unavailable.
+      }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
 
   function validateCommon(requireName = false, requireEmail = false) {
@@ -638,8 +677,13 @@ export function CauseCheckout({
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50"><Heart className="h-8 w-8 fill-emerald-600 text-emerald-600" /></div>
               <h2 className="mt-5 text-2xl font-extrabold text-petrol">Apoio confirmado. Obrigado!</h2>
               <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">O pagamento foi confirmado pelo servidor. Obrigado por apoiar {causeTitle}.</p>
-              <p className="mt-2 text-xs font-semibold text-emerald-700">Esta janela fecha automaticamente em alguns segundos.</p>
-              <Button onClick={() => { setOpen(false); resetCheckout(); }} className="mt-6 bg-petrol text-white hover:bg-petrol-light">Fechar agora</Button>
+              <p className="mt-2 text-xs font-semibold text-emerald-700">O apoio está confirmado. Se quiser ampliar o alcance, partilhe a campanha com alguém que também se importa.</p>
+              <div className="mt-6 grid w-full max-w-sm gap-2 sm:grid-cols-2">
+                <Button onClick={() => void shareConfirmedSupport()} className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+                  <Heart className="mr-2 h-4 w-4 fill-white" /> Partilhar
+                </Button>
+                <Button onClick={() => { setOpen(false); resetCheckout(); }} variant="outline" className="rounded-xl border-border text-petrol">Fechar</Button>
+              </div>
             </div>
           ) : hasEmbeddedCheckout ? (
             <div className="flex h-full flex-col bg-cream">
