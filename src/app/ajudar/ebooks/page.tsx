@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CheckCircle2, Heart, LockKeyhole, PawPrint, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Facebook, Heart, LockKeyhole, MessageCircle, PawPrint, PlayCircle, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
 import { CampaignShareButton } from "@/components/conversion/campaign-share-button";
 import { EbookRacaoFunnel } from "@/components/conversion/ebook-racao-funnel";
 import { getCampaignConfig } from "@/lib/campaign-landings";
 import { apiGet } from "@/lib/api";
-import { solidarityEbooks, SOLIDARITY_EBOOK_UNIT_CENTS } from "@/lib/solidarity-ebooks";
+import { BRAND } from "@/lib/brand";
+import { solidarityEbooks } from "@/lib/solidarity-ebooks";
 
 export const revalidate = 10;
 
@@ -33,31 +34,37 @@ export const metadata: Metadata = {
 };
 
 type Envelope<T> = { data: T };
-type CampaignCause = {
-  raisedAmountCents: number;
-  targetAmountCents: number | null;
+type CampaignImpact = {
+  confirmedKg: number;
+  confirmedContributions: number;
+  totalReceivedCents: number;
+  extraSupportCents: number;
+  goalKg: number;
+  progressPercent: number;
 };
 
-async function getCampaignCause(): Promise<CampaignCause | null> {
+async function getCampaignImpact(): Promise<CampaignImpact | null> {
   try {
-    return (await apiGet<Envelope<CampaignCause>>("/causes/mypets-ebook-racao-brl")).data;
+    return (await apiGet<Envelope<CampaignImpact>>("/campaigns/ebook-racao/impact")).data;
   } catch {
     return null;
   }
 }
 
 export default async function EbookRacaoCampaignPage() {
-  const [config, campaignCause] = await Promise.all([getCampaignConfig(), getCampaignCause()]);
+  const [config, impact] = await Promise.all([getCampaignConfig(), getCampaignImpact()]);
   const paymentReady = Boolean(
     config.paymentsLive &&
       config.paymentProvider === "xpayments" &&
       config.paymentCurrencies?.includes("BRL"),
   );
-  const confirmedKg = campaignCause ? Math.floor(campaignCause.raisedAmountCents / SOLIDARITY_EBOOK_UNIT_CENTS) : 0;
-  const goalKg = campaignCause?.targetAmountCents
-    ? Math.max(1, Math.round(campaignCause.targetAmountCents / SOLIDARITY_EBOOK_UNIT_CENTS))
-    : 100;
-  const goalProgress = Math.min(100, Math.round((confirmedKg / goalKg) * 100));
+  const confirmedKg = impact?.confirmedKg ?? 0;
+  const goalKg = impact?.goalKg ?? 100;
+  const goalProgress = impact?.progressPercent ?? 0;
+  const confirmedContributions = impact?.confirmedContributions ?? 0;
+  const extraSupportCents = impact?.extraSupportCents ?? 0;
+  const campaignVideoUrl = BRAND.ebookCampaignVideoUrl;
+  const hasCommunity = Boolean(BRAND.whatsappCommunityUrl || BRAND.facebookGroupUrl);
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol">
@@ -130,7 +137,13 @@ export default async function EbookRacaoCampaignPage() {
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-emerald-400 transition-[width]" style={{ width: `${goalProgress}%` }} />
               </div>
-              <p className="mt-2 text-[10px] leading-4 text-white/50">Só entram aqui participações financeiras confirmadas. QR Code gerado não soma kg.</p>
+              <p className="mt-2 text-[10px] leading-4 text-white/50">Só entram aqui kg ligados a participações financeiras confirmadas. QR Code gerado não soma kg.</p>
+              {(confirmedContributions > 0 || extraSupportCents > 0) && (
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-white/10 pt-3 text-[10px] font-bold text-white/55">
+                  <span>{confirmedContributions} {confirmedContributions === 1 ? "participação confirmada" : "participações confirmadas"}</span>
+                  {extraSupportCents > 0 && <span>+ {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(extraSupportCents / 100)} em reforços livres</span>}
+                </div>
+              )}
             </div>
           </div>
 
@@ -187,6 +200,65 @@ export default async function EbookRacaoCampaignPage() {
         </div>
       </section>
 
+      <section className="border-y border-border bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+          <div className="grid gap-8 lg:grid-cols-[.82fr_1.18fr] lg:items-center">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-emerald-700">Uma campanha feita para ser vista e partilhada</p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Da escolha do guia à tigela: uma história simples, visual e verificável.</h2>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">A comunicação da campanha trabalha com imagens reais/identificadas do ecossistema MyPets e um vídeo curto de campanha quando o media oficial estiver configurado. O objetivo é mostrar o mecanismo sem inventar entregas ou números: escolher, confirmar, garantir alimento e acompanhar.</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                {[
+                  ["1. Escolher", "Um guia que a pessoa realmente quer usar."],
+                  ["2. Confirmar", "Pix concluído e reconciliado no servidor."],
+                  ["3. Acompanhar", "Kg garantidos, reforço extra e comunidade."],
+                ].map(([title, text]) => (
+                  <div key={title} className="rounded-2xl border border-border bg-[#f8faf9] p-4">
+                    <p className="text-xs font-black text-petrol">{title}</p>
+                    <p className="mt-1 text-[11px] leading-5 text-muted-foreground">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-[2rem] bg-petrol shadow-2xl shadow-petrol/15">
+              {campaignVideoUrl ? (
+                <div className="relative aspect-video bg-black">
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster="/images/card-alimentou.jpg"
+                    className="h-full w-full object-cover"
+                  >
+                    <source src={campaignVideoUrl} />
+                  </video>
+                </div>
+              ) : (
+                <div className="grid aspect-[16/10] grid-cols-2 gap-1 bg-petrol p-1">
+                  <div className="relative row-span-2 overflow-hidden rounded-l-[1.7rem]">
+                    <Image src="/images/card-alimentou.jpg" alt="Cão representando a frente de alimentação MyPets" fill sizes="40vw" className="object-cover" />
+                  </div>
+                  <div className="relative overflow-hidden rounded-tr-[1.7rem]">
+                    <Image src="/images/cta-dog.jpg" alt="Cão na comunicação visual MyPets" fill sizes="30vw" className="object-cover" />
+                  </div>
+                  <div className="relative overflow-hidden rounded-br-[1.7rem]">
+                    <Image src="/images/hero.jpg" alt="Animais na comunicação institucional MyPets" fill sizes="30vw" className="object-cover" />
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-4 px-5 py-4 text-white">
+                <div>
+                  <p className="text-xs font-black">{campaignVideoUrl ? "Vídeo oficial da campanha" : "Narrativa visual da campanha"}</p>
+                  <p className="mt-1 text-[10px] text-white/55">{campaignVideoUrl ? "Veja, entenda e partilhe em menos de 1 minuto." : "O player de vídeo assume este espaço automaticamente quando o media oficial for configurado."}</p>
+                </div>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10"><PlayCircle className="h-5 w-5 text-emerald-300" /></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="como-funciona" className="scroll-mt-24 bg-petrol text-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:px-8 lg:py-16">
           <div className="relative min-h-[350px] overflow-hidden rounded-[2rem]">
@@ -225,6 +297,36 @@ export default async function EbookRacaoCampaignPage() {
         </div>
       </section>
 
+      {hasCommunity && (
+        <section className="bg-petrol text-white">
+          <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:px-8">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-emerald-300">Não precisa terminar no Pix</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight">Quem participa pode continuar perto da causa.</h2>
+              <p className="mt-3 text-sm leading-7 text-white/65">Depois do apoio confirmado, a pessoa pode entrar voluntariamente na comunidade MyPets, acompanhar novidades, partilhar histórias e ajudar a campanha a chegar a mais tutores.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {BRAND.whatsappCommunityUrl && (
+                <a href={BRAND.whatsappCommunityUrl} target="_blank" rel="noopener noreferrer" className="rounded-3xl border border-white/10 bg-white/7 p-5 transition hover:bg-white/10">
+                  <MessageCircle className="h-6 w-6 text-emerald-300" />
+                  <p className="mt-4 text-lg font-black">Comunidade WhatsApp</p>
+                  <p className="mt-1 text-xs leading-5 text-white/55">Atualizações rápidas, mobilização e participação ativa.</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-xs font-black text-emerald-300">Entrar voluntariamente <ArrowRight className="h-3.5 w-3.5" /></span>
+                </a>
+              )}
+              {BRAND.facebookGroupUrl && (
+                <a href={BRAND.facebookGroupUrl} target="_blank" rel="noopener noreferrer" className="rounded-3xl border border-white/10 bg-white/7 p-5 transition hover:bg-white/10">
+                  <Facebook className="h-6 w-6 text-blue-300" />
+                  <p className="mt-4 text-lg font-black">Grupo Facebook</p>
+                  <p className="mt-1 text-xs leading-5 text-white/55">Discussões, histórias, conteúdos e ligação entre participantes.</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-xs font-black text-blue-200">Participar do grupo <ArrowRight className="h-3.5 w-3.5" /></span>
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <p className="text-center text-xs font-black uppercase tracking-[.16em] text-emerald-700">Perguntas importantes</p>
         <h2 className="mt-3 text-center text-3xl font-black tracking-tight">Antes de participar, saiba exatamente o que está a fazer.</h2>
@@ -233,7 +335,8 @@ export default async function EbookRacaoCampaignPage() {
             ["Como funciona esta participação?", "O apoio financeiro desta campanha tem o MyPets como beneficiário e inclui uma recompensa digital. O tratamento fiscal, documental e de consumo deve permanecer coerente com a estrutura jurídica e os termos aplicáveis ao MyPets; a página não usa o nome da campanha para alterar esse enquadramento."],
             ["Quanto custa cada participação?", "Cada eBook selecionado acrescenta R$ 12,90 ao apoio. Um guia = R$ 12,90 e 1 kg; três = R$ 38,70 e 3 kg; a coleção completa = R$ 64,50 e 5 kg."],
             ["Como o MyPets garante 1 kg?", "A unidade da campanha é o peso, não uma estimativa visual. Cada R$ 12,90 confirmado cria o compromisso de financiar 1 kg. Se o custo de aquisição subir, o MyPets preserva os kg já confirmados e pode ajustar o valor apenas para participações futuras."],
-            ["Quando recebo o eBook?", "O acesso aparece depois de o backend confirmar o pagamento. Gerar o QR Code não desbloqueia a etapa de agradecimento."],
+            ["Quando recebo o eBook?", "O acesso aparece depois de o backend confirmar o pagamento. Gerar o QR Code não desbloqueia a etapa de agradecimento. O email é opcional: o acesso aparece na hora e, quando o WhatsApp oficial estiver configurado, também pode pedir o envio por lá."],
+            ["Posso arredondar ou apoiar com um valor maior?", "Sim. Depois de escolher os eBooks, pode manter o valor base ou arredondar/reforçar livremente. O valor base determina os eBooks e kg garantidos; o adicional reforça o fundo e a operação da campanha sem inflar artificialmente o contador de kg."],
             ["Posso escolher mais de um?", "Sim. Cada guia adicional acrescenta mais R$ 12,90 e mais 1 kg. Pode escolher 1, 3 ou os 5 eBooks e depois personalizar quais quer receber."],
           ].map(([q, a]) => (
             <details key={q} className="rounded-2xl border border-border bg-white p-5">
