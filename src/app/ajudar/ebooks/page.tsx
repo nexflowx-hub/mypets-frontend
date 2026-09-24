@@ -7,7 +7,8 @@ import { CampaignLandingTracker } from "@/components/conversion/campaign-landing
 import { CampaignShareButton } from "@/components/conversion/campaign-share-button";
 import { EbookRacaoFunnel } from "@/components/conversion/ebook-racao-funnel";
 import { getCampaignConfig } from "@/lib/campaign-landings";
-import { solidarityEbooks } from "@/lib/solidarity-ebooks";
+import { apiGet } from "@/lib/api";
+import { solidarityEbooks, SOLIDARITY_EBOOK_UNIT_CENTS } from "@/lib/solidarity-ebooks";
 
 export const revalidate = 10;
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/ajudar/ebooks" },
   openGraph: {
     title: "1 eBook = 1 kg de Ração — participe com R$ 12,90",
-    description: "Escolha um guia digital e transforme uma participação de R$ 12,90 em 1 kg de ração a financiar.",
+    description: "Escolha um guia digital e transforme uma participação de R$ 12,90 em 1 kg de ração garantido.",
     url: "https://mypets.lat/ajudar/ebooks",
     siteName: "MyPets",
     type: "website",
@@ -26,18 +27,37 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "1 eBook = 1 kg de Ração · MyPets",
-    description: "R$ 12,90 = um guia digital + 1 kg de ração a financiar.",
+    description: "R$ 12,90 = um guia digital + 1 kg de ração garantido.",
     images: ["https://mypets.lat/ajudar/ebooks/opengraph-image"],
   },
 };
 
+type Envelope<T> = { data: T };
+type CampaignCause = {
+  raisedAmountCents: number;
+  targetAmountCents: number | null;
+};
+
+async function getCampaignCause(): Promise<CampaignCause | null> {
+  try {
+    return (await apiGet<Envelope<CampaignCause>>("/causes/mypets-ebook-racao-brl")).data;
+  } catch {
+    return null;
+  }
+}
+
 export default async function EbookRacaoCampaignPage() {
-  const config = await getCampaignConfig();
+  const [config, campaignCause] = await Promise.all([getCampaignConfig(), getCampaignCause()]);
   const paymentReady = Boolean(
     config.paymentsLive &&
       config.paymentProvider === "xpayments" &&
       config.paymentCurrencies?.includes("BRL"),
   );
+  const confirmedKg = campaignCause ? Math.floor(campaignCause.raisedAmountCents / SOLIDARITY_EBOOK_UNIT_CENTS) : 0;
+  const goalKg = campaignCause?.targetAmountCents
+    ? Math.max(1, Math.round(campaignCause.targetAmountCents / SOLIDARITY_EBOOK_UNIT_CENTS))
+    : 100;
+  const goalProgress = Math.min(100, Math.round((confirmedKg / goalKg) * 100));
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol">
@@ -70,17 +90,17 @@ export default async function EbookRacaoCampaignPage() {
               <BookOpen className="h-3.5 w-3.5" /> 1 eBook = 1 kg de ração
             </span>
             <h1 className="mt-6 max-w-3xl text-balance text-5xl font-black leading-[.95] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
-              Escolha um guia. <span className="text-emerald-300">Coloque 1 kg de ração</span> numa tigela.
+              Você cuida do seu cão. <span className="text-emerald-300">Hoje pode alimentar outro.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/78">
-              Escolha um guia útil para si e transforme a participação em alimento. <strong className="text-white">R$ 12,90 = 1 eBook digital = 1 kg de ração a financiar.</strong>
+              Escolha um guia útil para si. Cada participação confirmada de <strong className="text-white">R$ 12,90</strong> desbloqueia o eBook e cria o compromisso MyPets de <strong className="text-white">1 kg de ração.</strong>
             </p>
 
             <div className="mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
               {[
                 ["Escolha", "um guia útil para si", BookOpen],
                 ["Participe", "R$ 12,90 por eBook", Heart],
-                ["Alimente", "1 kg por participação", PawPrint],
+                ["Alimente", "1 kg garantido", PawPrint],
               ].map(([title, text, Icon]) => {
                 const ItemIcon = Icon as typeof BookOpen;
                 return (
@@ -98,6 +118,20 @@ export default async function EbookRacaoCampaignPage() {
               <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-300" /> Apoio recebido pelo MyPets</span>
               <span className="inline-flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-emerald-300" /> eBook digital de agradecimento</span>
             </div>
+
+            <div className="mt-6 max-w-2xl rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur-sm">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-300">Meta de lançamento</p>
+                  <p className="mt-1 text-2xl font-black text-white">{confirmedKg > 0 ? `${confirmedKg} kg já confirmados` : "Primeiros 100 kg"}</p>
+                </div>
+                <p className="text-right text-xs font-bold text-white/60">{confirmedKg} / {goalKg} kg</p>
+              </div>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-emerald-400 transition-[width]" style={{ width: `${goalProgress}%` }} />
+              </div>
+              <p className="mt-2 text-[10px] leading-4 text-white/50">Só entram aqui participações financeiras confirmadas. QR Code gerado não soma kg.</p>
+            </div>
           </div>
 
           <div id="participar" className="scroll-mt-24">
@@ -112,7 +146,7 @@ export default async function EbookRacaoCampaignPage() {
             ["Apoio + recompensa digital", "O apoio tem o MyPets como beneficiário financeiro e o conteúdo digital é a recompensa desta campanha."],
             ["Valor simples", "R$ 12,90 por guia selecionado. Cada unidade confirmada corresponde a 1 kg."],
             ["Destino identificado", "A campanha mede separadamente a origem, os materiais escolhidos e o apoio confirmado."],
-            ["Compromisso por peso", "Participações confirmadas preservam 1 kg. O preço pode ser revisto apenas para novas participações se o custo de aquisição variar."],
+            ["Compromisso por peso", "Participações confirmadas preservam 1 kg garantido por participação confirmada. O preço pode ser revisto apenas para novas participações se o custo de aquisição variar."],
           ].map(([title, text]) => (
             <article key={title} className="border-b border-border/70 py-5 sm:px-4 lg:border-b-0 lg:border-r lg:last:border-r-0">
               <p className="text-xs font-black text-petrol">{title}</p>
@@ -168,7 +202,7 @@ export default async function EbookRacaoCampaignPage() {
             <div className="mt-5 space-y-4 text-sm leading-7 text-white/68">
               <p>O pagamento é um apoio ao MyPets. O eBook é entregue como material digital de agradecimento e torna a participação mais útil, memorável e partilhável.</p>
               <p>A campanha regista a origem do visitante, os guias escolhidos, o valor do apoio e a confirmação financeira. QR Code gerado não conta como apoio recebido.</p>
-              <p>A promessa é contabilizada por peso: <strong className="text-white">cada participação confirmada corresponde a 1 kg de ração.</strong> O MyPets usará compras e comprovantes para acompanhar o peso adquirido. Se os custos mudarem, os kg já confirmados permanecem preservados e o preço pode ser revisto somente para novas participações.</p>
+              <p>A promessa é contabilizada por peso: <strong className="text-white">cada participação confirmada cria um compromisso de 1 kg de ração, preservado mesmo se o custo de compra variar.</strong> O MyPets usará compras e comprovantes para acompanhar o peso adquirido. Se os custos mudarem, os kg já confirmados permanecem preservados e o preço pode ser revisto somente para novas participações.</p>
             </div>
             <a href="#participar" className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-6 text-sm font-black text-white">
               Participar com R$ 12,90 <Heart className="h-4 w-4 fill-white" />
@@ -185,7 +219,7 @@ export default async function EbookRacaoCampaignPage() {
           </div>
           <CampaignShareButton
             sharePath="/go/ebooks"
-            shareText="Conheça a campanha 1 eBook = 1 kg do MyPets: escolha um guia digital sobre cães e transforme R$ 12,90 em 1 kg de ração a financiar."
+            shareText="Conheça a campanha 1 eBook = 1 kg do MyPets: escolha um guia digital sobre cães e transforme R$ 12,90 em 1 kg de ração garantido."
             label="Partilhar a campanha"
           />
         </div>
