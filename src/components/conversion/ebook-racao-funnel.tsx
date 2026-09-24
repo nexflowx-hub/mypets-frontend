@@ -23,7 +23,7 @@ const intents = [
 
 const bundleOptions = [
   { count: 1, label: "1 eBook", impact: "1 kg", note: "Começar simples" },
-  { count: 3, label: "3 eBooks", impact: "3 kg", note: "Mais impacto" },
+  { count: 3, label: "3 eBooks", impact: "3 kg", note: "Sugerido" },
   { count: 5, label: "Coleção completa", impact: "5 kg", note: "Todos os guias" },
 ];
 
@@ -175,6 +175,12 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
                 >
                   <span className={cn("block text-[9px] font-black uppercase tracking-wide", active ? "text-emerald-300" : "text-emerald-700")}>{bundle.impact}</span>
                   <span className="mt-1 block text-xs font-black">{bundle.label}</span>
+                  <span className={cn(
+                    "mx-auto mt-1 inline-flex rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wide",
+                    bundle.count === 3
+                      ? active ? "bg-emerald-300/15 text-emerald-200" : "bg-emerald-50 text-emerald-700"
+                      : active ? "text-white/55" : "text-muted-foreground",
+                  )}>{bundle.note}</span>
                   <span className={cn("mt-1 block text-[9px]", active ? "text-white/55" : "text-muted-foreground")}>{money(bundle.count * SOLIDARITY_EBOOK_UNIT_CENTS)}</span>
                 </button>
               );
