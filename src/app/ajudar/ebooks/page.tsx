@@ -12,21 +12,21 @@ import { solidarityEbooks } from "@/lib/solidarity-ebooks";
 export const revalidate = 10;
 
 export const metadata: Metadata = {
-  title: "1 eBook = Ração | Campanha MyPets",
-  description: "Participe com R$ 9,90, escolha um eBook de cuidados com cães e ajude o MyPets a colocar mais uma cota de alimentação em movimento.",
+  title: "1 eBook = 1 kg de Ração | Campanha MyPets",
+  description: "Participe com R$ 12,90, escolha um eBook de cuidados com cães e ajude o MyPets a financiar 1 kg de ração.",
   alternates: { canonical: "/ajudar/ebooks" },
   openGraph: {
-    title: "1 eBook = Ração — participe com R$ 9,90",
-    description: "Escolha um guia digital, participe da campanha MyPets e transforme conhecimento em mais uma cota de alimentação.",
+    title: "1 eBook = 1 kg de Ração — participe com R$ 12,90",
+    description: "Escolha um guia digital e transforme uma participação de R$ 12,90 em 1 kg de ração a financiar.",
     url: "https://mypets.lat/ajudar/ebooks",
     siteName: "MyPets",
     type: "website",
-    images: [{ url: "https://mypets.lat/ajudar/ebooks/opengraph-image", width: 1200, height: 630, alt: "1 eBook = Ração · MyPets" }],
+    images: [{ url: "https://mypets.lat/ajudar/ebooks/opengraph-image", width: 1200, height: 630, alt: "1 eBook = 1 kg de Ração · MyPets" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "1 eBook = Ração · MyPets",
-    description: "R$ 9,90 = um guia digital + uma cota de alimentação em movimento.",
+    title: "1 eBook = 1 kg de Ração · MyPets",
+    description: "R$ 12,90 = um guia digital + 1 kg de ração a financiar.",
     images: ["https://mypets.lat/ajudar/ebooks/opengraph-image"],
   },
 };
@@ -73,14 +73,14 @@ export default async function EbookRacaoCampaignPage() {
               1 eBook <span className="text-emerald-300">= Ração.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/78">
-              Aprenda a cuidar melhor de um cão e ajude o MyPets a colocar alimento em movimento. Cada guia escolhido representa uma participação de <strong className="text-white">R$ 9,90</strong> e uma cota de alimentação.
+              Escolha um guia útil para si e transforme a participação em alimento. <strong className="text-white">R$ 12,90 = 1 eBook digital = 1 kg de ração a financiar.</strong>
             </p>
 
             <div className="mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
               {[
                 ["Escolha", "um guia útil para si", BookOpen],
-                ["Participe", "R$ 9,90 por eBook", Heart],
-                ["Alimente", "1 cota por participação", PawPrint],
+                ["Participe", "R$ 12,90 por eBook", Heart],
+                ["Alimente", "1 kg por participação", PawPrint],
               ].map(([title, text, Icon]) => {
                 const ItemIcon = Icon as typeof BookOpen;
                 return (
@@ -110,9 +110,9 @@ export default async function EbookRacaoCampaignPage() {
         <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
           {[
             ["Participação, não catálogo de loja", "O conteúdo digital funciona como recompensa de agradecimento e o apoio tem o MyPets como beneficiário."],
-            ["Valor simples", "R$ 9,90 por guia selecionado, sem preço escondido no funil."],
+            ["Valor simples", "R$ 12,90 por guia selecionado. Cada unidade confirmada corresponde a 1 kg."],
             ["Destino identificado", "A campanha mede separadamente a origem, os materiais escolhidos e o apoio confirmado."],
-            ["Impacto auditável", "Não inventamos quilos de ração. A equivalência física será publicada quando houver custo médio documentado."],
+            ["Compromisso por peso", "Participações confirmadas preservam 1 kg. O preço pode ser revisto apenas para novas participações se o custo de aquisição variar."],
           ].map(([title, text]) => (
             <article key={title} className="border-b border-border/70 py-5 sm:px-4 lg:border-b-0 lg:border-r lg:last:border-r-0">
               <p className="text-xs font-black text-petrol">{title}</p>
@@ -135,12 +135,12 @@ export default async function EbookRacaoCampaignPage() {
               <div className="relative h-44 overflow-hidden">
                 <Image src={ebook.image} alt="" fill sizes="(min-width:1280px) 20vw, 50vw" className="object-cover transition duration-500 group-hover:scale-[1.03]" />
                 <div className="absolute inset-0 bg-gradient-to-t from-petrol/55 to-transparent" />
-                <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-emerald-800">R$ 9,90</span>
+                <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-emerald-800">R$ 12,90 · 1 kg</span>
               </div>
               <div className="p-5">
                 <h3 className="text-base font-black">{ebook.shortTitle}</h3>
                 <p className="mt-2 text-xs leading-5 text-muted-foreground">{ebook.promise}</p>
-                <p className="mt-4 text-[10px] font-black uppercase tracking-wide text-emerald-700">1 guia · 1 cota de alimentação</p>
+                <p className="mt-4 text-[10px] font-black uppercase tracking-wide text-emerald-700">1 guia · 1 kg de ração</p>
               </div>
             </article>
           ))}
@@ -168,10 +168,10 @@ export default async function EbookRacaoCampaignPage() {
             <div className="mt-5 space-y-4 text-sm leading-7 text-white/68">
               <p>O pagamento é um apoio ao MyPets. O eBook é entregue como material digital de agradecimento e torna a participação mais útil, memorável e partilhável.</p>
               <p>A campanha regista a origem do visitante, os guias escolhidos, o valor do apoio e a confirmação financeira. QR Code gerado não conta como apoio recebido.</p>
-              <p>A promessa “1 eBook = Ração” usa inicialmente uma <strong className="text-white">cota de alimentação</strong>. Quando tivermos compras recorrentes e recibos suficientes, o MyPets poderá publicar uma equivalência em gramas ou quilos baseada no custo real.</p>
+              <p>A promessa é contabilizada por peso: <strong className="text-white">cada participação confirmada corresponde a 1 kg de ração.</strong> O MyPets usará compras e comprovantes para acompanhar o peso adquirido. Se os custos mudarem, os kg já confirmados permanecem preservados e o preço pode ser revisto somente para novas participações.</p>
             </div>
             <a href="#participar" className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-6 text-sm font-black text-white">
-              Participar com R$ 9,90 <Heart className="h-4 w-4 fill-white" />
+              Participar com R$ 12,90 <Heart className="h-4 w-4 fill-white" />
             </a>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default async function EbookRacaoCampaignPage() {
           </div>
           <CampaignShareButton
             sharePath="/go/ebooks"
-            shareText="Conheça a campanha 1 eBook = Ração do MyPets: escolha um guia digital sobre cães e transforme R$ 9,90 numa cota de alimentação."
+            shareText="Conheça a campanha 1 eBook = 1 kg do MyPets: escolha um guia digital sobre cães e transforme R$ 12,90 em 1 kg de ração a financiar."
             label="Partilhar a campanha"
           />
         </div>
@@ -197,10 +197,10 @@ export default async function EbookRacaoCampaignPage() {
         <div className="mt-7 space-y-3">
           {[
             ["Estou comprando um eBook?", "A experiência é apresentada pelo MyPets como participação solidária com recompensa digital. O apoio financeiro tem o MyPets como beneficiário; o enquadramento fiscal e documental da campanha deve permanecer coerente com a estrutura jurídica utilizada pelo MyPets."],
-            ["Quanto custa cada participação?", "Cada eBook selecionado acrescenta R$ 9,90 ao apoio. Um guia = R$ 9,90; dois = R$ 19,80; três = R$ 29,70."],
-            ["Quanto de ração representa R$ 9,90?", "Nesta primeira fase, R$ 9,90 representa uma cota de alimentação. Não publicamos peso artificial. Quando houver custo médio documentado das compras reais, a campanha poderá mostrar a equivalência física atualizada."],
+            ["Quanto custa cada participação?", "Cada eBook selecionado acrescenta R$ 12,90 ao apoio. Um guia = R$ 12,90 e 1 kg; três = R$ 38,70 e 3 kg; a coleção completa = R$ 64,50 e 5 kg."],
+            ["Como o MyPets garante 1 kg?", "A unidade da campanha é o peso, não uma estimativa visual. Cada R$ 12,90 confirmado cria o compromisso de financiar 1 kg. Se o custo de aquisição subir, o MyPets preserva os kg já confirmados e pode ajustar o valor apenas para participações futuras."],
             ["Quando recebo o eBook?", "O acesso aparece depois de o backend confirmar o pagamento. Gerar o QR Code não desbloqueia a etapa de agradecimento."],
-            ["Posso escolher mais de um?", "Sim. Cada guia adicional acrescenta mais uma participação de R$ 9,90 e mais uma cota de alimentação."],
+            ["Posso escolher mais de um?", "Sim. Cada guia adicional acrescenta mais R$ 12,90 e mais 1 kg. Pode escolher 1, 3 ou os 5 eBooks e depois personalizar quais quer receber."],
           ].map(([q, a]) => (
             <details key={q} className="rounded-2xl border border-border bg-white p-5">
               <summary className="cursor-pointer list-none text-sm font-black">{q}</summary>
