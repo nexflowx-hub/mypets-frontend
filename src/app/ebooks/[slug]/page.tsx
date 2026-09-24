@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, BookOpen, Heart, PawPrint } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { EbookPrintButton } from "@/components/conversion/ebook-print-button";
+import { validateEbookReceipt } from "@/lib/ebook-access";
 import { solidarityEbookBySlug, solidarityEbooks } from "@/lib/solidarity-ebooks";
 
 export const dynamicParams = false;
@@ -24,17 +25,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function EbookPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function EbookPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ receipt?: string }>;
+}) {
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
   const ebook = solidarityEbookBySlug[slug];
   if (!ebook) notFound();
+  const payment = await validateEbookReceipt(query.receipt);
+  if (!payment) redirect("/ajudar/ebooks?access=required");
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol print:bg-white">
       <header className="border-b border-border bg-white print:hidden">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href="/"><MyPetsLogo /></Link>
-          <Link href="/ajudar/ebooks" className="inline-flex items-center gap-2 text-xs font-black text-petrol">
+          <Link href={`/ebooks/colecao?receipt=${encodeURIComponent(query.receipt!)}`} className="inline-flex items-center gap-2 text-xs font-black text-petrol">
             <ArrowLeft className="h-4 w-4" /> Campanha 1 eBook = Ração
           </Link>
         </div>
