@@ -100,12 +100,18 @@ export default async function EbookRacaoCampaignPage() {
               Você cuida do seu cão. <span className="text-emerald-300">Hoje pode alimentar outro.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/78">
-              Escolha um guia útil para si. Cada participação confirmada de <strong className="text-white">R$ 12,90</strong> desbloqueia o eBook e cria o compromisso MyPets de <strong className="text-white">1 kg de ração.</strong>
+              Escolha um guia útil para você. Cada participação confirmada de <strong className="text-white">R$ 12,90</strong> desbloqueia o eBook e cria o compromisso MyPets de <strong className="text-white">1 kg de ração.</strong>
             </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <a href="#participar" className="inline-flex min-h-14 items-center gap-2 rounded-2xl bg-emerald-400 px-6 text-sm font-black text-[#092017] shadow-[0_18px_40px_-18px_rgba(52,211,153,.8)] transition hover:-translate-y-0.5 hover:bg-emerald-300">
+                Escolher meu eBook e garantir 1 kg <ArrowRight className="h-4 w-4" />
+              </a>
+              <span className="text-[11px] font-semibold text-white/55">Pix · acesso liberado após confirmação</span>
+            </div>
 
             <div className="mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
               {[
-                ["Escolha", "um guia útil para si", BookOpen],
+                ["Escolha", "um guia útil para você", BookOpen],
                 ["Participe", "R$ 12,90 por eBook", Heart],
                 ["Alimente", "1 kg garantido", PawPrint],
               ].map(([title, text, Icon]) => {
@@ -121,9 +127,9 @@ export default async function EbookRacaoCampaignPage() {
             </div>
 
             <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-semibold text-white/55">
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-300" /> Pix confirmado no backend</span>
-              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-300" /> Apoio recebido pelo MyPets</span>
-              <span className="inline-flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-emerald-300" /> eBook digital de agradecimento</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-300" /> Só contamos o kg após a confirmação do Pix</span>
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-emerald-300" /> Pagamento seguro via Pix</span>
+              <span className="inline-flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-emerald-300" /> eBook liberado após confirmação</span>
             </div>
 
             <div className="mt-6 max-w-2xl rounded-2xl border border-white/10 bg-black/20 p-4 backdrop-blur-sm">
@@ -172,7 +178,7 @@ export default async function EbookRacaoCampaignPage() {
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-black uppercase tracking-[.16em] text-emerald-700">Escolha algo que realmente vai usar</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Conhecimento útil para si. Mais capacidade de alimentação para o projeto.</h2>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Conhecimento útil para você. Mais alimento colocado em movimento.</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">Os primeiros guias foram pensados para dúvidas simples e recorrentes de quem vive com cães.</p>
         </div>
 
@@ -204,7 +210,7 @@ export default async function EbookRacaoCampaignPage() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <div className="grid gap-8 lg:grid-cols-[.82fr_1.18fr] lg:items-center">
             <div>
-              <p className="text-xs font-black uppercase tracking-[.16em] text-emerald-700">Uma campanha feita para ser vista e partilhada</p>
+              <p className="text-xs font-black uppercase tracking-[.16em] text-emerald-700">Uma campanha feita para ser vista e compartilhada</p>
               <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Da escolha do guia à tigela: uma história simples, visual e verificável.</h2>
               <p className="mt-4 text-sm leading-7 text-muted-foreground">A comunicação da campanha trabalha com imagens reais/identificadas do ecossistema MyPets e um vídeo curto de campanha quando o media oficial estiver configurado. O objetivo é mostrar o mecanismo sem inventar entregas ou números: escolher, confirmar, garantir alimento e acompanhar.</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
@@ -250,7 +256,7 @@ export default async function EbookRacaoCampaignPage() {
               <div className="flex items-center justify-between gap-4 px-5 py-4 text-white">
                 <div>
                   <p className="text-xs font-black">{campaignVideoUrl ? "Vídeo oficial da campanha" : "Narrativa visual da campanha"}</p>
-                  <p className="mt-1 text-[10px] text-white/55">{campaignVideoUrl ? "Veja, entenda e partilhe em menos de 1 minuto." : "Escolher, confirmar, garantir alimento e acompanhar - sem números ou entregas inventadas."}</p>
+                  <p className="mt-1 text-[10px] text-white/55">{campaignVideoUrl ? "Veja, entenda e compartilhe em menos de 1 minuto." : "Escolher, confirmar, garantir alimento e acompanhar - sem números ou entregas inventadas."}</p>
                 </div>
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10"><PlayCircle className="h-5 w-5 text-emerald-300" /></span>
               </div>
@@ -272,8 +278,8 @@ export default async function EbookRacaoCampaignPage() {
             <p className="text-xs font-black uppercase tracking-[.16em] text-emerald-300">Como funciona o dinheiro</p>
             <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Não escondemos a mecânica atrás do eBook.</h2>
             <div className="mt-5 space-y-4 text-sm leading-7 text-white/68">
-              <p>O pagamento é um apoio ao MyPets. O eBook é entregue como material digital de agradecimento e torna a participação mais útil, memorável e partilhável.</p>
-              <p>A campanha regista a origem do visitante, os guias escolhidos, o valor do apoio e a confirmação financeira. QR Code gerado não conta como apoio recebido.</p>
+              <p>O pagamento é um apoio ao MyPets. O eBook é entregue como material digital de agradecimento e torna a participação mais útil, memorável e compartilhável.</p>
+              <p>A campanha registra a origem do visitante, os guias escolhidos, o valor do apoio e a confirmação financeira. QR Code gerado não conta como apoio recebido.</p>
               <p>A promessa é contabilizada por peso: <strong className="text-white">cada participação confirmada cria um compromisso de 1 kg de ração, preservado mesmo se o custo de compra variar.</strong> O MyPets usará compras e comprovantes para acompanhar o peso adquirido. Se os custos mudarem, os kg já confirmados permanecem preservados e o preço pode ser revisto somente para novas participações.</p>
             </div>
             <a href="#participar" className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-6 text-sm font-black text-white">
@@ -292,7 +298,7 @@ export default async function EbookRacaoCampaignPage() {
           <CampaignShareButton
             sharePath="/go/ebooks"
             shareText="Conheça a campanha 1 eBook = 1 kg do MyPets: escolha um guia digital sobre cães e transforme R$ 12,90 em 1 kg de ração garantido."
-            label="Partilhar a campanha"
+            label="Compartilhar a campanha"
           />
         </div>
       </section>
@@ -332,10 +338,10 @@ export default async function EbookRacaoCampaignPage() {
         <h2 className="mt-3 text-center text-3xl font-black tracking-tight">Antes de participar, saiba exatamente o que está a fazer.</h2>
         <div className="mt-7 space-y-3">
           {[
-            ["Como funciona esta participação?", "O apoio financeiro desta campanha tem o MyPets como beneficiário e inclui uma recompensa digital. O tratamento fiscal, documental e de consumo deve permanecer coerente com a estrutura jurídica e os termos aplicáveis ao MyPets; a página não usa o nome da campanha para alterar esse enquadramento."],
+            ["Como funciona esta participação?", "O pagamento é um apoio financeiro ao MyPets com uma recompensa digital. O valor, o beneficiário e o compromisso de 1 kg são mostrados antes do Pix. A página não apresenta esta contribuição como doação dedutível de imposto."],
             ["Quanto custa cada participação?", "Cada eBook selecionado acrescenta R$ 12,90 ao apoio. Um guia = R$ 12,90 e 1 kg; três = R$ 38,70 e 3 kg; a coleção completa = R$ 64,50 e 5 kg."],
             ["Como o MyPets garante 1 kg?", "A unidade da campanha é o peso, não uma estimativa visual. Cada R$ 12,90 confirmado cria o compromisso de financiar 1 kg. Se o custo de aquisição subir, o MyPets preserva os kg já confirmados e pode ajustar o valor apenas para participações futuras."],
-            ["Quando recebo o eBook?", "O acesso aparece depois de o backend confirmar o pagamento. Gerar o QR Code não desbloqueia a etapa de agradecimento. O email é opcional: o acesso aparece na hora e, quando o WhatsApp oficial estiver configurado, também pode pedir o envio por lá."],
+            ["Quando recebo o eBook?", "O acesso é liberado assim que o pagamento é confirmado pelo servidor. Pedimos um email válido para entrega e recuperação do acesso. Gerar o QR Code, por si só, não libera os eBooks."],
             ["Posso arredondar ou apoiar com um valor maior?", "Sim. Depois de escolher os eBooks, pode manter o valor base ou arredondar/reforçar livremente. O valor base determina os eBooks e kg garantidos; o adicional reforça o fundo e a operação da campanha sem inflar artificialmente o contador de kg."],
             ["Posso escolher mais de um?", "Sim. Cada guia adicional acrescenta mais R$ 12,90 e mais 1 kg. Pode escolher 1, 3 ou os 5 eBooks e depois personalizar quais quer receber."],
           ].map(([q, a]) => (
