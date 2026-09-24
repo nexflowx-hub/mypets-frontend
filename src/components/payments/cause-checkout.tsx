@@ -269,11 +269,18 @@ export function CauseCheckout({
   }, [intent?.sessionId]);
 
   React.useEffect(() => {
-    if (!paid || !open) return;
+    idempotencyKeys.current = {};
+    setIntent(null);
+    setError(null);
+    setPaid(false);
+  }, [lockedAmountCents, rewardKeys?.join("|")]);
+
+  React.useEffect(() => {
+    if (!paid || !open || presentation === "campaign") return;
     const timer = window.setTimeout(() => {
       setOpen(false);
       resetCheckout();
-    }, presentation === "campaign" ? 20000 : 7000);
+    }, 7000);
     return () => window.clearTimeout(timer);
   }, [open, paid, presentation, resetCheckout]);
 
