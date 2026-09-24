@@ -2,13 +2,25 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, BarChart3, Check, Copy, Heart, Loader2, MousePointerClick, RefreshCw, Share2, ShieldCheck, WalletCards } from "lucide-react";
+import { ArrowUpRight, BarChart3, Check, Copy, Download, Heart, Loader2, MousePointerClick, RefreshCw, Share2, ShieldCheck, WalletCards } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authApi } from "@/lib/auth-api";
 import { getValidSession, onAuthChanged } from "@/lib/auth-client";
 import { useUiStore } from "@/lib/stores";
 
 type Envelope<T> = { data: T };
+type PublicConfig = {
+  environment: string;
+  paymentsLive: boolean;
+  paymentProvider: string | null;
+  paymentCurrencies: string[];
+  paymentWebhookCurrencies: string[];
+  paymentFinalityModes: Record<string, string>;
+  paymentNativeMethods: Record<string, string[]>;
+  degradedPaymentCurrencies: string[];
+  causeIntakeEnabled: boolean;
+  growthEnabled: boolean;
+};
 type Overview = {
   windowDays: number;
   path: string | null;
@@ -70,6 +82,7 @@ export function GrowthPerformanceAdmin() {
   const [days, setDays] = React.useState(7);
   const [path, setPath] = React.useState("/ajudar");
   const [data, setData] = React.useState<Overview | null>(null);
+  const [config, setConfig] = React.useState<PublicConfig | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
   const [copiedLink, setCopiedLink] = React.useState("");
@@ -88,8 +101,12 @@ export function GrowthPerformanceAdmin() {
       setAdmin(true);
       const params = new URLSearchParams({ days: String(days) });
       if (path.trim()) params.set("path", path.trim());
-      const response = await authApi<Envelope<Overview>>("/admin/growth/overview?" + params.toString());
+      const [response, configResponse] = await Promise.all([
+        authApi<Envelope<Overview>>("/admin/growth/overview?" + params.toString()),
+        authApi<Envelope<PublicConfig>>("/config"),
+      ]);
       setData(response.data);
+      setConfig(configResponse.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar a performance.");
     } finally {
@@ -146,6 +163,31 @@ export function GrowthPerformanceAdmin() {
     window.setTimeout(() => setCopiedLink(""), 1800);
   }
 
+
+  function exportBreakdownCsv() {
+    if (!data) return;
+    const headers = [
+      "source", "medium", "campaign", "content", "landingPath",
+      "landingViews", "supportStarted", "donationStarted", "donationCompleted",
+      "shareClicks", "amountCents", "landingToDonationPct", "donationCompletionPct",
+    ];
+    const escape = (value: unknown) => {
+      const text = String(value ?? "");
+      return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+    };
+    const rows = data.breakdown.map((row) => headers.map((key) => escape((row as unknown as Record<string, unknown>)[key])).join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `mypets-growth-${data.windowDays}d.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   const cards = [
     { label: "Landing views", value: totals?.landingViews ?? 0, detail: "Entradas no funil", icon: BarChart3 },
     { label: "Checkout aberto", value: totals?.supportStarted ?? 0, detail: String(totals?.landingToSupportPct ?? 0) + "% das visitas", icon: MousePointerClick },
@@ -174,13 +216,52 @@ export function GrowthPerformanceAdmin() {
           <select value={path} onChange={(event) => setPath(event.target.value)} className="h-11 rounded-xl border border-border bg-white px-3 text-sm font-bold text-petrol">
             <option value="/ajudar">Todas /ajudar</option><option value="/ajudar/petskids">PetsKids</option><option value="">Todo o Growth</option>
           </select>
-          <Button variant="outline" className="h-11 rounded-xl" disabled={busy} onClick={() => void load()}>
-            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />} Atualizar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="h-11 flex-1 rounded-xl" disabled={busy} onClick={() => void load()}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />} Atualizar
+            </Button>
+            <Button variant="outline" className="h-11 rounded-xl" disabled={!data?.breakdown.length} onClick={exportBreakdownCsv} aria-label="Exportar CSV">
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
       {error && <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>}
+
+      <section className="mt-6 rounded-3xl border border-border bg-white p-5 sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-coral">Launch readiness</p>
+            <h2 className="mt-1 text-xl font-black text-petrol">Estado técnico para aquisição paga</h2>
+          </div>
+          <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wide ${
+            config?.paymentsLive && config.paymentCurrencies.includes("BRL") && config.paymentNativeMethods?.BRL?.includes("pix")
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-amber-50 text-amber-800"
+          }`}>
+            {config?.paymentsLive && config.paymentCurrencies.includes("BRL") && config.paymentNativeMethods?.BRL?.includes("pix") ? "Financeiro pronto" : "Verificar financeiro"}
+          </span>
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+          {[
+            ["Ambiente", config?.environment === "production", config?.environment ?? "—"],
+            ["Payments", Boolean(config?.paymentsLive), config?.paymentsLive ? "LIVE" : "OFF"],
+            ["BRL", Boolean(config?.paymentCurrencies.includes("BRL")), config?.paymentCurrencies.includes("BRL") ? "Ativo" : "Ausente"],
+            ["PIX S2S", Boolean(config?.paymentNativeMethods?.BRL?.includes("pix")), config?.paymentNativeMethods?.BRL?.includes("pix") ? "Ativo" : "Ausente"],
+            ["Finalidade", config?.paymentFinalityModes?.BRL === "webhook", config?.paymentFinalityModes?.BRL ?? "—"],
+            ["Cause intake", Boolean(config?.causeIntakeEnabled), config?.causeIntakeEnabled ? "Ativo" : "OFF"],
+          ].map(([label, ok, detail]) => (
+            <article key={String(label)} className={`rounded-2xl border p-4 ${ok ? "border-emerald-100 bg-emerald-50/70" : "border-amber-100 bg-amber-50/70"}`}>
+              <p className="text-[10px] font-black uppercase tracking-wide text-muted-foreground">{String(label)}</p>
+              <p className={`mt-2 text-sm font-black ${ok ? "text-emerald-800" : "text-amber-900"}`}>{String(detail)}</p>
+            </article>
+          ))}
+        </div>
+        {config?.degradedPaymentCurrencies?.includes("BRL") && (
+          <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-xs font-semibold leading-5 text-amber-900">BRL aparece em modo de finalidade degradada. Não escalar mídia paga até confirmar reconciliação e um PIX real até SUCCEEDED.</p>
+        )}
+      </section>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {cards.map(({ label, value, detail, icon: Icon }) => (
