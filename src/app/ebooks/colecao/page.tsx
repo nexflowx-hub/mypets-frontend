@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, BookOpen, CheckCircle2, Heart } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
+import { validateEbookReceipt } from "@/lib/ebook-access";
 import { solidarityEbookBySlug, solidarityEbooks } from "@/lib/solidarity-ebooks";
 
 export const metadata: Metadata = {
@@ -16,9 +18,12 @@ export const dynamic = "force-dynamic";
 export default async function EbookCollectionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ books?: string; via?: string }>;
+  searchParams: Promise<{ books?: string; via?: string; receipt?: string }>;
 }) {
   const params = await searchParams;
+  const payment = await validateEbookReceipt(params.receipt);
+  if (!payment) redirect("/ajudar/ebooks?access=required");
+
   const requested = (params.books ?? "")
     .split(",")
     .map((value) => value.trim())
@@ -58,7 +63,7 @@ export default async function EbookCollectionPage({
           {selected.map((ebook) => (
             <Link
               key={ebook.slug}
-              href={`/ebooks/${ebook.slug}`}
+              href={`/ebooks/${ebook.slug}?receipt=${encodeURIComponent(params.receipt!)}`}
               className="group grid overflow-hidden rounded-3xl border border-border bg-white sm:grid-cols-[150px_1fr] transition hover:-translate-y-0.5 hover:shadow-lg"
             >
               <div className="relative min-h-40">
