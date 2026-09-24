@@ -230,7 +230,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
               </div>
               <div className="text-right">
                 <p className="text-3xl font-black text-emerald-700">{kg} kg</p>
-                <p className="mt-1 text-[10px] font-bold text-emerald-900/60">de ração a financiar</p>
+                <p className="mt-1 text-[10px] font-bold text-emerald-900/60">de ração garantidos</p>
               </div>
             </div>
           </div>
@@ -251,7 +251,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700"><Scale className="h-5 w-5" /></span>
               <div>
                 <p className="text-base font-black text-emerald-950">Está a financiar {impactLabel}.</p>
-                <p className="mt-1 text-[11px] leading-5 text-emerald-900/65">O compromisso da campanha é por peso: cada unidade confirmada de {money(SOLIDARITY_EBOOK_UNIT_CENTS)} corresponde a 1 kg. Se o custo de compra variar, o MyPets preserva os kg já confirmados e pode rever o valor apenas para novas participações.</p>
+                <p className="mt-1 text-[11px] leading-5 text-emerald-900/65">O compromisso da campanha é por peso: cada unidade confirmada de {money(SOLIDARITY_EBOOK_UNIT_CENTS)} garante 1 kg. Se o custo de compra variar, o MyPets completa a diferença necessária para preservar os kg já confirmados e pode rever o valor apenas para novas participações.</p>
               </div>
             </div>
           </div>
@@ -283,7 +283,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
                 campaignDescription="Depois da confirmação financeira, terá acesso imediato à coleção digital selecionada."
                 successActionHref={collectionHref}
                 successActionLabel={selectedEbooks.length > 1 ? "Abrir meus eBooks" : "Abrir meu eBook"}
-                successShareText={`Participei da campanha 1 eBook = 1 kg do MyPets e ajudei a financiar ${impactLabel}. Também recebi ${selectedEbooks.length === 1 ? "um guia digital" : "a minha coleção de guias digitais"} sobre cães.`}
+                successShareText={`Participei da campanha 1 eBook = 1 kg do MyPets e ajudei a garantir ${impactLabel}. Também recebi ${selectedEbooks.length === 1 ? "um guia digital" : "a minha coleção de guias digitais"} sobre cães.`}
                 successShareUrl="/ajudar/ebooks"
               />
             ) : (
