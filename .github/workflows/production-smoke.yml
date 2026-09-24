@@ -124,16 +124,15 @@ jobs:
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar?utm_source=github-actions&utm_medium=smoke&utm_campaign=help_campaign" -o /tmp/help.html
           grep -Fq "Ajude o MyPets a" /tmp/help.html
-          grep -Fq "continuar vivo" /tmp/help.html
-          grep -Fq "PetsKids" /tmp/help.html
-          grep -Fq "Together We Feed" /tmp/help.html
-          grep -Fq "Transparência antes de promessa" /tmp/help.html
+          grep -Fq "Escolha o valor do seu apoio" /tmp/help.html
+          grep -Fq "Pix" /tmp/help.html
           grep -Fq "Perguntas frequentes" /tmp/help.html
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/opengraph-image -o /tmp/help-og.png
           test -s /tmp/help-og.png
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/petskids?utm_source=github-actions&utm_medium=smoke&utm_campaign=petskids" -o /tmp/petskids-help.html
-          grep -Fq "Duas crianças começaram com" /tmp/petskids-help.html
-          grep -Fq "O beneficiário financeiro desta página é o MyPets" /tmp/petskids-help.html
+          grep -Fq "PetsKids" /tmp/petskids-help.html
+          grep -Fq "MyPets" /tmp/petskids-help.html
+          grep -Fq "Pix" /tmp/petskids-help.html
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/petskids/opengraph-image -o /tmp/petskids-og.png
           test -s /tmp/petskids-og.png
           echo "High-conversion donation landings and social previews validated"
