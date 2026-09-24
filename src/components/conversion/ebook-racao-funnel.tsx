@@ -283,6 +283,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
                 campaignDescription="Depois da confirmação financeira, terá acesso imediato à coleção digital selecionada."
                 successActionHref={collectionHref}
                 successActionLabel={selectedEbooks.length > 1 ? "Abrir meus eBooks" : "Abrir meu eBook"}
+                requireEmail
                 successShareText={`Participei da campanha 1 eBook = 1 kg do MyPets e ajudei a garantir ${impactLabel}. Também recebi ${selectedEbooks.length === 1 ? "um guia digital" : "a minha coleção de guias digitais"} sobre cães.`}
                 successShareUrl="/ajudar/ebooks"
               />
