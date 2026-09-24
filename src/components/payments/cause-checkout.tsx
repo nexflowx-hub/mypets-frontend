@@ -321,7 +321,9 @@ export function CauseCheckout({
       await new Promise((resolve) => window.setTimeout(resolve, 1800));
     }
     setVerifying(false);
-    setError("O pagamento ainda está a ser confirmado. Pode fechar esta janela; a confirmação continuará no sistema.");
+    setError(brazilPixOnly
+      ? "O pagamento ainda está sendo confirmado. Você pode fechar esta janela; a confirmação continuará no sistema."
+      : "O pagamento ainda está a ser confirmado. Pode fechar esta janela; a confirmação continuará no sistema.");
   }, [applyStatus, fetchPaymentStatus]);
 
   React.useEffect(() => {
@@ -811,8 +813,8 @@ export function CauseCheckout({
                   <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
                   <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para receber os eBooks" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
                 </div>
-                {brazilPixOnly && successWhatsappUrl && (
-                  <p className="-mt-1 text-[10px] leading-4 text-muted-foreground">Email opcional. Depois da confirmação pode abrir os eBooks imediatamente ou pedir o envio pelo WhatsApp.</p>
+                {brazilPixOnly && successWhatsappUrl && !requireEmail && (
+                  <p className="-mt-1 text-[10px] leading-4 text-muted-foreground">Email opcional. Depois da confirmação, você pode abrir os eBooks imediatamente ou pedir o envio pelo WhatsApp.</p>
                 )}
 
                 {(choice === "mb_way" || choice === "bizum") && !brazilPixOnly && (
