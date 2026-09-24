@@ -393,6 +393,25 @@ export function CauseCheckout({
     setOpen(true);
   }
 
+  function recordPostSupportAction(action: "ebook_access" | "whatsapp_delivery" | "whatsapp_community" | "facebook_group") {
+    const attribution = tracking();
+    void recordGrowthEvent({
+      eventName: "POST_SUPPORT_ACTION",
+      source: attribution.source,
+      medium: attribution.medium,
+      campaign: attribution.campaign,
+      content: attribution.content,
+      landingPath: typeof window === "undefined" ? null : `${window.location.pathname}${window.location.search}`.slice(0, 500),
+      metadata: {
+        causeId,
+        causeTitle,
+        currency,
+        paymentIntentId: intent?.id ?? null,
+        action,
+      },
+    });
+  }
+
   async function shareConfirmedSupport() {
     if (typeof window === "undefined") return;
     const attribution = tracking();
@@ -830,22 +849,22 @@ export function CauseCheckout({
               <p className="mt-2 text-xs font-semibold text-emerald-700">Agora escolha como quer continuar: conteúdo, WhatsApp, comunidade ou partilha.</p>
               <div className="mt-6 grid w-full max-w-lg gap-2 sm:grid-cols-2">
                 {successHrefWithReceipt && (
-                  <a href={successHrefWithReceipt} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
+                  <a href={successHrefWithReceipt} onClick={() => recordPostSupportAction("ebook_access")} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
                     {successActionLabel}
                   </a>
                 )}
                 {successWhatsappHref && (
-                  <a href={successWhatsappHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 text-sm font-black text-white">
+                  <a href={successWhatsappHref} onClick={() => recordPostSupportAction("whatsapp_delivery")} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 text-sm font-black text-white">
                     <MessageCircle className="h-4 w-4" /> Receber no WhatsApp
                   </a>
                 )}
                 {successCommunityWhatsappUrl && (
-                  <a href={successCommunityWhatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-black text-emerald-800">
+                  <a href={successCommunityWhatsappUrl} onClick={() => recordPostSupportAction("whatsapp_community")} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-black text-emerald-800">
                     <Users className="h-4 w-4" /> Comunidade WhatsApp
                   </a>
                 )}
                 {successFacebookGroupUrl && (
-                  <a href={successFacebookGroupUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-black text-blue-800">
+                  <a href={successFacebookGroupUrl} onClick={() => recordPostSupportAction("facebook_group")} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-black text-blue-800">
                     <Facebook className="h-4 w-4" /> Grupo Facebook
                   </a>
                 )}
