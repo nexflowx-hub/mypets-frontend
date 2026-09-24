@@ -53,6 +53,12 @@ type Props = {
   campaignTitle?: string;
   campaignDescription?: string;
   campaignClassName?: string;
+  amountPresetsCents?: number[];
+  lockedAmountCents?: number;
+  trackingCampaignOverride?: string;
+  trackingContentOverride?: string;
+  successActionHref?: string;
+  successActionLabel?: string;
   successShareText?: string;
   successShareUrl?: string;
 };
@@ -148,15 +154,26 @@ export function CauseCheckout({
   campaignTitle = "Escolha quanto quer colocar em movimento hoje",
   campaignDescription = "O valor escolhido abre o pagamento seguro já preparado para esta contribuição.",
   campaignClassName,
+  amountPresetsCents,
+  lockedAmountCents,
+  trackingCampaignOverride,
+  trackingContentOverride,
+  successActionHref,
+  successActionLabel = "Aceder ao conteúdo",
   successShareText = "Eu apoiei o MyPets. Se esta causa também fizer sentido para você, conheça e compartilhe.",
   successShareUrl,
 }: Props) {
   const router = useRouter();
   const brazilPixOnly = currency === "BRL";
-  const presets = React.useMemo(() => amountOptions(currency), [currency]);
-  const initialAmount = defaultAmountCents && defaultAmountCents >= 100 && defaultAmountCents <= 5_000_000
-    ? defaultAmountCents
-    : presets[1];
+  const presets = React.useMemo(
+    () => amountPresetsCents?.length ? amountPresetsCents : amountOptions(currency),
+    [amountPresetsCents, currency],
+  );
+  const initialAmount = lockedAmountCents && lockedAmountCents >= 100 && lockedAmountCents <= 5_000_000
+    ? lockedAmountCents
+    : defaultAmountCents && defaultAmountCents >= 100 && defaultAmountCents <= 5_000_000
+      ? defaultAmountCents
+      : presets[1] ?? presets[0] ?? 100;
   const [open, setOpen] = React.useState(false);
   const [amountCents, setAmountCents] = React.useState(initialAmount);
   const [customAmount, setCustomAmount] = React.useState("");
@@ -178,9 +195,11 @@ export function CauseCheckout({
   const [copiedAction, setCopiedAction] = React.useState(false);
   const idempotencyKeys = React.useRef<Record<string, string>>({});
 
-  const effectiveAmount = customAmount.trim()
-    ? Math.round((Number(customAmount.replace(",", ".")) || 0) * 100)
-    : amountCents;
+  const effectiveAmount = lockedAmountCents
+    ? lockedAmountCents
+    : customAmount.trim()
+      ? Math.round((Number(customAmount.replace(",", ".")) || 0) * 100)
+      : amountCents;
   const nativeMethods = React.useMemo(() => preferredNativeMethods(currency, marketCountry), [currency, marketCountry]);
 
   React.useEffect(() => {
@@ -311,8 +330,8 @@ export function CauseCheckout({
     return {
       source: params.get("utm_source"),
       medium: params.get("utm_medium"),
-      campaign: params.get("utm_campaign"),
-      content: params.get("utm_content"),
+      campaign: trackingCampaignOverride ?? params.get("utm_campaign"),
+      content: trackingContentOverride ?? params.get("utm_content"),
       refCode: params.get("ref"),
       landingPath: typeof window === "undefined" ? null : (window.location.pathname + window.location.search).slice(0, 500),
     };
@@ -531,48 +550,57 @@ export function CauseCheckout({
           <p className="text-[10px] font-black uppercase tracking-[0.17em] text-emerald-700">{campaignEyebrow}</p>
           <h2 className="mt-2 text-xl font-black tracking-tight text-petrol sm:text-2xl">{campaignTitle}</h2>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">{campaignDescription}</p>
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {presets.map((cents) => (
-              <button
-                key={cents}
-                type="button"
-                onClick={() => { setAmountCents(cents); setCustomAmount(""); setCampaignCustomOpen(false); setError(null); }}
-                className={cn(
-                  "min-h-11 rounded-xl border px-2 text-xs font-black transition sm:text-sm",
-                  !campaignCustomOpen && !customAmount && amountCents === cents
-                    ? "border-petrol bg-petrol text-white shadow-sm"
-                    : "border-border bg-[#f7fafb] text-petrol hover:border-petrol/35",
-                )}
-              >
-                {money(cents, currency)}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => { setCampaignCustomOpen(true); setError(null); }}
-              className={cn(
-                "min-h-11 rounded-xl border px-2 text-xs font-black transition sm:text-sm",
-                campaignCustomOpen
-                  ? "border-petrol bg-petrol text-white shadow-sm"
-                  : "border-border bg-[#f7fafb] text-petrol hover:border-petrol/35",
-              )}
-            >
-              Outro
-            </button>
-          </div>
-          {campaignCustomOpen && (
-            <div className="mt-2">
-              <Input
-                autoFocus
-                inputMode="decimal"
-                value={customAmount}
-                onChange={(event) => { setCustomAmount(event.target.value); setError(null); }}
-                placeholder={`Outro valor em ${currency}`}
-                aria-label={`Outro valor em ${currency}`}
-                className="h-11 bg-[#f7fafb]"
-              />
-              <p className="mt-1.5 text-[10px] leading-4 text-muted-foreground">Mínimo {money(100, currency)} · máximo {money(5_000_000, currency)}.</p>
+          {lockedAmountCents ? (
+            <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">Participação definida</p>
+              <p className="mt-1 text-3xl font-black text-emerald-950">{money(lockedAmountCents, currency)}</p>
             </div>
+          ) : (
+            <>
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {presets.map((cents) => (
+                  <button
+                    key={cents}
+                    type="button"
+                    onClick={() => { setAmountCents(cents); setCustomAmount(""); setCampaignCustomOpen(false); setError(null); }}
+                    className={cn(
+                      "min-h-11 rounded-xl border px-2 text-xs font-black transition sm:text-sm",
+                      !campaignCustomOpen && !customAmount && amountCents === cents
+                        ? "border-petrol bg-petrol text-white shadow-sm"
+                        : "border-border bg-[#f7fafb] text-petrol hover:border-petrol/35",
+                    )}
+                  >
+                    {money(cents, currency)}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => { setCampaignCustomOpen(true); setError(null); }}
+                  className={cn(
+                    "min-h-11 rounded-xl border px-2 text-xs font-black transition sm:text-sm",
+                    campaignCustomOpen
+                      ? "border-petrol bg-petrol text-white shadow-sm"
+                      : "border-border bg-[#f7fafb] text-petrol hover:border-petrol/35",
+                  )}
+                >
+                  Outro
+                </button>
+              </div>
+              {campaignCustomOpen && (
+                <div className="mt-2">
+                  <Input
+                    autoFocus
+                    inputMode="decimal"
+                    value={customAmount}
+                    onChange={(event) => { setCustomAmount(event.target.value); setError(null); }}
+                    placeholder={`Outro valor em ${currency}`}
+                    aria-label={`Outro valor em ${currency}`}
+                    className="h-11 bg-[#f7fafb]"
+                  />
+                  <p className="mt-1.5 text-[10px] leading-4 text-muted-foreground">Mínimo {money(100, currency)} · máximo {money(5_000_000, currency)}.</p>
+                </div>
+              )}
+            </>
           )}
           <button
             type="button"
@@ -624,22 +652,31 @@ export function CauseCheckout({
               <div className="max-h-[78svh] space-y-5 overflow-y-auto p-6">
                 <div>
                   <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Valor do apoio</p>
-                  <div className="mt-3 grid grid-cols-4 gap-2">
-                    {presets.map((cents) => (
-                      <button
-                        key={cents}
-                        type="button"
-                        onClick={() => { setAmountCents(cents); setCustomAmount(""); }}
-                        className={cn(
-                          "rounded-xl border px-2 py-3 text-sm font-extrabold transition",
-                          !customAmount && amountCents === cents ? "border-coral bg-coral/5 text-coral" : "border-border text-petrol hover:border-coral/40",
-                        )}
-                      >
-                        {money(cents, currency)}
-                      </button>
-                    ))}
-                  </div>
-                  <Input className="mt-3" inputMode="decimal" value={customAmount} onChange={(event) => setCustomAmount(event.target.value)} placeholder={`Outro valor (${currency})`} aria-label={`Outro valor em ${currency}`} />
+                  {lockedAmountCents ? (
+                    <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4 text-center">
+                      <p className="text-3xl font-black text-emerald-950">{money(lockedAmountCents, currency)}</p>
+                      <p className="mt-1 text-[11px] font-semibold text-emerald-900/65">Valor definido pela participação selecionada.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mt-3 grid grid-cols-4 gap-2">
+                        {presets.map((cents) => (
+                          <button
+                            key={cents}
+                            type="button"
+                            onClick={() => { setAmountCents(cents); setCustomAmount(""); }}
+                            className={cn(
+                              "rounded-xl border px-2 py-3 text-sm font-extrabold transition",
+                              !customAmount && amountCents === cents ? "border-coral bg-coral/5 text-coral" : "border-border text-petrol hover:border-coral/40",
+                            )}
+                          >
+                            {money(cents, currency)}
+                          </button>
+                        ))}
+                      </div>
+                      <Input className="mt-3" inputMode="decimal" value={customAmount} onChange={(event) => setCustomAmount(event.target.value)} placeholder={`Outro valor (${currency})`} aria-label={`Outro valor em ${currency}`} />
+                    </>
+                  )}
                 </div>
 
                 <div>
@@ -742,7 +779,12 @@ export function CauseCheckout({
               <h2 className="mt-5 text-2xl font-extrabold text-petrol">Apoio confirmado. Obrigado!</h2>
               <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">O pagamento foi confirmado pelo servidor. Obrigado por apoiar {causeTitle}.</p>
               <p className="mt-2 text-xs font-semibold text-emerald-700">O apoio está confirmado. Se quiser ampliar o alcance, partilhe a campanha com alguém que também se importa.</p>
-              <div className="mt-6 grid w-full max-w-sm gap-2 sm:grid-cols-2">
+              <div className={cn("mt-6 grid w-full max-w-md gap-2", successActionHref ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+                {successActionHref && (
+                  <a href={successActionHref} className="inline-flex min-h-10 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
+                    {successActionLabel}
+                  </a>
+                )}
                 <Button onClick={() => void shareConfirmedSupport()} className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
                   <Heart className="mr-2 h-4 w-4 fill-white" /> Partilhar
                 </Button>
