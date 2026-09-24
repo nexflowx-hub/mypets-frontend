@@ -225,9 +225,9 @@ export function CauseCheckout({
     const timer = window.setTimeout(() => {
       setOpen(false);
       resetCheckout();
-    }, 4200);
+    }, presentation === "campaign" ? 20000 : 7000);
     return () => window.clearTimeout(timer);
-  }, [open, paid, resetCheckout]);
+  }, [open, paid, presentation, resetCheckout]);
 
   const applyStatus = React.useCallback((status: string | undefined) => {
     if (status === "SUCCEEDED") {
