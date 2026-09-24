@@ -122,8 +122,9 @@ export function CommunityCauseIntake({ initialType = "OTHER" }: { initialType?: 
           <div className="rounded-2xl bg-sand p-4"><p className="text-xs font-black uppercase text-petrol/45">Promoção</p><p className="mt-1 font-black text-petrol">Na fila editorial</p></div>
         </div>
 
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-7 grid gap-3 sm:grid-cols-3">
           <a href={result.publicUrl} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-petrol px-5 text-sm font-black text-white hover:bg-petrol/90">Ver causa publicada <ExternalLink className="h-4 w-4" /></a>
+          <a href={`/preciso-de-apoio/status/${result.id}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-cream px-5 text-sm font-black text-petrol hover:border-coral/40">Acompanhar estado</a>
           <a href={result.verificationWhatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#20b65a] px-5 text-sm font-black text-white hover:bg-[#19994b]"><MessageCircle className="h-4 w-4" /> Solicitar selo e captação</a>
         </div>
 

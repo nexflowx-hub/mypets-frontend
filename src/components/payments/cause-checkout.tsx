@@ -6,12 +6,15 @@ import {
   Copy,
   CreditCard,
   ExternalLink,
+  Facebook,
   Heart,
   Landmark,
   Loader2,
   LockKeyhole,
+  MessageCircle,
   ShieldCheck,
   Smartphone,
+  Users,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -22,6 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { apiUrl } from "@/lib/api";
 import { getValidSession } from "@/lib/auth-client";
+import { recordGrowthEvent } from "@/lib/growth";
 import { cn } from "@/lib/utils";
 
 type NativePaymentMethod = "pix" | "mb_way" | "multibanco" | "bizum";
@@ -46,6 +50,28 @@ type Props = {
   causeTitle: string;
   currency: "EUR" | "BRL";
   enabled: boolean;
+  presentation?: "button" | "campaign";
+  defaultAmountCents?: number;
+  campaignEyebrow?: string;
+  campaignTitle?: string;
+  campaignDescription?: string;
+  campaignClassName?: string;
+  amountPresetsCents?: number[];
+  lockedAmountCents?: number;
+  trackingCampaignOverride?: string;
+  trackingContentOverride?: string;
+  rewardKeys?: string[];
+  successActionHref?: string;
+  successActionLabel?: string;
+  requireEmail?: boolean;
+  successHeadline?: string;
+  successDescription?: string;
+  successWhatsappUrl?: string;
+  successCommunityWhatsappUrl?: string;
+  successFacebookGroupUrl?: string;
+  successShareText?: string;
+  successShareUrl?: string;
+  successShareCampaign?: string;
 };
 
 const methodLabel: Record<PaymentChoice, string> = {
@@ -99,6 +125,17 @@ function validCpf(value: string) {
   return digit(9) === numbers[9] && digit(10) === numbers[10];
 }
 
+function whatsappMessageUrl(baseUrl: string | undefined, text: string) {
+  if (!baseUrl) return null;
+  try {
+    const url = new URL(baseUrl);
+    url.searchParams.set("text", text);
+    return url.toString();
+  } catch {
+    return baseUrl;
+  }
+}
+
 function actionValue(action: NativeAction | null | undefined, ...keys: string[]) {
   for (const key of keys) {
     const value = action?.[key];
@@ -128,13 +165,49 @@ function methodIcon(method: PaymentChoice) {
   return <CreditCard className="h-4 w-4" />;
 }
 
-export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props) {
+export function CauseCheckout({
+  causeId,
+  causeTitle,
+  currency,
+  enabled,
+  presentation = "button",
+  defaultAmountCents,
+  campaignEyebrow = "Faça parte desta causa",
+  campaignTitle = "Escolha quanto quer colocar em movimento hoje",
+  campaignDescription = "O valor escolhido abre o pagamento seguro já preparado para esta contribuição.",
+  campaignClassName,
+  amountPresetsCents,
+  lockedAmountCents,
+  trackingCampaignOverride,
+  trackingContentOverride,
+  rewardKeys,
+  successActionHref,
+  successActionLabel = "Aceder ao conteúdo",
+  requireEmail = false,
+  successHeadline = "Apoio confirmado. Obrigado!",
+  successDescription,
+  successWhatsappUrl,
+  successCommunityWhatsappUrl,
+  successFacebookGroupUrl,
+  successShareText = "Eu apoiei o MyPets. Se esta causa também fizer sentido para você, conheça e compartilhe.",
+  successShareUrl,
+  successShareCampaign,
+}: Props) {
   const router = useRouter();
   const brazilPixOnly = currency === "BRL";
-  const presets = React.useMemo(() => amountOptions(currency), [currency]);
+  const presets = React.useMemo(
+    () => amountPresetsCents?.length ? amountPresetsCents : amountOptions(currency),
+    [amountPresetsCents, currency],
+  );
+  const initialAmount = lockedAmountCents && lockedAmountCents >= 100 && lockedAmountCents <= 5_000_000
+    ? lockedAmountCents
+    : defaultAmountCents && defaultAmountCents >= 100 && defaultAmountCents <= 5_000_000
+      ? defaultAmountCents
+      : presets[1] ?? presets[0] ?? 100;
   const [open, setOpen] = React.useState(false);
-  const [amountCents, setAmountCents] = React.useState(presets[1]);
+  const [amountCents, setAmountCents] = React.useState(initialAmount);
   const [customAmount, setCustomAmount] = React.useState("");
+  const [campaignCustomOpen, setCampaignCustomOpen] = React.useState(false);
   const [donorName, setDonorName] = React.useState("");
   const [donorEmail, setDonorEmail] = React.useState("");
   const [donorPhone, setDonorPhone] = React.useState("");
@@ -152,9 +225,11 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   const [copiedAction, setCopiedAction] = React.useState(false);
   const idempotencyKeys = React.useRef<Record<string, string>>({});
 
-  const effectiveAmount = customAmount.trim()
-    ? Math.round((Number(customAmount.replace(",", ".")) || 0) * 100)
-    : amountCents;
+  const effectiveAmount = lockedAmountCents
+    ? lockedAmountCents
+    : customAmount.trim()
+      ? Math.round((Number(customAmount.replace(",", ".")) || 0) * 100)
+      : amountCents;
   const nativeMethods = React.useMemo(() => preferredNativeMethods(currency, marketCountry), [currency, marketCountry]);
 
   React.useEffect(() => {
@@ -196,13 +271,20 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   }, [intent?.sessionId]);
 
   React.useEffect(() => {
-    if (!paid || !open) return;
+    idempotencyKeys.current = {};
+    setIntent(null);
+    setError(null);
+    setPaid(false);
+  }, [lockedAmountCents, rewardKeys?.join("|")]);
+
+  React.useEffect(() => {
+    if (!paid || !open || presentation === "campaign") return;
     const timer = window.setTimeout(() => {
       setOpen(false);
       resetCheckout();
-    }, 4200);
+    }, 7000);
     return () => window.clearTimeout(timer);
-  }, [open, paid, resetCheckout]);
+  }, [open, paid, presentation, resetCheckout]);
 
   const applyStatus = React.useCallback((status: string | undefined) => {
     if (status === "SUCCEEDED") {
@@ -239,7 +321,9 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
       await new Promise((resolve) => window.setTimeout(resolve, 1800));
     }
     setVerifying(false);
-    setError("O pagamento ainda está a ser confirmado. Pode fechar esta janela; a confirmação continuará no sistema.");
+    setError(brazilPixOnly
+      ? "O pagamento ainda está sendo confirmado. Você pode fechar esta janela; a confirmação continuará no sistema."
+      : "O pagamento ainda está a ser confirmado. Pode fechar esta janela; a confirmação continuará no sistema.");
   }, [applyStatus, fetchPaymentStatus]);
 
   React.useEffect(() => {
@@ -285,10 +369,149 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
     return {
       source: params.get("utm_source"),
       medium: params.get("utm_medium"),
-      campaign: params.get("utm_campaign"),
-      content: params.get("utm_content"),
+      campaign: trackingCampaignOverride ?? params.get("utm_campaign"),
+      content: trackingContentOverride ?? params.get("utm_content"),
+      term: params.get("utm_term"),
+      utmId: params.get("utm_id"),
+      sourcePlatform: params.get("utm_source_platform"),
+      gclid: params.get("gclid"),
+      gbraid: params.get("gbraid"),
+      wbraid: params.get("wbraid"),
+      fbclid: params.get("fbclid"),
+      msclkid: params.get("msclkid"),
+      ttclid: params.get("ttclid"),
       refCode: params.get("ref"),
+      landingPath: typeof window === "undefined" ? null : (window.location.pathname + window.location.search).slice(0, 500),
     };
+  }
+
+  function openCheckout() {
+    const attribution = tracking();
+    if (typeof window !== "undefined") {
+      void recordGrowthEvent({
+        eventName: "SUPPORT_STARTED",
+        source: attribution.source,
+        medium: attribution.medium,
+        campaign: attribution.campaign,
+        content: attribution.content,
+        landingPath: `${window.location.pathname}${window.location.search}`.slice(0, 500),
+        metadata: {
+          causeId,
+          causeTitle,
+          currency,
+          presentation,
+          amountCents: effectiveAmount,
+          rewardCount: rewardKeys?.length ?? 0,
+          rewardKeys: rewardKeys ?? [],
+          term: attribution.term,
+          utmId: attribution.utmId,
+          sourcePlatform: attribution.sourcePlatform,
+          gclid: attribution.gclid,
+          gbraid: attribution.gbraid,
+          wbraid: attribution.wbraid,
+          fbclid: attribution.fbclid,
+          msclkid: attribution.msclkid,
+          ttclid: attribution.ttclid,
+        },
+      });
+    }
+    setOpen(true);
+  }
+
+  function recordPostSupportAction(action: "ebook_access" | "whatsapp_delivery" | "whatsapp_community" | "facebook_group") {
+    const attribution = tracking();
+    void recordGrowthEvent({
+      eventName: "SHARE_CLICK",
+      source: attribution.source,
+      medium: attribution.medium,
+      campaign: attribution.campaign,
+      content: attribution.content,
+      landingPath: typeof window === "undefined" ? null : `${window.location.pathname}${window.location.search}`.slice(0, 500),
+      metadata: {
+        causeId,
+        causeTitle,
+        currency,
+        paymentIntentId: intent?.id ?? null,
+        surface: "post_support",
+        action,
+      },
+    });
+  }
+
+  async function shareConfirmedSupport() {
+    if (typeof window === "undefined") return;
+    const attribution = tracking();
+    const campaignName = successShareCampaign
+      ?? ((successShareUrl || window.location.pathname).includes("petskids")
+        ? "petskids_story"
+        : (successShareUrl || window.location.pathname).includes("/ajudar/ebooks")
+          ? "ebook_racao"
+          : "mypets_support");
+    const destinationPath = successShareUrl || window.location.pathname;
+    const targetUrl = new URL(destinationPath, window.location.origin);
+    if (!targetUrl.searchParams.has("utm_source")) targetUrl.searchParams.set("utm_source", "share");
+    if (!targetUrl.searchParams.has("utm_medium")) targetUrl.searchParams.set("utm_medium", "referral");
+    if (!targetUrl.searchParams.has("utm_campaign")) targetUrl.searchParams.set("utm_campaign", campaignName);
+    targetUrl.searchParams.set("utm_content", "post_donation");
+
+    let target = targetUrl.toString();
+    let personalized = false;
+    const session = await getValidSession().catch(() => null);
+    if (session?.access_token) {
+      try {
+        const response = await fetch(apiUrl("/growth/share-links"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            destinationPath,
+            source: "mypets",
+            medium: "share",
+            campaign: campaignName,
+            content: "post_donation",
+          }),
+        });
+        const body = (await response.json().catch(() => ({}))) as { data?: { path?: string } };
+        if (response.ok && body.data?.path) {
+          target = new URL(body.data.path, window.location.origin).toString();
+          personalized = true;
+        }
+      } catch {
+        // Referral creation must never block sharing.
+      }
+    }
+
+    const text = `${successShareText}\n\n${target}`;
+
+    void recordGrowthEvent({
+      eventName: "SHARE_CLICK",
+      source: attribution.source,
+      medium: attribution.medium,
+      campaign: attribution.campaign,
+      content: attribution.content,
+      landingPath: `${window.location.pathname}${window.location.search}`.slice(0, 500),
+      metadata: {
+        causeId,
+        causeTitle,
+        currency,
+        shareTarget: target,
+        personalized,
+        surface: "post_donation",
+      },
+    });
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "MyPets", text: successShareText, url: target });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
 
   function validateCommon(requireName = false, requireEmail = false) {
@@ -297,15 +520,15 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
       return false;
     }
     if (!validEmail(donorEmail)) {
-      setError("Introduza um email válido ou deixe o campo vazio.");
+      setError(brazilPixOnly ? "Informe um email válido ou deixe o campo vazio." : "Introduza um email válido ou deixe o campo vazio.");
       return false;
     }
     if (requireName && !donorName.trim()) {
-      setError("Indique o nome do titular pagador para continuar.");
+      setError(brazilPixOnly ? "Informe o nome do titular pagador para continuar." : "Indique o nome do titular pagador para continuar.");
       return false;
     }
     if (requireEmail && !donorEmail.trim()) {
-      setError("Indique um email válido para este meio de pagamento.");
+      setError(brazilPixOnly ? "Informe um email válido para continuar." : "Indique um email válido para este meio de pagamento.");
       return false;
     }
     return true;
@@ -333,7 +556,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
       setError("No Brasil, os apoios em reais são processados por Pix.");
       return;
     }
-    if (!enabled || !validateCommon()) return;
+    if (!enabled || !validateCommon(false, requireEmail)) return;
     setBusy(true);
     setError(null);
     try {
@@ -343,6 +566,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
         frequency: "ONE_TIME",
         donorName: donorName.trim() || null,
         donorEmail: donorEmail.trim() || null,
+        rewardKeys,
         ...tracking(),
       });
       if (!data.embedUrl) throw new Error("Não foi possível abrir o checkout seguro.");
@@ -355,7 +579,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
   }
 
   async function startNative(method: NativePaymentMethod) {
-    const requiresEmail = method !== "pix";
+    const requiresEmail = method !== "pix" || requireEmail;
     if (!enabled || !validateCommon(true, requiresEmail)) return;
     if (method === "pix") {
       if (!validCpf(donorDocument)) {
@@ -383,6 +607,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
         donorEmail: donorEmail.trim() || null,
         donorPhone: donorPhone.trim() || null,
         donorDocument: method === "pix" ? cpfDigits(donorDocument) : donorDocument.trim() || null,
+        rewardKeys,
         ...tracking(),
       });
       setIntent(data);
@@ -403,16 +628,98 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
 
   const triggerLabel = paid ? "Apoio confirmado" : intent ? "Retomar apoio" : "Apoiar agora";
   const hasEmbeddedCheckout = Boolean(intent?.embedUrl);
+  const successHrefWithReceipt = successActionHref && intent?.id
+    ? `${successActionHref}${successActionHref.includes("?") ? "&" : "?"}receipt=${encodeURIComponent(intent.id)}`
+    : successActionHref;
+  const successWhatsappHref = intent?.id
+    ? whatsappMessageUrl(
+        successWhatsappUrl,
+        `Olá! Participei da campanha MyPets 1 eBook = 1 kg e o pagamento já foi confirmado. Meu recibo MyPets é ${intent.id}. Quero receber meus eBooks pelo WhatsApp.`,
+      )
+    : null;
   const nativeMethod = intent?.paymentMethod && intent.paymentMethod !== "checkout" ? intent.paymentMethod as NativePaymentMethod : null;
 
   return (
     <>
-      <PremiumSupportButton
-        onClick={() => setOpen(true)}
-        label={triggerLabel}
-        detail={brazilPixOnly ? "Pix no Brasil" : "pagamento seguro"}
-        className="min-w-[162px]"
-      />
+      {presentation === "campaign" ? (
+        <div className={cn("rounded-[1.75rem] border border-white/10 bg-white p-5 text-petrol shadow-2xl shadow-black/15 sm:p-6", campaignClassName)}>
+          <p className="text-[10px] font-black uppercase tracking-[0.17em] text-emerald-700">{campaignEyebrow}</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-petrol sm:text-2xl">{campaignTitle}</h2>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">{campaignDescription}</p>
+          {lockedAmountCents ? (
+            <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">Participação definida</p>
+              <p className="mt-1 text-3xl font-black text-emerald-950">{money(lockedAmountCents, currency)}</p>
+            </div>
+          ) : (
+            <>
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {presets.map((cents) => (
+                  <button
+                    key={cents}
+                    type="button"
+                    onClick={() => { setAmountCents(cents); setCustomAmount(""); setCampaignCustomOpen(false); setError(null); }}
+                    className={cn(
+                      "min-h-11 rounded-xl border px-2 text-xs font-black transition sm:text-sm",
+                      !campaignCustomOpen && !customAmount && amountCents === cents
+                        ? "border-petrol bg-petrol text-white shadow-sm"
+                        : "border-border bg-[#f7fafb] text-petrol hover:border-petrol/35",
+                    )}
+                  >
+                    {money(cents, currency)}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => { setCampaignCustomOpen(true); setError(null); }}
+                  className={cn(
+                    "min-h-11 rounded-xl border px-2 text-xs font-black transition sm:text-sm",
+                    campaignCustomOpen
+                      ? "border-petrol bg-petrol text-white shadow-sm"
+                      : "border-border bg-[#f7fafb] text-petrol hover:border-petrol/35",
+                  )}
+                >
+                  Outro
+                </button>
+              </div>
+              {campaignCustomOpen && (
+                <div className="mt-2">
+                  <Input
+                    autoFocus
+                    inputMode="decimal"
+                    value={customAmount}
+                    onChange={(event) => { setCustomAmount(event.target.value); setError(null); }}
+                    placeholder={`Outro valor em ${currency}`}
+                    aria-label={`Outro valor em ${currency}`}
+                    className="h-11 bg-[#f7fafb]"
+                  />
+                  <p className="mt-1.5 text-[10px] leading-4 text-muted-foreground">Mínimo {money(100, currency)} · máximo {money(5_000_000, currency)}.</p>
+                </div>
+              )}
+            </>
+          )}
+          <button
+            type="button"
+            onClick={openCheckout}
+            className="mt-4 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-[0_16px_32px_-18px_rgba(16,185,129,.85)] transition hover:-translate-y-0.5 hover:bg-emerald-600"
+          >
+            <Heart className="h-5 w-5" />
+            {intent ? "Retomar apoio" : `Quero ajudar agora · ${money(effectiveAmount, currency)}`}
+          </button>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-semibold text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5"><LockKeyhole className="h-3.5 w-3.5 text-emerald-700" /> Pagamento seguro</span>
+            {brazilPixOnly && <span className="inline-flex items-center gap-1.5"><PixBrand className="h-3.5 w-auto" /> Pix no Brasil</span>}
+            <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-700" /> Confirmação pelo servidor</span>
+          </div>
+        </div>
+      ) : (
+        <PremiumSupportButton
+          onClick={openCheckout}
+          label={triggerLabel}
+          detail={brazilPixOnly ? "Pix no Brasil" : "pagamento seguro"}
+          className="min-w-[162px]"
+        />
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
@@ -441,22 +748,31 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
               <div className="max-h-[78svh] space-y-5 overflow-y-auto p-6">
                 <div>
                   <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Valor do apoio</p>
-                  <div className="mt-3 grid grid-cols-4 gap-2">
-                    {presets.map((cents) => (
-                      <button
-                        key={cents}
-                        type="button"
-                        onClick={() => { setAmountCents(cents); setCustomAmount(""); }}
-                        className={cn(
-                          "rounded-xl border px-2 py-3 text-sm font-extrabold transition",
-                          !customAmount && amountCents === cents ? "border-coral bg-coral/5 text-coral" : "border-border text-petrol hover:border-coral/40",
-                        )}
-                      >
-                        {money(cents, currency)}
-                      </button>
-                    ))}
-                  </div>
-                  <Input className="mt-3" inputMode="decimal" value={customAmount} onChange={(event) => setCustomAmount(event.target.value)} placeholder={`Outro valor (${currency})`} aria-label={`Outro valor em ${currency}`} />
+                  {lockedAmountCents ? (
+                    <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4 text-center">
+                      <p className="text-3xl font-black text-emerald-950">{money(lockedAmountCents, currency)}</p>
+                      <p className="mt-1 text-[11px] font-semibold text-emerald-900/65">Valor definido pela participação selecionada.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mt-3 grid grid-cols-4 gap-2">
+                        {presets.map((cents) => (
+                          <button
+                            key={cents}
+                            type="button"
+                            onClick={() => { setAmountCents(cents); setCustomAmount(""); }}
+                            className={cn(
+                              "rounded-xl border px-2 py-3 text-sm font-extrabold transition",
+                              !customAmount && amountCents === cents ? "border-coral bg-coral/5 text-coral" : "border-border text-petrol hover:border-coral/40",
+                            )}
+                          >
+                            {money(cents, currency)}
+                          </button>
+                        ))}
+                      </div>
+                      <Input className="mt-3" inputMode="decimal" value={customAmount} onChange={(event) => setCustomAmount(event.target.value)} placeholder={`Outro valor (${currency})`} aria-label={`Outro valor em ${currency}`} />
+                    </>
+                  )}
                 </div>
 
                 <div>
@@ -487,7 +803,7 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
                     </div>
                   )}
                   {brazilPixOnly ? (
-                    <p className="mt-2 text-[11px] leading-5 text-muted-foreground">O Pix é criado via integração S2S com a XPAYMENTS e apresentado diretamente no MyPets. O pagamento só é considerado concluído após confirmação financeira.</p>
+                    <p className="mt-2 text-[11px] leading-5 text-muted-foreground">O Pix é gerado com segurança dentro do fluxo MyPets. O apoio só é considerado concluído após a confirmação financeira do pagamento.</p>
                   ) : marketCountry ? (
                     <p className="mt-2 text-[11px] text-muted-foreground">Meios priorizados para {marketCountry}; a disponibilidade final é validada pela Store XPAYMENTS.</p>
                   ) : null}
@@ -495,8 +811,11 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
-                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
+                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para receber os eBooks" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
                 </div>
+                {brazilPixOnly && successWhatsappUrl && !requireEmail && (
+                  <p className="-mt-1 text-[10px] leading-4 text-muted-foreground">Email opcional. Depois da confirmação, você pode abrir os eBooks imediatamente ou pedir o envio pelo WhatsApp.</p>
+                )}
 
                 {(choice === "mb_way" || choice === "bizum") && !brazilPixOnly && (
                   <Input value={donorPhone} onChange={(event) => setDonorPhone(event.target.value)} inputMode="tel" placeholder={choice === "mb_way" ? "Telemóvel +351" : "Móvel +34"} maxLength={40} />
@@ -549,17 +868,42 @@ export function CauseCheckout({ causeId, causeTitle, currency, enabled }: Props)
 
                 <div className="flex items-start gap-2 rounded-xl bg-sand/60 px-3 py-3 text-[11px] leading-relaxed text-muted-foreground">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  <span>{brazilPixOnly ? "O MyPets não considera a geração do QR Code como pagamento concluído. A confirmação depende do estado financeiro recebido da XPAYMENTS." : "Pagamento orquestrado pela XPAYMENTS. Métodos locais usam API S2S; cartão e wallets permanecem em superfície segura do provedor. Criar um pagamento nunca é tratado como confirmação."}</span>
+                  <span>{brazilPixOnly ? "Gerar o QR Code não conta como pagamento. O MyPets só confirma o apoio depois de receber a confirmação financeira do Pix." : "Pagamento orquestrado pela XPAYMENTS. Métodos locais usam API S2S; cartão e wallets permanecem em superfície segura do provedor. Criar um pagamento nunca é tratado como confirmação."}</span>
                 </div>
               </div>
             </div>
           ) : paid ? (
             <div className="flex min-h-[420px] flex-col items-center justify-center px-8 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50"><Heart className="h-8 w-8 fill-emerald-600 text-emerald-600" /></div>
-              <h2 className="mt-5 text-2xl font-extrabold text-petrol">Apoio confirmado. Obrigado!</h2>
-              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">O pagamento foi confirmado pelo servidor. Obrigado por apoiar {causeTitle}.</p>
-              <p className="mt-2 text-xs font-semibold text-emerald-700">Esta janela fecha automaticamente em alguns segundos.</p>
-              <Button onClick={() => { setOpen(false); resetCheckout(); }} className="mt-6 bg-petrol text-white hover:bg-petrol-light">Fechar agora</Button>
+              <h2 className="mt-5 text-2xl font-extrabold text-petrol">{successHeadline}</h2>
+              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{successDescription ?? `O pagamento foi confirmado pelo servidor. Obrigado por apoiar ${causeTitle}.`}</p>
+              <p className="mt-2 text-xs font-semibold text-emerald-700">Agora escolha como quer continuar: conteúdo, WhatsApp, comunidade ou partilha.</p>
+              <div className="mt-6 grid w-full max-w-lg gap-2 sm:grid-cols-2">
+                {successHrefWithReceipt && (
+                  <a href={successHrefWithReceipt} onClick={() => recordPostSupportAction("ebook_access")} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-petrol px-4 text-sm font-black text-white">
+                    {successActionLabel}
+                  </a>
+                )}
+                {successWhatsappHref && (
+                  <a href={successWhatsappHref} onClick={() => recordPostSupportAction("whatsapp_delivery")} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 text-sm font-black text-white">
+                    <MessageCircle className="h-4 w-4" /> Receber no WhatsApp
+                  </a>
+                )}
+                {successCommunityWhatsappUrl && (
+                  <a href={successCommunityWhatsappUrl} onClick={() => recordPostSupportAction("whatsapp_community")} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-black text-emerald-800">
+                    <Users className="h-4 w-4" /> Comunidade WhatsApp
+                  </a>
+                )}
+                {successFacebookGroupUrl && (
+                  <a href={successFacebookGroupUrl} onClick={() => recordPostSupportAction("facebook_group")} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-black text-blue-800">
+                    <Facebook className="h-4 w-4" /> Grupo Facebook
+                  </a>
+                )}
+                <Button onClick={() => void shareConfirmedSupport()} className="min-h-11 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+                  <Heart className="mr-2 h-4 w-4 fill-white" /> {brazilPixOnly ? "Compartilhar" : "Partilhar"}
+                </Button>
+                <Button onClick={() => { setOpen(false); resetCheckout(); }} variant="outline" className="min-h-11 rounded-xl border-border text-petrol">Fechar</Button>
+              </div>
             </div>
           ) : hasEmbeddedCheckout ? (
             <div className="flex h-full flex-col bg-cream">

@@ -24,9 +24,17 @@ jobs:
             "https://www.mypets.lat/sitemap.xml"
             "https://www.mypets.lat/manifest.webmanifest"
             "https://www.mypets.lat/apoiar"
+            "https://www.mypets.lat/ajudar"
+            "https://www.mypets.lat/ajudar/opengraph-image"
+            "https://www.mypets.lat/ajudar/petskids"
+            "https://www.mypets.lat/ajudar/petskids/opengraph-image"
+            "https://www.mypets.lat/ajudar/ebooks"
+            "https://www.mypets.lat/ajudar/ebooks/opengraph-image"
             "https://www.mypets.lat/apoiar/mypets"
             "https://www.mypets.lat/preciso-de-apoio"
             "https://www.mypets.lat/preciso-de-apoio/publicar"
+            "https://www.mypets.lat/projetos/apresentar"
+            "https://www.mypets.lat/projetos/petskids"
             "https://www.mypets.lat/projetos/vet-help/apoiar"
             "https://www.mypets.lat/projetos/rescue/apoiar"
             "https://www.mypets.lat/projetos/shelter/apoiar"
@@ -64,6 +72,8 @@ jobs:
           grep -Fq "Sitemap: https://mypets.lat/sitemap.xml" /tmp/robots.txt
           grep -Fq "https://mypets.lat/sobre" /tmp/sitemap.xml
           grep -Fq "https://mypets.lat/causas" /tmp/sitemap.xml
+          grep -Fq "https://mypets.lat/ajudar" /tmp/sitemap.xml
+          grep -Fq "https://mypets.lat/ajudar/petskids" /tmp/sitemap.xml
           grep -Fq "https://mypets.lat/preciso-de-apoio/publicar" /tmp/sitemap.xml
           echo "SEO discovery endpoints validated"
 
@@ -81,6 +91,15 @@ jobs:
           echo "paymentCurrencies=$(jq -c '.data.paymentCurrencies' /tmp/config.json)"
           echo "paymentWebhookCurrencies=$(jq -c '.data.paymentWebhookCurrencies' /tmp/config.json)"
 
+      - name: Prove cause intake DB round-trip in production
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS -X POST https://api.mypets.lat/v1/cause-intake/readiness | tee /tmp/intake-readiness.json
+          jq -e '.data.status == "ready" and .data.databaseRoundTrip == true and .data.rolledBack == true' /tmp/intake-readiness.json >/dev/null
+          jq -e '.data.checks | index("causes") and index("cause_intake_submissions") and index("cause_promotion_queue")' /tmp/intake-readiness.json >/dev/null
+          echo "Production cause intake database path validated"
+
       - name: Verify public cause intake form is rendered
         shell: bash
         run: |
@@ -89,8 +108,53 @@ jobs:
           grep -Fq "Nome do projeto / causa" /tmp/intake.html
           grep -Fq "Mensagem principal para o site MyPets" /tmp/intake.html
           grep -Fq "A sua história pode encontrar quem quer ajudar" /tmp/intake.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/projetos/apresentar -o /tmp/project-intake.html
+          grep -Fq "O seu projeto ajuda animais" /tmp/project-intake.html
+          grep -Fq "Projetos conduzidos por menores" /tmp/project-intake.html
           if grep -Fq "Sincronização final" /tmp/intake.html; then
             echo "Cause intake page unexpectedly rendered the rollout fallback" >&2
             exit 1
           fi
           echo "Public cause intake form is live"
+
+
+      - name: Verify high-conversion donation landing
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar?utm_source=github-actions&utm_medium=smoke&utm_campaign=help_campaign" -o /tmp/help.html
+          grep -Fq "Ajude o MyPets a" /tmp/help.html
+          grep -Fq "continuar vivo" /tmp/help.html
+          grep -Fq "PetsKids" /tmp/help.html
+          grep -Fq "Together We Feed" /tmp/help.html
+          grep -Fq "Transparência antes de promessa" /tmp/help.html
+          grep -Fq "Perguntas frequentes" /tmp/help.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/opengraph-image -o /tmp/help-og.png
+          test -s /tmp/help-og.png
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/petskids?utm_source=github-actions&utm_medium=smoke&utm_campaign=petskids" -o /tmp/petskids-help.html
+          grep -Fq "Duas crianças começaram com" /tmp/petskids-help.html
+          grep -Fq "O beneficiário financeiro desta página é o MyPets" /tmp/petskids-help.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/petskids/opengraph-image -o /tmp/petskids-og.png
+          test -s /tmp/petskids-og.png
+          echo "High-conversion donation landings and social previews validated"
+
+      - name: Verify ebook-to-feed funnel
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/ebooks?utm_source=github-actions&utm_medium=smoke&utm_campaign=ebook_racao" -o /tmp/ebooks.html
+          grep -Fq "1 eBook" /tmp/ebooks.html
+          grep -Fq "R$ 12,90" /tmp/ebooks.html
+          grep -Fq "1 kg de ração" /tmp/ebooks.html
+          grep -Fq "Cuidados Essenciais" /tmp/ebooks.html
+          grep -Fq "Treino Gentil" /tmp/ebooks.html
+          grep -Fq "Escolher meu eBook e garantir 1 kg" /tmp/ebooks.html
+          readiness="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS https://api.mypets.lat/v1/campaigns/ebook-racao/readiness)"
+          printf '%s' "$readiness" | grep -q '"technicalReady":true'
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/ebooks/opengraph-image -o /tmp/ebooks-og.png
+          test -s /tmp/ebooks-og.png
+          headers="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -sSI https://www.mypets.lat/ebooks/cuidados-essenciais)"
+          printf '%s' "$headers" | grep -Eqi '^location: .*/ajudar/ebooks\?access=required'
+          collection_headers="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -sSI "https://www.mypets.lat/ebooks/colecao?books=cuidados-essenciais,treino-gentil")"
+          printf '%s' "$collection_headers" | grep -Eqi '^location: .*/ajudar/ebooks\?access=required'
+          echo "Ebook-to-feed funnel and gated rewards validated"

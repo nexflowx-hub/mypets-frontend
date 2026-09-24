@@ -29,6 +29,9 @@ export type ImpactProject = {
   publicUrl?: string;
   media?: ImpactProjectMedia;
   ecosystem?: ImpactProjectEcosystem;
+  supportLabel?: string;
+  fundingNotice?: string;
+  fundingLabel?: string;
 };
 
 const TWF_SITE_PATH = "/go/together-we-feed";
@@ -63,6 +66,20 @@ export function impactProjects(): ImpactProject[] {
         ] : undefined,
         video: TWF_MEDIA ? { src: "https://hopeheaart.com/pt/media/videos/apresentacao.mp4", poster: `${TWF_MEDIA}/video-poster.webp`, title: "Apresentação Together We Feed" } : undefined,
       },
+    },
+    {
+      slug: "petskids",
+      title: "PetsKids",
+      shortTitle: "PetsKids",
+      category: "Alimentação comunitária",
+      summary: "Um projeto do Centro-Oeste do Brasil que transforma pequenas compras de ração em cuidado direto para cães em situação de rua.",
+      description: "PetsKids é uma iniciativa comunitária conduzida por duas crianças, com acompanhamento responsável, que compra ração em comércios do bairro e a distribui a cães em situação de rua. O MyPets está a integrar o projeto para dar visibilidade, organização, transparência e capacidade de apoio sem expor dados pessoais dos menores nem criar repasses diretos para crianças.",
+      status: "active",
+      image: "/images/card-alimentou.jpg",
+      funnelUrl: "/apoiar/mypets?utm_source=mypets&utm_medium=internal&utm_campaign=petskids_launch&utm_content=project_page",
+      supportLabel: "Apoiar o MyPets para viabilizar o PetsKids",
+      fundingLabel: "Apoio via MyPets",
+      fundingNotice: "Nesta fase, qualquer apoio financeiro é recebido pelo MyPets e aplicado de forma rastreável na operação e em iniciativas elegíveis como o PetsKids. Não existe repasse direto a menores.",
     },
     {
       slug: "vet-help",
