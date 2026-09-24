@@ -71,6 +71,7 @@ type Props = {
   successFacebookGroupUrl?: string;
   successShareText?: string;
   successShareUrl?: string;
+  successShareCampaign?: string;
 };
 
 const methodLabel: Record<PaymentChoice, string> = {
@@ -190,6 +191,7 @@ export function CauseCheckout({
   successFacebookGroupUrl,
   successShareText = "Eu apoiei o MyPets. Se esta causa também fizer sentido para você, conheça e compartilhe.",
   successShareUrl,
+  successShareCampaign,
 }: Props) {
   const router = useRouter();
   const brazilPixOnly = currency === "BRL";
@@ -367,6 +369,15 @@ export function CauseCheckout({
       medium: params.get("utm_medium"),
       campaign: trackingCampaignOverride ?? params.get("utm_campaign"),
       content: trackingContentOverride ?? params.get("utm_content"),
+      term: params.get("utm_term"),
+      utmId: params.get("utm_id"),
+      sourcePlatform: params.get("utm_source_platform"),
+      gclid: params.get("gclid"),
+      gbraid: params.get("gbraid"),
+      wbraid: params.get("wbraid"),
+      fbclid: params.get("fbclid"),
+      msclkid: params.get("msclkid"),
+      ttclid: params.get("ttclid"),
       refCode: params.get("ref"),
       landingPath: typeof window === "undefined" ? null : (window.location.pathname + window.location.search).slice(0, 500),
     };
@@ -387,6 +398,18 @@ export function CauseCheckout({
           causeTitle,
           currency,
           presentation,
+          amountCents: effectiveAmount,
+          rewardCount: rewardKeys?.length ?? 0,
+          rewardKeys: rewardKeys ?? [],
+          term: attribution.term,
+          utmId: attribution.utmId,
+          sourcePlatform: attribution.sourcePlatform,
+          gclid: attribution.gclid,
+          gbraid: attribution.gbraid,
+          wbraid: attribution.wbraid,
+          fbclid: attribution.fbclid,
+          msclkid: attribution.msclkid,
+          ttclid: attribution.ttclid,
         },
       });
     }
@@ -416,7 +439,12 @@ export function CauseCheckout({
   async function shareConfirmedSupport() {
     if (typeof window === "undefined") return;
     const attribution = tracking();
-    const campaignName = (successShareUrl || window.location.pathname).includes("petskids") ? "petskids_story" : "mypets_support";
+    const campaignName = successShareCampaign
+      ?? ((successShareUrl || window.location.pathname).includes("petskids")
+        ? "petskids_story"
+        : (successShareUrl || window.location.pathname).includes("/ajudar/ebooks")
+          ? "ebook_racao"
+          : "mypets_support");
     const destinationPath = successShareUrl || window.location.pathname;
     const targetUrl = new URL(destinationPath, window.location.origin);
     if (!targetUrl.searchParams.has("utm_source")) targetUrl.searchParams.set("utm_source", "share");
@@ -490,15 +518,15 @@ export function CauseCheckout({
       return false;
     }
     if (!validEmail(donorEmail)) {
-      setError("Introduza um email válido ou deixe o campo vazio.");
+      setError(brazilPixOnly ? "Informe um email válido ou deixe o campo vazio." : "Introduza um email válido ou deixe o campo vazio.");
       return false;
     }
     if (requireName && !donorName.trim()) {
-      setError("Indique o nome do titular pagador para continuar.");
+      setError(brazilPixOnly ? "Informe o nome do titular pagador para continuar." : "Indique o nome do titular pagador para continuar.");
       return false;
     }
     if (requireEmail && !donorEmail.trim()) {
-      setError("Indique um email válido para este meio de pagamento.");
+      setError(brazilPixOnly ? "Informe um email válido para continuar." : "Indique um email válido para este meio de pagamento.");
       return false;
     }
     return true;
@@ -773,7 +801,7 @@ export function CauseCheckout({
                     </div>
                   )}
                   {brazilPixOnly ? (
-                    <p className="mt-2 text-[11px] leading-5 text-muted-foreground">O Pix é criado via integração S2S com a XPAYMENTS e apresentado diretamente no MyPets. O pagamento só é considerado concluído após confirmação financeira.</p>
+                    <p className="mt-2 text-[11px] leading-5 text-muted-foreground">O Pix é gerado com segurança dentro do fluxo MyPets. O apoio só é considerado concluído após a confirmação financeira do pagamento.</p>
                   ) : marketCountry ? (
                     <p className="mt-2 text-[11px] text-muted-foreground">Meios priorizados para {marketCountry}; a disponibilidade final é validada pela Store XPAYMENTS.</p>
                   ) : null}
@@ -838,7 +866,7 @@ export function CauseCheckout({
 
                 <div className="flex items-start gap-2 rounded-xl bg-sand/60 px-3 py-3 text-[11px] leading-relaxed text-muted-foreground">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  <span>{brazilPixOnly ? "O MyPets não considera a geração do QR Code como pagamento concluído. A confirmação depende do estado financeiro recebido da XPAYMENTS." : "Pagamento orquestrado pela XPAYMENTS. Métodos locais usam API S2S; cartão e wallets permanecem em superfície segura do provedor. Criar um pagamento nunca é tratado como confirmação."}</span>
+                  <span>{brazilPixOnly ? "Gerar o QR Code não conta como pagamento. O MyPets só confirma o apoio depois de receber a confirmação financeira do Pix." : "Pagamento orquestrado pela XPAYMENTS. Métodos locais usam API S2S; cartão e wallets permanecem em superfície segura do provedor. Criar um pagamento nunca é tratado como confirmação."}</span>
                 </div>
               </div>
             </div>
@@ -870,7 +898,7 @@ export function CauseCheckout({
                   </a>
                 )}
                 <Button onClick={() => void shareConfirmedSupport()} className="min-h-11 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
-                  <Heart className="mr-2 h-4 w-4 fill-white" /> Partilhar
+                  <Heart className="mr-2 h-4 w-4 fill-white" /> {brazilPixOnly ? "Compartilhar" : "Partilhar"}
                 </Button>
                 <Button onClick={() => { setOpen(false); resetCheckout(); }} variant="outline" className="min-h-11 rounded-xl border-border text-petrol">Fechar</Button>
               </div>
