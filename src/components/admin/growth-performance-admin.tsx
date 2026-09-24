@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, BarChart3, Heart, Loader2, MousePointerClick, RefreshCw, Share2, ShieldCheck, WalletCards } from "lucide-react";
+import { ArrowUpRight, BarChart3, Check, Copy, Heart, Loader2, MousePointerClick, RefreshCw, Share2, ShieldCheck, WalletCards } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authApi } from "@/lib/auth-api";
 import { getValidSession, onAuthChanged } from "@/lib/auth-client";
@@ -72,6 +72,7 @@ export function GrowthPerformanceAdmin() {
   const [data, setData] = React.useState<Overview | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [copiedLink, setCopiedLink] = React.useState("");
 
   const load = React.useCallback(async () => {
     setBusy(true);
@@ -116,6 +117,35 @@ export function GrowthPerformanceAdmin() {
 
   const totals = data?.totals;
   const brl = data?.amounts.find((item) => item.currency === "BRL");
+  const launchLinks = [
+    {
+      id: "meta-institutional",
+      label: "Meta · Institucional",
+      url: "https://mypets.lat/ajudar?utm_source=meta&utm_medium=paid_social&utm_campaign=mypets_survival_br&utm_content=myp_surv_01",
+    },
+    {
+      id: "meta-petskids",
+      label: "Meta · PetsKids",
+      url: "https://mypets.lat/ajudar/petskids?utm_source=meta&utm_medium=paid_social&utm_campaign=petskids_story_br&utm_content=pk_story_01",
+    },
+    {
+      id: "instagram-organic",
+      label: "Instagram · Orgânico",
+      url: "https://mypets.lat/go/ajudar?utm_source=instagram&utm_medium=organic_social&utm_campaign=mypets_support",
+    },
+    {
+      id: "whatsapp-petskids",
+      label: "WhatsApp · PetsKids",
+      url: "https://mypets.lat/go/petskids?utm_source=whatsapp&utm_medium=referral&utm_campaign=petskids_story",
+    },
+  ];
+
+  async function copyLaunchLink(id: string, url: string) {
+    await navigator.clipboard.writeText(url);
+    setCopiedLink(id);
+    window.setTimeout(() => setCopiedLink(""), 1800);
+  }
+
   const cards = [
     { label: "Landing views", value: totals?.landingViews ?? 0, detail: "Entradas no funil", icon: BarChart3 },
     { label: "Checkout aberto", value: totals?.supportStarted ?? 0, detail: String(totals?.landingToSupportPct ?? 0) + "% das visitas", icon: MousePointerClick },
@@ -180,6 +210,33 @@ export function GrowthPerformanceAdmin() {
           <p className="mt-2 truncate text-sm text-muted-foreground">{data?.path ?? "Todo o Growth"}</p>
         </article>
       </div>
+
+      <section className="mt-8 rounded-3xl border border-border bg-white p-5 sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-coral">Launch kit</p>
+            <h2 className="mt-1 text-xl font-black text-petrol">Links prontos para distribuição</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Use URLs diferentes por canal/criativo para preservar atribuição até o pagamento confirmado.</p>
+          </div>
+          <Link href="/docs" className="hidden text-xs font-bold text-muted-foreground" aria-hidden="true">Docs</Link>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {launchLinks.map((item) => (
+            <div key={item.id} className="rounded-2xl border border-border bg-cream/60 p-4">
+              <p className="text-xs font-black text-petrol">{item.label}</p>
+              <p className="mt-2 break-all font-mono text-[10px] leading-4 text-muted-foreground">{item.url}</p>
+              <button
+                type="button"
+                onClick={() => void copyLaunchLink(item.id, item.url)}
+                className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-lg bg-petrol px-3 text-xs font-black text-white"
+              >
+                {copiedLink === item.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedLink === item.id ? "Copiado" : "Copiar link"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-8 overflow-hidden rounded-3xl border border-border bg-white">
         <div className="border-b border-border px-5 py-4 sm:px-6"><h2 className="text-xl font-black text-petrol">Campanhas e criativos</h2><p className="mt-1 text-xs text-muted-foreground">Ordenados no backend por conversão e intenção.</p></div>
