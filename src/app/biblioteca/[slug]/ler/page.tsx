@@ -6,7 +6,7 @@ import { MyPetsLogo } from "@/components/brand/logo";
 import { EbookPrintButton } from "@/components/conversion/ebook-print-button";
 import { LibraryMarkdown } from "@/components/library/library-markdown";
 import { LibraryToc } from "@/components/library/library-toc";
-import { validateEbookReceipt } from "@/lib/ebook-access";
+import { getEbookAccessPayment } from "@/lib/ebook-access";
 import {
   entitlementKeysForGuide,
   extractGuideHeadings,
@@ -17,6 +17,7 @@ import {
 export const metadata: Metadata = {
   title: "Leitor da Biblioteca MyPets",
   robots: { index: false, follow: false },
+  referrer: "no-referrer",
 };
 
 export const dynamic = "force-dynamic";
@@ -32,12 +33,20 @@ export default async function DigitalLibraryReaderPage({
   const guide = await resolveDigitalLibraryGuide(slug);
   if (!guide) notFound();
 
-  const payment = await validateEbookReceipt(query.receipt);
+  if (query.receipt) {
+    const target = new URLSearchParams({
+      receipt: query.receipt,
+      next: "/biblioteca/" + guide.slug + "/ler",
+    });
+    redirect("/ebooks/acesso?" + target.toString());
+  }
+
+  const payment = await getEbookAccessPayment();
   if (!payment) redirect("/ajudar/ebooks?access=required");
 
   const allowedKeys = entitlementKeysForGuide(guide);
   if (!(payment.rewardKeys ?? []).some((key) => allowedKeys.includes(key))) {
-    redirect("/ebooks/colecao?receipt=" + encodeURIComponent(query.receipt!));
+    redirect("/ebooks/colecao");
   }
 
   const markdown = await getDigitalLibraryContent(guide);
@@ -50,7 +59,7 @@ export default async function DigitalLibraryReaderPage({
           <Link href="/"><MyPetsLogo /></Link>
           <div className="flex items-center gap-3">
             <Link
-              href={"/ebooks/colecao?receipt=" + encodeURIComponent(query.receipt!)}
+              href="/ebooks/colecao"
               className="hidden items-center gap-2 text-xs font-black text-petrol/60 sm:inline-flex"
             >
               <ArrowLeft className="h-4 w-4" /> Minha coleção
