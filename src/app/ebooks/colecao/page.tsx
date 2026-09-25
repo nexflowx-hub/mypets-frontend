@@ -55,9 +55,11 @@ export default async function EbookCollectionPage({
       .filter((slug) => entitledCanonicalSlugs.has(slug)),
   )];
 
-  const selected = requested.length
-    ? requested.map((slug) => solidarityEbookBySlug[slug]).filter(Boolean)
-    : entitled;
+  const requestedSet = new Set(requested);
+  const selected = [
+    ...requested.map((slug) => solidarityEbookBySlug[slug]).filter(Boolean),
+    ...entitled.filter((ebook) => !requestedSet.has(ebook.slug)),
+  ];
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol">
