@@ -54,7 +54,10 @@ export default async function EbookCollectionPage({
       <header className="border-b border-border bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/"><MyPetsLogo /></Link>
-          <Link href="/ajudar/ebooks" className="text-xs font-black text-emerald-700">Campanha 1 eBook = 1 kg</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/ajudar/ebooks" className="text-xs font-black text-emerald-700">Campanha 1 eBook = 1 kg</Link>
+            <Link href="/ebooks/sair" className="text-[10px] font-bold text-petrol/45 hover:text-petrol">Sair deste dispositivo</Link>
+          </div>
         </div>
       </header>
 
