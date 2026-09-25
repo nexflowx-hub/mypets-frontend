@@ -10,6 +10,8 @@ export type DigitalLibraryGuide = {
   tags: string[];
   contentPath: string;
   previewPath: string;
+  atlasProfileCount?: number;
+  structuredAtlasPath?: string;
 };
 
 export type DigitalLibraryIndex = {
@@ -24,7 +26,7 @@ export type DigitalLibraryIndex = {
 };
 
 const CONTENT_REPO = "nexflowx-hub/mypets-data";
-const CONTENT_REF = process.env.MYPETS_CONTENT_REF || "cfd9b8c9f4a99a426e386637b0684128b613b252";
+const CONTENT_REF = process.env.MYPETS_CONTENT_REF || "cf75919727dc611fa5c7064480e1f3042e0bfa43";
 const RAW_BASE = "https://raw.githubusercontent.com/" + CONTENT_REPO + "/" + encodeURIComponent(CONTENT_REF);
 
 async function fetchContentFile(path: string) {
