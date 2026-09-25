@@ -3,10 +3,13 @@ import { notFound, redirect } from "next/navigation";
 import { resolveDigitalLibraryGuide } from "@/lib/digital-library";
 import { solidarityEbooks } from "@/lib/solidarity-ebooks";
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return solidarityEbooks.map((ebook) => ({ slug: ebook.slug }));
+  return solidarityEbooks.flatMap((ebook) => [
+    { slug: ebook.slug },
+    ...(ebook.legacySlugs ?? []).map((slug) => ({ slug })),
+  ]);
 }
 
 export const metadata: Metadata = {
@@ -25,6 +28,13 @@ export default async function LegacyEbookReader({
   const guide = await resolveDigitalLibraryGuide(slug);
   if (!guide) notFound();
 
-  const receipt = query.receipt ? "?receipt=" + encodeURIComponent(query.receipt) : "";
-  redirect("/biblioteca/" + guide.slug + "/ler" + receipt);
+  if (query.receipt) {
+    const target = new URLSearchParams({
+      receipt: query.receipt,
+      next: "/biblioteca/" + guide.slug + "/ler",
+    });
+    redirect("/ebooks/acesso?" + target.toString());
+  }
+
+  redirect("/biblioteca/" + guide.slug + "/ler");
 }
