@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BookOpen, CheckCircle2, Facebook, Heart, LockKeyhole, MessageCircle, PawPrint, PlayCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
+import { MyPetsRoundSeal } from "@/components/brand/round-seal";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
 import { CampaignShareButton } from "@/components/conversion/campaign-share-button";
 import { EbookRacaoFunnel } from "@/components/conversion/ebook-racao-funnel";
@@ -192,6 +193,7 @@ export default async function EbookRacaoCampaignPage() {
                 <Image src={ebook.image} alt="" fill sizes="(min-width:1280px) 25vw, 50vw" className="object-cover transition duration-500 group-hover:scale-[1.03]" />
                 <div className="absolute inset-0 bg-gradient-to-t from-petrol/55 to-transparent" />
                 <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-emerald-800">R$ 12,90 · 1 kg</span>
+                <MyPetsRoundSeal className="absolute bottom-3 right-3 h-12 w-12" />
               </div>
               <div className="p-5">
                 <h3 className="text-base font-black">{ebook.shortTitle}</h3>
