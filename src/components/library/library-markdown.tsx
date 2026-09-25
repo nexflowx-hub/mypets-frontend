@@ -3,7 +3,11 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { CheckCircle2, Circle, ExternalLink } from "lucide-react";
-import { headingId, type GuideHeading } from "@/lib/digital-library";
+import type { GuideHeading } from "@/lib/digital-library";
+
+function headingId(text: string) {
+  return text.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9\\s-]/g, "").trim().replace(/\\s+/g, "-").replace(/-+/g, "-");
+}
 
 function textFromChildren(children: React.ReactNode) {
   return React.Children.toArray(children)
