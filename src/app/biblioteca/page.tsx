@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Clock3, PawPrint, Sparkles } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
+import { MyPetsRoundSeal } from "@/components/brand/round-seal";
 import { getDigitalLibraryIndex } from "@/lib/digital-library";
 
 export const metadata: Metadata = {
@@ -63,6 +64,7 @@ export default async function LibraryPage() {
                     <div className="absolute bottom-4 left-4 flex gap-2">
                       <span className="rounded-full bg-white/92 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-petrol">Guia MyPets</span>
                     </div>
+                    <MyPetsRoundSeal className="absolute bottom-3 right-3 h-14 w-14" />
                   </div>
                   <div className="p-6">
                     <div className="flex items-center gap-3 text-[11px] font-bold text-muted-foreground">
