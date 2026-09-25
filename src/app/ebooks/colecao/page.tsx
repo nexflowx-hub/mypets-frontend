@@ -38,16 +38,26 @@ export default async function EbookCollectionPage({
   const payment = await getEbookAccessPayment();
   if (!payment) redirect("/ajudar/ebooks?access=required");
 
-  const entitledSlugs = (payment.rewardKeys ?? []).filter((slug) => Boolean(solidarityEbookBySlug[slug]));
-  if (entitledSlugs.length === 0) redirect("/ajudar/ebooks?access=invalid");
+  const entitled = [...new Map(
+    (payment.rewardKeys ?? [])
+      .map((slug) => solidarityEbookBySlug[slug])
+      .filter(Boolean)
+      .map((ebook) => [ebook.slug, ebook] as const),
+  ).values()];
+  if (entitled.length === 0) redirect("/ajudar/ebooks?access=invalid");
 
-  const requested = (params.books ?? "")
-    .split(",")
-    .map((value) => value.trim())
-    .filter((slug) => entitledSlugs.includes(slug));
+  const entitledCanonicalSlugs = new Set(entitled.map((ebook) => ebook.slug));
+  const requested = [...new Set(
+    (params.books ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .map((slug) => solidarityEbookBySlug[slug]?.slug ?? slug)
+      .filter((slug) => entitledCanonicalSlugs.has(slug)),
+  )];
 
-  const selectedSlugs = requested.length ? requested : entitledSlugs;
-  const selected = selectedSlugs.map((slug) => solidarityEbookBySlug[slug]).filter(Boolean);
+  const selected = requested.length
+    ? requested.map((slug) => solidarityEbookBySlug[slug]).filter(Boolean)
+    : entitled;
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol">
