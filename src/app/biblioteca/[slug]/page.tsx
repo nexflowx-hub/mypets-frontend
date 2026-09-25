@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Clock3, LockKeyhole, PawPrint, ShieldC
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
+import { MyPetsRoundSeal } from "@/components/brand/round-seal";
 import { LibraryMarkdown } from "@/components/library/library-markdown";
 import {
   extractGuideHeadings,
@@ -70,8 +71,8 @@ export default async function LibraryGuidePage({ params }: { params: Promise<{ s
                   <a href="#amostra" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-petrol px-5 text-sm font-black text-white">
                     Ler amostra <ArrowRight className="h-4 w-4" />
                   </a>
-                  <Link href="/ajudar/ebooks" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-black text-white">
-                    Desbloquear e garantir 1 kg <PawPrint className="h-4 w-4" />
+                  <Link href="/ajudar/ebooks#participar" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-black text-white">
+                    R$ 12,90 · desbloquear + garantir 1 kg <PawPrint className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
@@ -79,6 +80,7 @@ export default async function LibraryGuidePage({ params }: { params: Promise<{ s
               <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] bg-petrol">
                 <Image src={guide.image} alt="" fill priority sizes="430px" className="object-cover opacity-90" />
                 <div className="absolute inset-0 bg-gradient-to-t from-petrol/65 via-transparent to-transparent" />
+                <MyPetsRoundSeal className="absolute right-5 top-5 h-16 w-16" />
                 <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/15 bg-black/20 p-4 text-white backdrop-blur-sm">
                   <p className="text-[10px] font-black uppercase tracking-[.15em] text-emerald-200">Incluído no guia completo</p>
                   <p className="mt-1 text-sm font-bold leading-6">{guide.description}</p>
