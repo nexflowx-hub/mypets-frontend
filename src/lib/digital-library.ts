@@ -50,12 +50,22 @@ export async function resolveDigitalLibraryGuide(slug: string) {
   return index.guides.find((guide) => guide.slug === slug || guide.legacySlugs.includes(slug)) ?? null;
 }
 
+function readerMarkdown(markdown: string) {
+  // Production-only media directives remain canonical in mypets-data, but the
+  // launch reader must never expose implementation instructions such as
+  // "[!MEDIA] renderizar ...". Rich media is progressively rendered from the
+  // separate placement manifest.
+  return markdown
+    .replace(/\n## Recursos visuais do reader[\s\S]*?(?=\n## Referências de base desta edição)/g, "\n")
+    .replace(/\nAlém destes medias externos\/licenciados,[^\n]*\n/g, "\n");
+}
+
 export async function getDigitalLibraryPreview(guide: DigitalLibraryGuide) {
-  return fetchContentFile(guide.previewPath);
+  return readerMarkdown(await fetchContentFile(guide.previewPath));
 }
 
 export async function getDigitalLibraryContent(guide: DigitalLibraryGuide) {
-  return fetchContentFile(guide.contentPath);
+  return readerMarkdown(await fetchContentFile(guide.contentPath));
 }
 
 export function entitlementKeysForGuide(guide: DigitalLibraryGuide) {
