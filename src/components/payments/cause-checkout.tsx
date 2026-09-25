@@ -634,7 +634,7 @@ export function CauseCheckout({
   const successWhatsappHref = intent?.id
     ? whatsappMessageUrl(
         successWhatsappUrl,
-        `Olá! Participei da campanha MyPets 1 eBook = 1 kg e o pagamento já foi confirmado. Meu recibo MyPets é ${intent.id}. Quero receber meus eBooks pelo WhatsApp.`,
+        `Olá! Participei da campanha MyPets 1 eBook = 1 kg e o pagamento já foi confirmado. Quero ajuda para aceder aos meus guias.`,
       )
     : null;
   const nativeMethod = intent?.paymentMethod && intent.paymentMethod !== "checkout" ? intent.paymentMethod as NativePaymentMethod : null;
