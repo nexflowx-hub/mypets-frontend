@@ -68,7 +68,7 @@ export default async function EbookRacaoCampaignPage() {
   const hasCommunity = Boolean(BRAND.whatsappCommunityUrl || BRAND.facebookGroupUrl);
 
   return (
-    <main className="min-h-screen bg-[#f8f6ef] text-petrol">
+    <main className="min-h-screen bg-[#f8f6ef] pb-20 text-petrol sm:pb-0">
       <CampaignLandingTracker variant="ebook_racao_library13_v2" />
 
       <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur">
@@ -183,7 +183,18 @@ export default async function EbookRacaoCampaignPage() {
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-black uppercase tracking-[.16em] text-emerald-700">Escolha algo que realmente vai usar</p>
           <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Uma biblioteca para usar de verdade — não um PDF esquecido.</h2>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">São 13 guias, mais de 64 mil palavras, Atlas com 64 raças, checklists, planos práticos e vídeos selecionados. Pode ver a amostra de cada guia antes de participar.</p>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">São 13 guias, mais de 64 mil palavras, Atlas com 64 raças, checklists, planos práticos e conteúdo estruturado para consulta. Pode ver a amostra de cada guia antes de participar.</p>
+        </div>
+
+        <div className="mx-auto mt-7 max-w-3xl rounded-[1.75rem] border border-emerald-200 bg-emerald-50 p-5 text-left sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[.15em] text-emerald-700">Biblioteca completa · 13 guias</p>
+            <p className="mt-1 text-2xl font-black text-emerald-950">R$ 167,70 · 13 kg garantidos</p>
+            <p className="mt-1 text-xs leading-5 text-emerald-900/65">Sem assinatura. O mesmo princípio da campanha: cada guia selecionado corresponde a uma unidade confirmada de 1 kg.</p>
+          </div>
+          <a href="#participar" className="mt-4 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-emerald-600 px-5 text-xs font-black text-white sm:mt-0">
+            Ver opções <ArrowRight className="h-3.5 w-3.5" />
+          </a>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -362,6 +373,18 @@ export default async function EbookRacaoCampaignPage() {
           ))}
         </div>
       </section>
+
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-black/10 bg-white/95 p-3 shadow-[0_-12px_35px_-24px_rgba(0,0,0,.5)] backdrop-blur sm:hidden">
+        <div className="mx-auto flex max-w-md items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[9px] font-black uppercase tracking-wide text-emerald-700">1 guia = 1 kg</p>
+            <p className="truncate text-sm font-black text-petrol">A partir de R$ 12,90</p>
+          </div>
+          <a href="#participar" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-emerald-500 px-4 text-xs font-black text-white">
+            Escolher <ArrowRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </div>
 
       <footer className="bg-[#091a22] text-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
