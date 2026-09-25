@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { EBOOK_ACCESS_COOKIE, validateEbookReceipt } from "@/lib/ebook-access";
+import { EBOOK_ACCESS_COOKIE, parseEbookAccessCookie, serializeEbookAccessCookie, validateEbookReceipt } from "@/lib/ebook-access";
 
 function safeNext(value: string | null) {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/ebooks/colecao";
@@ -23,9 +23,11 @@ export async function GET(request: NextRequest) {
   if (via) destination.searchParams.set("via", via);
 
   const response = NextResponse.redirect(destination, 303);
+  const existing = parseEbookAccessCookie(request.cookies.get(EBOOK_ACCESS_COOKIE)?.value);
+  const accessReceipts = serializeEbookAccessCookie([...existing, receipt]);
   response.cookies.set({
     name: EBOOK_ACCESS_COOKIE,
-    value: receipt,
+    value: accessReceipts,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
