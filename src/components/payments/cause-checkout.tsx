@@ -811,7 +811,7 @@ export function CauseCheckout({
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
-                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para receber os eBooks" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
+                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para identificar e recuperar o acesso" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
                 </div>
                 {brazilPixOnly && successWhatsappUrl && !requireEmail && (
                   <p className="-mt-1 text-[10px] leading-4 text-muted-foreground">Email opcional. Depois da confirmação, você pode abrir os eBooks imediatamente ou pedir o envio pelo WhatsApp.</p>
