@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { apiGet } from "@/lib/api";
+import { getDigitalLibraryIndex } from "@/lib/digital-library";
 
 const BASE = "https://mypets.lat";
 
@@ -72,11 +73,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/guias",
     "/guias/primeiras-24h",
     "/biblioteca",
-    "/biblioteca/cuidados-essenciais",
-    "/biblioteca/primeiros-30-dias",
-    "/biblioteca/treino-gentil",
-    "/biblioteca/guia-das-racas",
-    "/biblioteca/alimentacao-bem-estar",
     "/projetos",
     "/projetos/apresentar",
     "/projetos/together-we-feed",
@@ -98,7 +94,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/join/projeto",
     "/join/encontrei-um-animal",
   ];
-  const [campaigns, causes] = await Promise.all([campaignUrls(), causeEntries()]);
+  const [campaigns, causes, library] = await Promise.all([
+    campaignUrls(),
+    causeEntries(),
+    getDigitalLibraryIndex().catch(() => null),
+  ]);
+  const libraryEntries = (library?.guides ?? []).map((guide) => ({
+    url: `${BASE}/biblioteca/${encodeURIComponent(guide.slug)}`,
+    changeFrequency: "weekly" as const,
+    priority: 0.9,
+  }));
 
   return [
     { url: BASE, changeFrequency: "weekly", priority: 1 },
@@ -112,6 +117,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         path.startsWith("/legal/") ? 0.65 :
         index <= 16 ? 0.85 : 0.75,
     })),
+    ...libraryEntries,
     ...causes,
     ...campaigns.map((url) => ({
       url,
