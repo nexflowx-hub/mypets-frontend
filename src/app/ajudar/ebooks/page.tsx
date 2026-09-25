@@ -69,7 +69,7 @@ export default async function EbookRacaoCampaignPage() {
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] text-petrol">
-      <CampaignLandingTracker variant="ebook_racao_1kg_v1" />
+      <CampaignLandingTracker variant="ebook_racao_library13_v2" />
 
       <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
