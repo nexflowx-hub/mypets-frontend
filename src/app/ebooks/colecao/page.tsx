@@ -4,13 +4,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, BookOpen, CheckCircle2, Heart } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
-import { validateEbookReceipt } from "@/lib/ebook-access";
+import { getEbookAccessPayment } from "@/lib/ebook-access";
 import { solidarityEbookBySlug, solidarityEbooks } from "@/lib/solidarity-ebooks";
 
 export const metadata: Metadata = {
-  title: "A sua coleção de eBooks | MyPets",
-  description: "Acesso aos guias digitais da campanha 1 eBook = 1 kg de Ração.",
+  title: "A sua Biblioteca MyPets",
+  description: "Acesso aos guias digitais da campanha 1 eBook = 1 kg de ração.",
   robots: { index: false, follow: false },
+  referrer: "no-referrer",
 };
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,20 @@ export default async function EbookCollectionPage({
   searchParams: Promise<{ books?: string; via?: string; receipt?: string }>;
 }) {
   const params = await searchParams;
-  const payment = await validateEbookReceipt(params.receipt);
+
+  // Backward compatibility: old emailed/shared receipt links are upgraded once
+  // to an HttpOnly access session, then the receipt disappears from the URL.
+  if (params.receipt) {
+    const target = new URLSearchParams({
+      receipt: params.receipt,
+      next: "/ebooks/colecao",
+    });
+    if (params.books) target.set("books", params.books);
+    if (params.via) target.set("via", params.via);
+    redirect("/ebooks/acesso?" + target.toString());
+  }
+
+  const payment = await getEbookAccessPayment();
   if (!payment) redirect("/ajudar/ebooks?access=required");
 
   const entitledSlugs = (payment.rewardKeys ?? []).filter((slug) => Boolean(solidarityEbookBySlug[slug]));
@@ -50,9 +64,9 @@ export default async function EbookCollectionPage({
             <CheckCircle2 className="h-6 w-6" />
           </span>
           <p className="mt-5 text-xs font-black uppercase tracking-[.16em] text-emerald-300">Coleção MyPets</p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Os seus guias estão aqui.</h1>
+          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">A sua biblioteca está pronta.</h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/68">
-            Abra cada eBook na versão web e use “Guardar / imprimir em PDF” dentro do guia se quiser arquivar uma cópia no seu dispositivo.
+            Leia online com índice e progresso de leitura. Se quiser, use “Guardar / imprimir em PDF” dentro de cada guia.
           </p>
           {params.via === "apoio-confirmado" && (
             <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-200">
@@ -65,7 +79,7 @@ export default async function EbookCollectionPage({
           {selected.map((ebook) => (
             <Link
               key={ebook.slug}
-              href={`/ebooks/${ebook.slug}?receipt=${encodeURIComponent(params.receipt!)}`}
+              href={`/biblioteca/${ebook.slug}/ler`}
               className="group grid overflow-hidden rounded-3xl border border-border bg-white sm:grid-cols-[150px_1fr] transition hover:-translate-y-0.5 hover:shadow-lg"
             >
               <div className="relative min-h-40">
