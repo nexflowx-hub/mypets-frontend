@@ -71,6 +71,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/loja",
     "/guias",
     "/guias/primeiras-24h",
+    "/biblioteca",
+    "/biblioteca/cuidados-essenciais",
+    "/biblioteca/primeiros-30-dias",
+    "/biblioteca/treino-gentil",
+    "/biblioteca/guia-das-racas",
+    "/biblioteca/alimentacao-bem-estar",
     "/projetos",
     "/projetos/apresentar",
     "/projetos/together-we-feed",
@@ -101,6 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority:
         path === "/sobre" || path === "/institucional" ? 0.9 :
+        path === "/biblioteca" || path.startsWith("/biblioteca/") ? 0.9 :
         path === "/apoiar" || path === "/preciso-de-apoio" || path === "/preciso-de-apoio/publicar" || path.endsWith("/apoiar") ? 0.9 :
         path.startsWith("/legal/") ? 0.65 :
         index <= 16 ? 0.85 : 0.75,
