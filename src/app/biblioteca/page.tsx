@@ -28,15 +28,16 @@ export default async function LibraryPage() {
               <BookOpen className="h-3.5 w-3.5" /> Biblioteca Digital MyPets
             </span>
             <h1 className="mt-5 max-w-4xl text-balance text-4xl font-black leading-tight tracking-[-.035em] sm:text-6xl">
-              Conteúdo útil para cuidar melhor. <span className="text-emerald-300">E cada guia pode colocar 1 kg em movimento.</span>
+              Uma biblioteca para cuidar melhor. <span className="text-emerald-300">Cada guia desbloqueado também garante 1 kg.</span>
             </h1>
             <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-white/68 sm:text-lg">
-              Explore a coleção, leia amostras e escolha o guia mais útil para o seu momento. A versão completa é liberada após a participação confirmada na campanha.
+              Explore 13 guias, leia amostras gratuitas e escolha apenas o que faz sentido para o seu momento. O acesso completo é liberado depois da participação confirmada, sem obrigar a criar conta no checkout.
             </p>
             <div className="mt-7 flex flex-wrap gap-3 text-xs font-black">
-              <span className="rounded-full bg-white/8 px-4 py-2">5 guias de lançamento</span>
+              <span className="rounded-full bg-white/8 px-4 py-2">{library.guides.length} guias disponíveis</span>
+              <span className="rounded-full bg-white/8 px-4 py-2">Atlas com 64 raças</span>
               <span className="rounded-full bg-white/8 px-4 py-2">Leitura web + PDF</span>
-              <span className="rounded-full bg-white/8 px-4 py-2">R$ {library.collection.basePriceBrl.toFixed(2).replace(".", ",")} = 1 kg</span>
+              <span className="rounded-full bg-white/8 px-4 py-2">R$ {library.collection.basePriceBrl.toFixed(2).replace(".", ",")} = 1 guia + 1 kg</span>
             </div>
           </div>
         </section>
