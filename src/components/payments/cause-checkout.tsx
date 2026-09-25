@@ -218,6 +218,7 @@ export function CauseCheckout({
   const selectionTouched = React.useRef(false);
   const [busy, setBusy] = React.useState(false);
   const [intent, setIntent] = React.useState<CheckoutIntent | null>(null);
+  const accessBootstrapIntentRef = React.useRef<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [verifying, setVerifying] = React.useState(false);
   const [paid, setPaid] = React.useState(false);
