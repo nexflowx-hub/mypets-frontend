@@ -12,6 +12,7 @@ import {
   extractGuideHeadings,
   getDigitalLibraryIndex,
   getDigitalLibraryPreview,
+  getGuideMediaBundle,
   resolveDigitalLibraryGuide,
 } from "@/lib/digital-library";
 
@@ -37,7 +38,10 @@ export default async function LibraryGuidePage({ params }: { params: Promise<{ s
   const { slug } = await params;
   const guide = await resolveDigitalLibraryGuide(slug);
   if (!guide) notFound();
-  const preview = await getDigitalLibraryPreview(guide);
+  const [preview, mediaBundle] = await Promise.all([
+    getDigitalLibraryPreview(guide),
+    getGuideMediaBundle(guide),
+  ]);
   const previewHeadings = extractGuideHeadings(preview);
 
   return (
@@ -95,7 +99,12 @@ export default async function LibraryGuidePage({ params }: { params: Promise<{ s
             <p className="mb-6 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.14em] text-emerald-700">
               <BookOpen className="h-3.5 w-3.5" /> Amostra gratuita
             </p>
-            <LibraryMarkdown markdown={preview} headings={previewHeadings} />
+            <LibraryMarkdown
+              markdown={preview}
+              headings={previewHeadings}
+              mediaPlacements={mediaBundle.placements}
+              mediaRecords={mediaBundle.mediaRecords}
+            />
             <div className="mt-12 rounded-[1.5rem] bg-[#0f241b] p-6 text-white sm:p-8">
               <LockKeyhole className="h-6 w-6 text-emerald-300" />
               <h2 className="mt-4 text-2xl font-black">Continue no guia completo.</h2>
