@@ -157,7 +157,7 @@ jobs:
           grep -Fq "R$ 167,70" /tmp/ebooks.html
           grep -Fq "Cuidados Essenciais" /tmp/ebooks.html
           grep -Fq "Treino Gentil" /tmp/ebooks.html
-          grep -Fq "50 Ideias de Enriquecimento" /tmp/ebooks.html
+          grep -Fq "50 Ideias para Enriquecer a Vida do Seu Cão" /tmp/ebooks.html
 
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             https://www.mypets.lat/biblioteca -o /tmp/library.html
           grep -Fq "13 guias" /tmp/library.html
@@ -174,6 +174,22 @@ jobs:
           # device access session.
           final_reader_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/biblioteca/cuidados-essenciais/ler)"
           printf '%s' "$final_reader_url" | grep -Eq '/ajudar/ebooks\?access=required
+          final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/ebooks/colecao)"
+          printf '%s' "$final_collection_url" | grep -Eq '/ajudar/ebooks\?access=required
+          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"
+
+
+
+          final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/ebooks/colecao)"
+          printf '%s' "$final_collection_url" | grep -Eq '/ajudar/ebooks\?access=required
+
+
+          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"
+
+
+
+          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"
+
 
 
           final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/ebooks/colecao)"
