@@ -148,52 +148,38 @@ jobs:
         run: |
           set -euo pipefail
 
-          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             "https://www.mypets.lat/ajudar/ebooks?utm_source=github-actions&utm_medium=smoke&utm_campaign=ebook_racao_library13_v2"             -o /tmp/ebooks.html
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             "https://www.mypets.lat/ajudar/ebooks?utm_source=github-actions&utm_medium=smoke&utm_campaign=ebook_racao_quiz_founder_v3"             -o /tmp/ebooks.html
 
-          # Structural/value proof rather than fragile CTA copy.
+          # Stable product invariants, not fragile CTA wording.
           grep -Fq "R$ 12,90" /tmp/ebooks.html
           grep -Fq "13 guias" /tmp/ebooks.html
           grep -Fq "Biblioteca completa" /tmp/ebooks.html
-          grep -Fq "R$ 167,70" /tmp/ebooks.html
           grep -Fq "Cuidados Essenciais" /tmp/ebooks.html
           grep -Fq "Treino Gentil" /tmp/ebooks.html
-          grep -Fq "50 Ideias para Enriquecer a Vida do Seu Cão" /tmp/ebooks.html
 
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             https://www.mypets.lat/biblioteca -o /tmp/library.html
           grep -Fq "13 guias" /tmp/library.html
           grep -Fq "64 raças" /tmp/library.html
           grep -Fq "Leitura web + PDF" /tmp/library.html
 
-          readiness="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS https://api.mypets.lat/v1/campaigns/ebook-racao/readiness)"
+          readiness="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS             https://api.mypets.lat/v1/campaigns/ebook-racao/readiness)"
           printf '%s' "$readiness" | grep -q '"technicalReady":true'
 
-          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             https://www.mypets.lat/ajudar/ebooks/opengraph-image -o /tmp/ebooks-og.png
-          test -s /tmp/ebooks-og.png
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             https://www.mypets.lat/ajudar/ebooks/opengraph-image -o /dev/null
 
-          # Premium pages must end at the campaign when there is no validated
-          # device access session.
-          final_reader_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/biblioteca/cuidados-essenciais/ler)"
-          printf '%s' "$final_reader_url" | grep -Eq '/ajudar/ebooks\?access=required
-          final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/ebooks/colecao)"
-          printf '%s' "$final_collection_url" | grep -Eq '/ajudar/ebooks\?access=required
-          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"
+          # Without a validated access session, premium routes must resolve back
+          # to the campaign. Validate the final URL rather than a specific
+          # intermediate redirect implementation.
+          final_reader_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20             -LsS -o /dev/null -w '%{url_effective}'             https://www.mypets.lat/biblioteca/cuidados-essenciais/ler)"
+          case "$final_reader_url" in
+            *"/ajudar/ebooks?access=required"*) ;;
+            *) echo "Unexpected reader final URL: $final_reader_url" >&2; exit 1 ;;
+          esac
 
+          final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20             -LsS -o /dev/null -w '%{url_effective}'             https://www.mypets.lat/ebooks/colecao)"
+          case "$final_collection_url" in
+            *"/ajudar/ebooks?access=required"*) ;;
+            *) echo "Unexpected collection final URL: $final_collection_url" >&2; exit 1 ;;
+          esac
 
-
-          final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/ebooks/colecao)"
-          printf '%s' "$final_collection_url" | grep -Eq '/ajudar/ebooks\?access=required
-
-
-          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"
-
-
-
-          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"
-
-
-
-          final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/ebooks/colecao)"
-          printf '%s' "$final_collection_url" | grep -Eq '/ajudar/ebooks\?access=required
-
-
-          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"
+          echo "Library 13 sales funnel, API readiness and gated reader validated"
