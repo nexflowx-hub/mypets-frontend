@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, BookOpen, Clock3, LockKeyhole, PawPrint, ShieldCheck } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
-import { MyPetsRoundSeal } from "@/components/brand/round-seal";
 import { LibraryMarkdown } from "@/components/library/library-markdown";
+import { GuideCover } from "@/components/library/guide-cover";
 import {
   extractGuideHeadings,
   getDigitalLibraryIndex,
@@ -81,15 +80,12 @@ export default async function LibraryGuidePage({ params }: { params: Promise<{ s
                 </div>
               </div>
 
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] bg-petrol">
-                <Image src={guide.image} alt="" fill priority sizes="430px" className="object-cover opacity-90" />
-                <div className="absolute inset-0 bg-gradient-to-t from-petrol/65 via-transparent to-transparent" />
-                <MyPetsRoundSeal className="absolute right-5 top-5 h-16 w-16" />
-                <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/15 bg-black/20 p-4 text-white backdrop-blur-sm">
-                  <p className="text-[10px] font-black uppercase tracking-[.15em] text-emerald-200">Incluído no guia completo</p>
-                  <p className="mt-1 text-sm font-bold leading-6">{guide.description}</p>
-                </div>
-              </div>
+              <GuideCover
+                slug={guide.slug}
+                title={guide.title}
+                image={guide.image}
+                className="aspect-[4/3] rounded-[2rem] shadow-2xl shadow-petrol/10"
+              />
             </div>
           </div>
         </section>
