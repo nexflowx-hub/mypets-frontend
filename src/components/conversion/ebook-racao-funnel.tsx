@@ -10,16 +10,34 @@ import {
   SOLIDARITY_EBOOK_UNIT_CENTS,
 } from "@/lib/solidarity-ebooks";
 import { BRAND } from "@/lib/brand";
+import { recordGrowthEvent } from "@/lib/growth";
 import { cn } from "@/lib/utils";
 
 const EBOOK_RACAO_BRL_CAUSE_ID = "9a7f1000-0000-4a11-8c01-000000000007";
 
+const petOptions = [
+  { id: "dog", label: "Tenho cão", detail: "Quero cuidar ainda melhor." },
+  { id: "cat", label: "Tenho gato", detail: "E também quero apoiar a causa." },
+  { id: "other", label: "Tenho outro pet", detail: "Faço parte do mundo pet." },
+  { id: "none", label: "Ainda não tenho", detail: "Mas gosto muito de animais." },
+];
+
+const experienceOptions = [
+  { id: "new", label: "Menos de 1 ano", detail: "Ainda estou a descobrir muita coisa." },
+  { id: "growing", label: "Entre 1 e 5 anos", detail: "Já tenho experiência, mas quero evoluir." },
+  { id: "experienced", label: "Mais de 5 anos", detail: "Quero aprofundar e atualizar conhecimentos." },
+  { id: "future", label: "Estou a preparar-me", detail: "Ainda não tenho pet ou estou a planear." },
+];
+
 const intents = [
-  { id: "care", label: "Quero cuidar melhor do meu cão", detail: "Rotina, segurança e bem-estar." },
-  { id: "puppy", label: "Tenho ou vou receber um filhote", detail: "Primeiros dias e adaptação." },
-  { id: "training", label: "Quero melhorar o treino", detail: "Comandos úteis e reforço positivo." },
-  { id: "breeds", label: "Quero escolher ou conhecer melhor um cão", detail: "Perfis, raças e compatibilidade." },
-  { id: "food", label: "Quero organizar alimentação e rotina", detail: "Hábitos consistentes e observação." },
+  { id: "care", label: "Cuidados e rotina", detail: "Segurança, bem-estar e uma base sólida." },
+  { id: "puppy", label: "Filhote / primeiros meses", detail: "Adaptação, sono, xixi, socialização e rotina." },
+  { id: "training", label: "Treino e comportamento", detail: "Comandos úteis, comunicação e reforço positivo." },
+  { id: "walks", label: "Passeios e vida urbana", detail: "Guia frouxa, farejo, reatividade e apartamento." },
+  { id: "food", label: "Alimentação e higiene", detail: "Rotina alimentar, corpo, dentes, banho e grooming." },
+  { id: "children", label: "Família e crianças", detail: "Convivência segura, supervisão e linguagem corporal." },
+  { id: "breeds", label: "Raças, adoção e escolha", detail: "64 perfis, estilo de vida e decisão responsável." },
+  { id: "enrichment", label: "Brincadeiras e gastar energia melhor", detail: "Farejo, desafios mentais e 50 atividades para cães." },
 ];
 
 const bundleOptions = [
@@ -38,7 +56,10 @@ function money(cents: number) {
 }
 
 export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
+  const [petType, setPetType] = React.useState("dog");
+  const [experience, setExperience] = React.useState("new");
   const [interest, setInterest] = React.useState("care");
+  const [quizStep, setQuizStep] = React.useState<1 | 2 | 3>(1);
   const [selected, setSelected] = React.useState<string[]>([recommendationMap.care]);
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
   const [supportTotalCents, setSupportTotalCents] = React.useState<number | null>(null);
@@ -78,6 +99,24 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
 
   function continueToSelection() {
     setSelected((current) => current.includes(recommendedSlug) ? current : [recommendedSlug]);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      void recordGrowthEvent({
+        eventName: "SUPPORT_STARTED",
+        source: params.get("utm_source"),
+        medium: params.get("utm_medium"),
+        campaign: params.get("utm_campaign") ?? "ebook_racao_quiz_v3",
+        content: params.get("utm_content") ?? "quiz_completed",
+        landingPath: `${window.location.pathname}${window.location.search}`.slice(0, 500),
+        metadata: {
+          stage: "quiz_completed",
+          petType,
+          experience,
+          interest,
+          recommendedSlug,
+        },
+      });
+    }
     setStep(2);
   }
 
@@ -142,37 +181,106 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
 
       {step === 1 && (
         <div className="mt-6">
-          <p className="text-sm font-black">Qual guia seria mais útil para você hoje?</p>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">Uma pergunta, uma recomendação. No próximo passo pode mudar a escolha ou ampliar para 3, 5 ou 13 kg.</p>
-          <div className="mt-4 space-y-2">
-            {intents.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setInterest(item.id)}
-                className={cn(
-                  "flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition",
-                  interest === item.id ? "border-petrol bg-petrol text-white" : "border-border bg-[#fbfcfa] hover:border-petrol/25",
-                )}
-              >
-                <div>
-                  <p className="text-sm font-black">{item.label}</p>
-                  <p className={cn("mt-1 text-[11px]", interest === item.id ? "text-white/60" : "text-muted-foreground")}>{item.detail}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0" />
-              </button>
-            ))}
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">Quiz rápido · 3 perguntas</p>
+              <p className="mt-1 text-sm font-black">
+                {quizStep === 1 ? "Qual é a sua ligação com pets?" : quizStep === 2 ? "Há quanto tempo faz parte do mundo pet?" : "O que seria mais útil para você agora?"}
+              </p>
+            </div>
+            <span className="text-[10px] font-black text-petrol/45">{quizStep}/3</span>
           </div>
-          <button
-            type="button"
-            onClick={continueToSelection}
-            className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,.8)] transition hover:-translate-y-0.5 hover:bg-emerald-600"
-          >
-            Continuar <ChevronRight className="h-4 w-4" />
-          </button>
-          <button type="button" onClick={() => { setSelected([recommendedSlug]); setStep(2); }} className="mt-2 w-full py-2 text-[11px] font-bold text-muted-foreground">
-            Ver todos os eBooks
-          </button>
+
+          {quizStep === 1 && (
+            <div className="space-y-2">
+              {petOptions.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => { setPetType(item.id); setQuizStep(2); }}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition",
+                    petType === item.id ? "border-petrol bg-petrol text-white" : "border-border bg-[#fbfcfa] hover:border-petrol/25",
+                  )}
+                >
+                  <div>
+                    <p className="text-sm font-black">{item.label}</p>
+                    <p className={cn("mt-1 text-[11px]", petType === item.id ? "text-white/60" : "text-muted-foreground")}>{item.detail}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {quizStep === 2 && (
+            <div>
+              <div className="space-y-2">
+                {experienceOptions.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => { setExperience(item.id); setQuizStep(3); }}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition",
+                      experience === item.id ? "border-petrol bg-petrol text-white" : "border-border bg-[#fbfcfa] hover:border-petrol/25",
+                    )}
+                  >
+                    <div>
+                      <p className="text-sm font-black">{item.label}</p>
+                      <p className={cn("mt-1 text-[11px]", experience === item.id ? "text-white/60" : "text-muted-foreground")}>{item.detail}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0" />
+                  </button>
+                ))}
+              </div>
+              <button type="button" onClick={() => setQuizStep(1)} className="mt-2 w-full py-2 text-[11px] font-bold text-muted-foreground">Voltar</button>
+            </div>
+          )}
+
+          {quizStep === 3 && (
+            <div>
+              {petType !== "dog" && (
+                <div className="mb-3 rounded-xl bg-amber-50 p-3 text-[10px] leading-5 text-amber-900">
+                  A coleção de lançamento é focada em cães. Pode continuar para apoiar a causa, escolher um guia para si/presentear e entrar na lista das próximas coleções para outros pets.
+                </div>
+              )}
+              <div className="grid gap-2 sm:grid-cols-2">
+                {intents.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setInterest(item.id)}
+                    className={cn(
+                      "flex min-h-20 items-center justify-between gap-3 rounded-2xl border p-3.5 text-left transition",
+                      interest === item.id ? "border-petrol bg-petrol text-white" : "border-border bg-[#fbfcfa] hover:border-petrol/25",
+                    )}
+                  >
+                    <div>
+                      <p className="text-xs font-black">{item.label}</p>
+                      <p className={cn("mt-1 text-[10px] leading-4", interest === item.id ? "text-white/60" : "text-muted-foreground")}>{item.detail}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0" />
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-2xl bg-emerald-50 p-4">
+                <p className="text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">A nossa recomendação inicial</p>
+                <p className="mt-1 text-sm font-black text-emerald-950">{solidarityEbooks.find((ebook) => ebook.slug === recommendedSlug)?.title}</p>
+                <p className="mt-1 text-[10px] leading-4 text-emerald-900/65">Pode alterar esta escolha e comparar todos os 13 guias no próximo passo.</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={continueToSelection}
+                className="mt-4 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-sm font-black text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,.8)] transition hover:-translate-y-0.5 hover:bg-emerald-600"
+              >
+                Ver minha recomendação e opções <ChevronRight className="h-4 w-4" />
+              </button>
+              <button type="button" onClick={() => setQuizStep(2)} className="mt-2 w-full py-2 text-[11px] font-bold text-muted-foreground">Voltar</button>
+            </div>
+          )}
         </div>
       )}
 

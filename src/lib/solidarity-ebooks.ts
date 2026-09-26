@@ -219,9 +219,9 @@ export const solidarityEbooks: SolidarityEbook[] = [
     "slug": "50-ideias-enriquecimento",
     "legacySlugs": [],
     "title": "50 Ideias de Enriquecimento para Cães",
-    "shortTitle": "50 Ideias de Enriquecimento",
-    "promise": "Farejo, comida, cérebro, movimento e calma com atividades de baixo custo adaptáveis à vida real.",
-    "description": "Farejo, comida, cérebro, movimento e calma com atividades de baixo custo adaptáveis à vida real.",
+    "shortTitle": "50 Ideias para Enriquecer a Vida do Seu Cão",
+    "promise": "Brincadeiras, farejo, desafios mentais e atividades simples para gastar energia com qualidade e enriquecer a rotina do seu cão.",
+    "description": "Brincadeiras, farejo, desafios mentais e atividades simples para gastar energia com qualidade e enriquecer a rotina do seu cão.",
     "audience": "Para quem quer enriquecer a rotina sem depender de brinquedos caros.",
     "image": "/images/cta-dog.jpg",
     "tags": [

@@ -7,6 +7,7 @@ import { MyPetsRoundSeal } from "@/components/brand/round-seal";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
 import { CampaignShareButton } from "@/components/conversion/campaign-share-button";
 import { EbookRacaoFunnel } from "@/components/conversion/ebook-racao-funnel";
+import { FounderLeadCapture } from "@/components/conversion/founder-lead-capture";
 import { getCampaignConfig } from "@/lib/campaign-landings";
 import { apiGet } from "@/lib/api";
 import { BRAND } from "@/lib/brand";
@@ -69,7 +70,7 @@ export default async function EbookRacaoCampaignPage() {
 
   return (
     <main className="min-h-screen bg-[#f8f6ef] pb-20 text-petrol sm:pb-0">
-      <CampaignLandingTracker variant="ebook_racao_library13_v2" />
+      <CampaignLandingTracker variant="ebook_racao_quiz_founder_v3" />
 
       <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -95,17 +96,17 @@ export default async function EbookRacaoCampaignPage() {
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_470px] lg:items-center lg:px-8 lg:py-16">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
-              <BookOpen className="h-3.5 w-3.5" /> 1 eBook = 1 kg de ração
+              <BookOpen className="h-3.5 w-3.5" /> Quiz rápido · guia certo · 1 eBook = 1 kg
             </span>
             <h1 className="mt-6 max-w-3xl text-balance text-5xl font-black leading-[.95] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
               Você cuida do seu cão. <span className="text-emerald-300">Hoje pode alimentar outro.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-white/78">
-              Escolha entre <strong className="text-white">13 guias digitais</strong>. Cada participação confirmada de <strong className="text-white">R$ 12,90</strong> desbloqueia 1 guia e cria o compromisso MyPets de <strong className="text-white">1 kg de ração.</strong>
+              Responda 3 perguntas, descubra o guia mais útil para o seu momento e escolha como participar. Cada unidade confirmada de <strong className="text-white">R$ 12,90</strong> desbloqueia 1 guia e cria o compromisso MyPets de <strong className="text-white">1 kg de ração.</strong>
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <a href="#participar" className="inline-flex min-h-14 items-center gap-2 rounded-2xl bg-emerald-400 px-6 text-sm font-black text-[#092017] shadow-[0_18px_40px_-18px_rgba(52,211,153,.8)] transition hover:-translate-y-0.5 hover:bg-emerald-300">
-                Escolher meu eBook e garantir 1 kg <ArrowRight className="h-4 w-4" />
+                Fazer o quiz e descobrir meu guia <ArrowRight className="h-4 w-4" />
               </a>
               <Link href="/biblioteca" className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 text-sm font-black text-white transition hover:bg-white/10">
                 Ver a biblioteca <BookOpen className="h-4 w-4" />
@@ -116,7 +117,7 @@ export default async function EbookRacaoCampaignPage() {
             <div className="mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
               {[
                 ["13 guias", "conteúdo para diferentes momentos", BookOpen],
-                ["Leitura web + PDF", "acesso digital depois do Pix", Sparkles],
+                ["7,3 mil+", "seguidores na comunidade Facebook", Facebook],
                 ["1 guia = 1 kg", "R$ 12,90 por unidade confirmada", PawPrint],
               ].map(([title, text, Icon]) => {
                 const ItemIcon = Icon as typeof BookOpen;
@@ -159,6 +160,30 @@ export default async function EbookRacaoCampaignPage() {
 
           <div id="participar" className="scroll-mt-24">
             <EbookRacaoFunnel paymentReady={paymentReady} />
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border bg-[#fffaf0]">
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:px-8">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[.16em] text-amber-700">Comunidade real · prova social verificável</p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Mais de 7,3 mil seguidores já acompanham a MyPets no Facebook.</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+              A Biblioteca nasce dentro de uma comunidade que já existe. O objetivo agora é transformar atenção em conhecimento útil, apoio mensurável e participação de longo prazo.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <a href={BRAND.facebookUrl} target="_blank" rel="noopener noreferrer" className="rounded-2xl border border-amber-200 bg-white p-4 transition hover:-translate-y-0.5">
+              <Facebook className="h-5 w-5 text-blue-600" />
+              <p className="mt-3 text-xl font-black">7,3 mil+ seguidores</p>
+              <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Número visível no perfil oficial MyPets enviado como prova social desta campanha.</p>
+            </a>
+            <div className="rounded-2xl border border-amber-200 bg-white p-4">
+              <MessageCircle className="h-5 w-5 text-emerald-600" />
+              <p className="mt-3 text-xl font-black">Comunidade em expansão</p>
+              <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Facebook ativo e nova frente de WhatsApp/comunidade a ser aberta para participantes e Fundadores.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -224,6 +249,39 @@ export default async function EbookRacaoCampaignPage() {
           <a href="#participar" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-500 px-6 text-sm font-black text-white shadow-lg shadow-emerald-900/10">
             Escolher guias e impacto <ArrowRight className="h-4 w-4" />
           </a>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-[#10252c] text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_10%,rgba(251,191,36,.18),transparent_28%),radial-gradient(circle_at_10%_90%,rgba(52,211,153,.12),transparent_30%)]" />
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:px-8 lg:py-16">
+          <div>
+            <span className="inline-flex rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-[.16em] text-amber-200">
+              Pré-lançamento · Membro Fundador
+            </span>
+            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Acesso vitalício à Biblioteca MyPets por <span className="text-amber-300">R$ 99,90</span>.</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/68">
+              A proposta de Fundador reúne os <strong className="text-white">13 guias atuais</strong>, futuras publicações elegíveis sem custo adicional, acesso antecipado a novidades e participação na ante-estreia da <strong className="text-white">Virtual-Pet IA</strong>.
+            </p>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+              {[
+                "13 guias atuais + novas publicações elegíveis",
+                "Leitor web e recursos digitais MyPets",
+                "Distintivo digital de Membro Fundador",
+                "Ante-estreia gratuita da Virtual-Pet IA",
+                "Convites para testes e feedback com a equipa",
+                "Prioridade na nova comunidade WhatsApp",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-xs font-bold text-white/78">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" /> {item}
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-[10px] leading-5 text-white/45">
+              Esta é uma oferta de plataforma, diferente da compra unitária “1 eBook = 1 kg”. A regra de impacto em kg do plano Fundador será fechada e exibida explicitamente antes de ativarmos qualquer cobrança de R$ 99,90.
+            </p>
+          </div>
+          <FounderLeadCapture />
         </div>
       </section>
 
@@ -365,6 +423,8 @@ export default async function EbookRacaoCampaignPage() {
             ["Quando recebo o guia?", "O acesso é liberado na própria experiência assim que o servidor confirma o pagamento. O link de confirmação cria uma sessão segura no dispositivo, sem obrigar a criar senha no checkout. Pedimos um email válido para identificar a participação e facilitar suporte de acesso. Gerar o QR Code, por si só, não libera os guias."],
             ["Posso arredondar ou apoiar com um valor maior?", "Sim. Depois de escolher os eBooks, pode manter o valor base ou arredondar/reforçar livremente. O valor base determina os eBooks e kg garantidos; o adicional reforça o fundo e a operação da campanha sem inflar artificialmente o contador de kg."],
             ["Posso escolher mais de um?", "Sim. Cada guia adicional acrescenta R$ 12,90 e mais 1 kg. Pode escolher 1, 3, 5 ou a biblioteca completa com 13 guias e personalizar a seleção."],
+            ["O que é o Membro Fundador de R$ 99,90?", "É uma oferta de plataforma em pré-lançamento: acesso vitalício à Biblioteca MyPets, 13 guias atuais, futuras publicações elegíveis, distintivo de Fundador e prioridade na ante-estreia da Virtual-Pet IA. A lista já está aberta, mas nenhuma cobrança é feita pela inscrição."],
+            ["Por que o plano Fundador não diz ainda quantos kg garante?", "Porque é uma oferta diferente da compra unitária de eBooks. Não vamos inventar um número para parecer mais generoso: a regra de impacto do plano vitalício será publicada de forma explícita antes de a cobrança de R$ 99,90 ser ativada."],
           ].map(([q, a]) => (
             <details key={q} className="rounded-2xl border border-border bg-white p-5">
               <summary className="cursor-pointer list-none text-sm font-black">{q}</summary>
