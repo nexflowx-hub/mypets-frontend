@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Clock3, PawPrint, Sparkles } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
-import { MyPetsRoundSeal } from "@/components/brand/round-seal";
+import { GuideCover } from "@/components/library/guide-cover";
 import { getDigitalLibraryIndex } from "@/lib/digital-library";
 
 export const metadata: Metadata = {
@@ -58,14 +57,13 @@ export default async function LibraryPage() {
             {library.guides.map((guide) => (
               <article key={guide.id} className="group overflow-hidden rounded-[1.75rem] border border-border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
                 <Link href={"/biblioteca/" + guide.slug} className="block">
-                  <div className="relative aspect-[16/9] overflow-hidden">
-                    <Image src={guide.image} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-[1.03]" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-petrol/60 via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-4 flex gap-2">
-                      <span className="rounded-full bg-white/92 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-petrol">Guia MyPets</span>
-                    </div>
-                    <MyPetsRoundSeal className="absolute bottom-3 right-3 h-14 w-14" />
-                  </div>
+                  <GuideCover
+                    slug={guide.slug}
+                    title={guide.title}
+                    image={guide.image}
+                    compact
+                    className="aspect-[4/3] transition duration-500 group-hover:scale-[1.01]"
+                  />
                   <div className="p-6">
                     <div className="flex items-center gap-3 text-[11px] font-bold text-muted-foreground">
                       <span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> ~{guide.readingMinutes} min</span>
