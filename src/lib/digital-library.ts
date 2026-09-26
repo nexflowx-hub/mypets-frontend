@@ -61,7 +61,8 @@ export type DigitalLibraryIndex = {
 };
 
 const CONTENT_REPO = "nexflowx-hub/mypets-data";
-const CONTENT_REF = process.env.MYPETS_CONTENT_REF || "6f4c6b0e60279ac81ef9c4273284e0566d474267";
+export const DIGITAL_LIBRARY_CONTENT_REF = process.env.MYPETS_CONTENT_REF || "507dfbc03e30f036d8b5fbc6f31c4473b2083b7b";
+const CONTENT_REF = DIGITAL_LIBRARY_CONTENT_REF;
 const RAW_BASE = "https://raw.githubusercontent.com/" + CONTENT_REPO + "/" + encodeURIComponent(CONTENT_REF);
 
 async function fetchContentFile(path: string) {

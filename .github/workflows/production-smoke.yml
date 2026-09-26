@@ -173,6 +173,7 @@ jobs:
             sleep 5
           done
           [ "$release_ready" = "true" ] || { echo "Library 2.4.0-rc2 never became active" >&2; exit 1; }
+          grep -Fq 'data-library-ref="507dfbc03e30f036d8b5fbc6f31c4473b2083b7b"' /tmp/library.html
           grep -Fq "13 guias" /tmp/library.html
           grep -Fq "64 raças" /tmp/library.html
           grep -Fq "Leitura web + PDF" /tmp/library.html

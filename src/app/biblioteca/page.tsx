@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { GuideCover } from "@/components/library/guide-cover";
-import { getDigitalLibraryIndex } from "@/lib/digital-library";
+import { DIGITAL_LIBRARY_CONTENT_REF, getDigitalLibraryIndex } from "@/lib/digital-library";
 
 export const metadata: Metadata = {
   title: "Biblioteca Digital MyPets | Guias para cuidar melhor",
@@ -21,7 +21,7 @@ export default async function LibraryPage() {
   return (
     <>
       <SiteHeader />
-      <main data-library-version={library.version} className="min-h-screen bg-[#f8f6ef] pt-[72px] text-petrol">
+      <main data-library-version={library.version} data-library-ref={DIGITAL_LIBRARY_CONTENT_REF} className="min-h-screen bg-[#f8f6ef] pt-[72px] text-petrol">
         <section className="overflow-hidden bg-[#0f241b] text-white">
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.16em] text-emerald-200">
