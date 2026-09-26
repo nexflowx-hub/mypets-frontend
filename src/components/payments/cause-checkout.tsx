@@ -218,6 +218,7 @@ export function CauseCheckout({
   const selectionTouched = React.useRef(false);
   const [busy, setBusy] = React.useState(false);
   const [intent, setIntent] = React.useState<CheckoutIntent | null>(null);
+  const accessBootstrapIntentRef = React.useRef<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [verifying, setVerifying] = React.useState(false);
   const [paid, setPaid] = React.useState(false);
@@ -634,7 +635,7 @@ export function CauseCheckout({
   const successWhatsappHref = intent?.id
     ? whatsappMessageUrl(
         successWhatsappUrl,
-        `Olá! Participei da campanha MyPets 1 eBook = 1 kg e o pagamento já foi confirmado. Meu recibo MyPets é ${intent.id}. Quero receber meus eBooks pelo WhatsApp.`,
+        `Olá! Participei da campanha MyPets 1 eBook = 1 kg e o pagamento já foi confirmado. Quero ajuda para aceder aos meus guias.`,
       )
     : null;
   const nativeMethod = intent?.paymentMethod && intent.paymentMethod !== "checkout" ? intent.paymentMethod as NativePaymentMethod : null;
@@ -811,7 +812,7 @@ export function CauseCheckout({
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
-                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para receber os eBooks" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
+                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para identificar e recuperar o acesso" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
                 </div>
                 {brazilPixOnly && successWhatsappUrl && !requireEmail && (
                   <p className="-mt-1 text-[10px] leading-4 text-muted-foreground">Email opcional. Depois da confirmação, você pode abrir os eBooks imediatamente ou pedir o envio pelo WhatsApp.</p>

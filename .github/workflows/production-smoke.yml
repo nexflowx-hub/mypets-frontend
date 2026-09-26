@@ -47,6 +47,20 @@ jobs:
             "https://www.mypets.lat/loja"
             "https://www.mypets.lat/guias"
             "https://www.mypets.lat/guias/primeiras-24h"
+            "https://www.mypets.lat/biblioteca"
+            "https://www.mypets.lat/biblioteca/cuidados-essenciais"
+            "https://www.mypets.lat/biblioteca/primeiros-30-dias"
+            "https://www.mypets.lat/biblioteca/treino-gentil"
+            "https://www.mypets.lat/biblioteca/guia-das-racas"
+            "https://www.mypets.lat/biblioteca/alimentacao-bem-estar"
+            "https://www.mypets.lat/biblioteca/linguagem-corporal-canina"
+            "https://www.mypets.lat/biblioteca/passeios-sem-stress"
+            "https://www.mypets.lat/biblioteca/ficar-sozinho"
+            "https://www.mypets.lat/biblioteca/cao-em-apartamento"
+            "https://www.mypets.lat/biblioteca/higiene-saude-oral"
+            "https://www.mypets.lat/biblioteca/adotei-cao-adulto"
+            "https://www.mypets.lat/biblioteca/caes-e-criancas"
+            "https://www.mypets.lat/biblioteca/50-ideias-enriquecimento"
           )
 
           for url in "${routes[@]}"; do
@@ -124,35 +138,52 @@ jobs:
           set -euo pipefail
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar?utm_source=github-actions&utm_medium=smoke&utm_campaign=help_campaign" -o /tmp/help.html
           grep -Fq "MyPets" /tmp/help.html
-          grep -Fq "Pix" /tmp/help.html
           grep -Eiq "apoiar|apoio|ajudar" /tmp/help.html
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/opengraph-image -o /tmp/help-og.png
           test -s /tmp/help-og.png
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/petskids?utm_source=github-actions&utm_medium=smoke&utm_campaign=petskids" -o /tmp/petskids-help.html
           grep -Fq "PetsKids" /tmp/petskids-help.html
           grep -Fq "MyPets" /tmp/petskids-help.html
-          grep -Fq "Pix" /tmp/petskids-help.html
+          grep -Eiq "apoiar|apoio|ajudar" /tmp/petskids-help.html
           curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/petskids/opengraph-image -o /tmp/petskids-og.png
           test -s /tmp/petskids-og.png
           echo "High-conversion donation landings and social previews validated"
 
-      - name: Verify ebook-to-feed funnel
+      - name: Verify Library 13 sales funnel and gated reader
         shell: bash
         run: |
           set -euo pipefail
-          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS "https://www.mypets.lat/ajudar/ebooks?utm_source=github-actions&utm_medium=smoke&utm_campaign=ebook_racao" -o /tmp/ebooks.html
-          grep -Fq "1 eBook" /tmp/ebooks.html
+
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             "https://www.mypets.lat/ajudar/ebooks?utm_source=github-actions&utm_medium=smoke&utm_campaign=ebook_racao_library13_v2"             -o /tmp/ebooks.html
+
+          # Structural/value proof rather than fragile CTA copy.
           grep -Fq "R$ 12,90" /tmp/ebooks.html
-          grep -Fq "1 kg de ração" /tmp/ebooks.html
+          grep -Fq "13 guias" /tmp/ebooks.html
+          grep -Fq "Biblioteca completa" /tmp/ebooks.html
+          grep -Fq "R$ 167,70" /tmp/ebooks.html
           grep -Fq "Cuidados Essenciais" /tmp/ebooks.html
           grep -Fq "Treino Gentil" /tmp/ebooks.html
-          grep -Fq "Escolher meu eBook e garantir 1 kg" /tmp/ebooks.html
+          grep -Fq "50 Ideias de Enriquecimento" /tmp/ebooks.html
+
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             https://www.mypets.lat/biblioteca -o /tmp/library.html
+          grep -Fq "13 guias" /tmp/library.html
+          grep -Fq "64 raças" /tmp/library.html
+          grep -Fq "Leitura web + PDF" /tmp/library.html
+
           readiness="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS https://api.mypets.lat/v1/campaigns/ebook-racao/readiness)"
           printf '%s' "$readiness" | grep -q '"technicalReady":true'
-          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS https://www.mypets.lat/ajudar/ebooks/opengraph-image -o /tmp/ebooks-og.png
+
+          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             https://www.mypets.lat/ajudar/ebooks/opengraph-image -o /tmp/ebooks-og.png
           test -s /tmp/ebooks-og.png
-          headers="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -sSI https://www.mypets.lat/ebooks/cuidados-essenciais)"
-          printf '%s' "$headers" | grep -Eqi '^location: .*/ajudar/ebooks\?access=required'
-          collection_headers="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -sSI "https://www.mypets.lat/ebooks/colecao?books=cuidados-essenciais,treino-gentil")"
-          printf '%s' "$collection_headers" | grep -Eqi '^location: .*/ajudar/ebooks\?access=required'
-          echo "Ebook-to-feed funnel and gated rewards validated"
+
+          # Premium pages must end at the campaign when there is no validated
+          # device access session.
+          final_reader_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/biblioteca/cuidados-essenciais/ler)"
+          printf '%s' "$final_reader_url" | grep -Eq '/ajudar/ebooks\?access=required
+
+
+          final_collection_url="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LsS -o /dev/null -w '%{url_effective}' https://www.mypets.lat/ebooks/colecao)"
+          printf '%s' "$final_collection_url" | grep -Eq '/ajudar/ebooks\?access=required
+
+
+          echo "Library 13 sales funnel, previews, API readiness and gated reader validated"

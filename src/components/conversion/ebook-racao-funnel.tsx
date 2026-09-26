@@ -23,9 +23,10 @@ const intents = [
 ];
 
 const bundleOptions = [
-  { count: 1, label: "1 eBook", impact: "1 kg", note: "Começar simples" },
-  { count: 3, label: "3 eBooks", impact: "3 kg", note: "Sugerido" },
-  { count: 5, label: "Coleção completa", impact: "5 kg", note: "Todos os guias" },
+  { count: 1, label: "1 guia", impact: "1 kg", note: "Começar" },
+  { count: 3, label: "3 guias", impact: "3 kg", note: "Mais escolhido" },
+  { count: 5, label: "5 guias", impact: "5 kg", note: "Coleção essencial" },
+  { count: 13, label: "Biblioteca completa", impact: "13 kg", note: "Maior impacto" },
 ];
 
 function money(cents: number) {
@@ -108,7 +109,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
       ? supportTotalCents
       : amountCents;
   const topUpCents = Math.max(0, selectedSupportTotal - amountCents);
-  const collectionHref = `/ebooks/colecao?books=${encodeURIComponent(selectedEbooks.map((ebook) => ebook.slug).join(","))}&via=apoio-confirmado`;
+  const collectionHref = `/ebooks/acesso?next=${encodeURIComponent("/ebooks/colecao")}&books=${encodeURIComponent(selectedEbooks.map((ebook) => ebook.slug).join(","))}&via=apoio-confirmado`;
 
   return (
     <div className="rounded-[2rem] border border-white/10 bg-white p-5 text-petrol shadow-2xl shadow-black/20 sm:p-6">
@@ -142,7 +143,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
       {step === 1 && (
         <div className="mt-6">
           <p className="text-sm font-black">Qual guia seria mais útil para você hoje?</p>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">Uma pergunta, uma recomendação. No próximo passo pode mudar a escolha ou ampliar para 3 ou 5 kg.</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Uma pergunta, uma recomendação. No próximo passo pode mudar a escolha ou ampliar para 3, 5 ou 13 kg.</p>
           <div className="mt-4 space-y-2">
             {intents.map((item) => (
               <button
@@ -183,7 +184,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
             <p className="mt-1 text-xs leading-5 text-emerald-900/65">Comece com 1 kg ou aumente o gesto. Cada eBook adicional acrescenta exatamente mais 1 kg à participação.</p>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2" aria-label="Escolher impacto">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Escolher impacto">
             {bundleOptions.map((bundle) => {
               const active = selected.length === bundle.count;
               return (
@@ -202,7 +203,9 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
                     "mx-auto mt-1 inline-flex rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-wide",
                     bundle.count === 3
                       ? active ? "bg-emerald-300/15 text-emerald-200" : "bg-emerald-50 text-emerald-700"
-                      : active ? "text-white/55" : "text-muted-foreground",
+                      : bundle.count === 13
+                        ? active ? "bg-amber-300/15 text-amber-100" : "bg-amber-50 text-amber-800"
+                        : active ? "text-white/55" : "text-muted-foreground",
                   )}>{bundle.note}</span>
                   <span className={cn("mt-1 block text-[9px]", active ? "text-white/55" : "text-muted-foreground")}>{money(bundle.count * SOLIDARITY_EBOOK_UNIT_CENTS)}</span>
                 </button>
