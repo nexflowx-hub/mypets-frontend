@@ -157,11 +157,25 @@ jobs:
           grep -Fq "Cuidados Essenciais" /tmp/ebooks.html
           grep -Fq "Treino Gentil" /tmp/ebooks.html
 
-          curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS             https://www.mypets.lat/biblioteca -o /tmp/library.html
+          # HTTP 200 can still come from the previous Vercel deployment while
+          # the new production build is propagating. Wait for the release marker,
+          # then validate the stable library invariants against that same response.
+          release_ready=false
+          for attempt in $(seq 1 24); do
+            curl --retry 3 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS \
+              https://www.mypets.lat/biblioteca -o /tmp/library.html
+            if grep -Fq 'data-library-version="2.4.0-rc2"' /tmp/library.html; then
+              release_ready=true
+              echo "Library release marker ready on attempt=$attempt"
+              break
+            fi
+            echo "Waiting for Library 2.4.0-rc2 deployment, attempt=$attempt"
+            sleep 5
+          done
+          [ "$release_ready" = "true" ] || { echo "Library 2.4.0-rc2 never became active" >&2; exit 1; }
           grep -Fq "13 guias" /tmp/library.html
           grep -Fq "64 raças" /tmp/library.html
           grep -Fq "Leitura web + PDF" /tmp/library.html
-          grep -Fq 'data-library-version="2.4.0-rc2"' /tmp/library.html
 
           readiness="$(curl --retry 5 --retry-delay 2 --retry-all-errors --max-time 20 -fsS             https://api.mypets.lat/v1/campaigns/ebook-racao/readiness)"
           printf '%s' "$readiness" | grep -q '"technicalReady":true'
