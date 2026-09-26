@@ -8,13 +8,13 @@ Repository:
 `nexflowx-hub/mypets-frontend`
 
 Base branch:
-`feat/premium-guide-cover-system`
+`main`
 
 Canonical content:
 `nexflowx-hub/mypets-data`
 
 Pinned editorial release:
-`ed6259dcf1d80bf9517cfdf7aa9fc17605acee89`
+`6f4c6b0e60279ac81ef9c4273284e0566d474267`
 
 Read first:
 - `src/components/library/guide-cover.tsx`
@@ -138,7 +138,7 @@ Do not bake price into cover images.
 The rich-media reader already renders exact canonical placements from:
 `media/media-placement-master.json`.
 
-Upgrade the current accessible original-visual fallback in `LibraryMediaSlot` into reusable semantic SVG/HTML visuals for these families when canonical source data is sufficient:
+There are **50 original-visual placement occurrences** in the canonical 103-placement pack. Upgrade the current accessible original-visual fallback in `LibraryMediaSlot` into reusable semantic SVG/HTML visuals for these families when canonical source data is sufficient:
 
 - traffic-light
 - timeline
@@ -179,6 +179,8 @@ Never invent:
 - nutritional numbers.
 
 If the placement metadata does not contain enough structured information, render a polished summary visual using only the canonical alt/caption instead of fabricating detail.
+
+**Completion rule:** all 50 original-visual placements must resolve to a deliberate family renderer or a deliberate polished summary renderer. No known production placement may fall back to the current generic icon + four bars placeholder.
 
 ## Mission D — quality assurance
 
