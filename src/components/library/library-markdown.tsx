@@ -3,7 +3,8 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { CheckCircle2, Circle, ExternalLink } from "lucide-react";
-import type { GuideHeading } from "@/lib/digital-library";
+import type { GuideHeading, LibraryMediaPlacement, LibraryMediaRecord } from "@/lib/digital-library";
+import { LibraryMediaSlot } from "@/components/library/library-media-slot";
 
 function headingId(text: string) {
   return text.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9\\s-]/g, "").trim().replace(/\\s+/g, "-").replace(/-+/g, "-");
@@ -19,12 +20,32 @@ export function LibraryMarkdown({
   markdown,
   headings = [],
   progressKey,
+  mediaPlacements = [],
+  mediaRecords = [],
 }: {
   markdown: string;
   headings?: GuideHeading[];
   progressKey?: string;
+  mediaPlacements?: LibraryMediaPlacement[];
+  mediaRecords?: LibraryMediaRecord[];
 }) {
   const [completed, setCompleted] = React.useState<string[]>([]);
+  const mediaById = React.useMemo(
+    () => new Map(mediaRecords.map((item) => [item.id, item] as const)),
+    [mediaRecords],
+  );
+
+  function slots(anchor: string, position: "before" | "after") {
+    return mediaPlacements
+      .filter((placement) => placement.anchor === anchor && placement.position === position)
+      .map((placement) => (
+        <LibraryMediaSlot
+          key={placement.id + ":" + anchor + ":" + position}
+          placement={placement}
+          media={mediaById.get(placement.id)}
+        />
+      ));
+  }
 
   React.useEffect(() => {
     if (!progressKey) return;
@@ -75,26 +96,38 @@ export function LibraryMarkdown({
             h2: ({ children }) => {
               const text = textFromChildren(children);
               const id = headingId(text);
+              const anchor = "## " + text;
               const isDone = completed.includes(id);
               return (
-                <div className="group mt-14 flex scroll-mt-28 items-start gap-3" id={id}>
-                  <h2 className="min-w-0 flex-1 text-2xl font-black leading-tight text-petrol sm:text-3xl">{children}</h2>
-                  {progressKey && (
-                    <button
-                      type="button"
-                      onClick={() => toggle(id)}
-                      aria-label={isDone ? "Marcar seção como não concluída" : "Marcar seção como concluída"}
-                      className="mt-0.5 rounded-full p-1 text-emerald-600 transition hover:bg-emerald-50 print:hidden"
-                    >
-                      {isDone ? <CheckCircle2 className="h-6 w-6" /> : <Circle className="h-6 w-6 text-petrol/20" />}
-                    </button>
-                  )}
-                </div>
+                <>
+                  {slots(anchor, "before")}
+                  <div className="group mt-14 flex scroll-mt-28 items-start gap-3" id={id}>
+                    <h2 className="min-w-0 flex-1 text-2xl font-black leading-tight text-petrol sm:text-3xl">{children}</h2>
+                    {progressKey && (
+                      <button
+                        type="button"
+                        onClick={() => toggle(id)}
+                        aria-label={isDone ? "Marcar seção como não concluída" : "Marcar seção como concluída"}
+                        className="mt-0.5 rounded-full p-1 text-emerald-600 transition hover:bg-emerald-50 print:hidden"
+                      >
+                        {isDone ? <CheckCircle2 className="h-6 w-6" /> : <Circle className="h-6 w-6 text-petrol/20" />}
+                      </button>
+                    )}
+                  </div>
+                  {slots(anchor, "after")}
+                </>
               );
             },
             h3: ({ children }) => {
               const text = textFromChildren(children);
-              return <h3 id={headingId(text)} className="mt-9 scroll-mt-28 text-xl font-black text-petrol">{children}</h3>;
+              const anchor = "### " + text;
+              return (
+                <>
+                  {slots(anchor, "before")}
+                  <h3 id={headingId(text)} className="mt-9 scroll-mt-28 text-xl font-black text-petrol">{children}</h3>
+                  {slots(anchor, "after")}
+                </>
+              );
             },
             p: ({ children }) => <p className="mt-4 text-[15px] leading-7 text-petrol/78 sm:text-base sm:leading-8">{children}</p>,
             ul: ({ children }) => <ul className="mt-4 space-y-2 pl-5 text-[15px] leading-7 text-petrol/78 marker:text-emerald-500 sm:text-base">{children}</ul>,
