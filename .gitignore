@@ -73,3 +73,6 @@ prompt
 /public/logo.svg
 .zscripts/
 mini-services/
+
+# Visual QA raw dump (curated evidence in docs/qa-evidence)
+/qa-out/

@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { AuthDialog } from "@/components/layout/auth-dialog";
 import { GuideCover } from "@/components/library/guide-cover";
 import { getDigitalLibraryIndex } from "@/lib/digital-library";
+import { coverBackgroundForSlug } from "@/lib/cover-backgrounds";
 
 export const metadata: Metadata = {
   title: "Biblioteca Digital MyPets | Guias para cuidar melhor",
@@ -60,7 +61,7 @@ export default async function LibraryPage() {
                   <GuideCover
                     slug={guide.slug}
                     title={guide.title}
-                    image={guide.image}
+                    image={coverBackgroundForSlug(guide.slug, guide.image)}
                     compact
                     className="aspect-[4/3] transition duration-500 group-hover:scale-[1.01]"
                   />

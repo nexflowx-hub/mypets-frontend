@@ -12,6 +12,7 @@ import { getCampaignConfig } from "@/lib/campaign-landings";
 import { apiGet } from "@/lib/api";
 import { BRAND } from "@/lib/brand";
 import { solidarityEbooks } from "@/lib/solidarity-ebooks";
+import { coverBackgroundForSlug } from "@/lib/cover-backgrounds";
 
 export const revalidate = 10;
 
@@ -226,7 +227,7 @@ export default async function EbookRacaoCampaignPage() {
           {solidarityEbooks.map((ebook) => (
             <article key={ebook.slug} className="group overflow-hidden rounded-3xl border border-border bg-white">
               <div className="relative">
-                <GuideCover slug={ebook.slug} title={ebook.shortTitle} image={ebook.image} compact className="h-52" />
+                <GuideCover slug={ebook.slug} title={ebook.shortTitle} image={coverBackgroundForSlug(ebook.slug, ebook.image)} compact className="h-52" />
                 <span className="absolute left-3 bottom-3 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-emerald-800 shadow-sm">R$ 12,90 · 1 kg</span>
               </div>
               <div className="p-5">

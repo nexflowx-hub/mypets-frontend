@@ -1,0 +1,106 @@
+[
+  {
+    "slug": "cuidados-essenciais",
+    "file": "01-cuidados-essenciais.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 123336,
+    "ok": true
+  },
+  {
+    "slug": "primeiros-30-dias",
+    "file": "02-primeiros-30-dias.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 163140,
+    "ok": true
+  },
+  {
+    "slug": "treino-gentil",
+    "file": "03-treino-gentil.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 183188,
+    "ok": true
+  },
+  {
+    "slug": "guia-das-racas",
+    "file": "04-atlas-64.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 162698,
+    "ok": true
+  },
+  {
+    "slug": "alimentacao-bem-estar",
+    "file": "05-alimentacao-bem-estar.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 103626,
+    "ok": true
+  },
+  {
+    "slug": "linguagem-corporal-canina",
+    "file": "06-linguagem-corporal.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 126030,
+    "ok": true
+  },
+  {
+    "slug": "passeios-sem-stress",
+    "file": "07-passeios-sem-stress.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 113154,
+    "ok": true
+  },
+  {
+    "slug": "ficar-sozinho",
+    "file": "08-ficar-sozinho.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 128412,
+    "ok": true
+  },
+  {
+    "slug": "cao-em-apartamento",
+    "file": "09-cao-em-apartamento.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 131590,
+    "ok": true
+  },
+  {
+    "slug": "higiene-saude-oral",
+    "file": "10-higiene-saude-oral.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 80076,
+    "ok": true
+  },
+  {
+    "slug": "adotei-cao-adulto",
+    "file": "11-adotei-cao-adulto.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 86232,
+    "ok": true
+  },
+  {
+    "slug": "caes-e-criancas",
+    "file": "12-caes-e-criancas.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 136312,
+    "ok": true
+  },
+  {
+    "slug": "50-ideias-enriquecimento",
+    "file": "13-enriquecimento.webp",
+    "w": 914,
+    "h": 1600,
+    "bytes": 137776,
+    "ok": true
+  }
+]

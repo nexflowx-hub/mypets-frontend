@@ -61,7 +61,7 @@ export type DigitalLibraryIndex = {
 };
 
 const CONTENT_REPO = "nexflowx-hub/mypets-data";
-const CONTENT_REF = process.env.MYPETS_CONTENT_REF || "6f4c6b0e60279ac81ef9c4273284e0566d474267";
+const CONTENT_REF = process.env.MYPETS_CONTENT_REF || "507dfbc03e30f036d8b5fbc6f31c4473b2083b7b";
 const RAW_BASE = "https://raw.githubusercontent.com/" + CONTENT_REPO + "/" + encodeURIComponent(CONTENT_REF);
 
 async function fetchContentFile(path: string) {
@@ -149,8 +149,10 @@ function readerMarkdown(markdown: string) {
   // "[!MEDIA] renderizar ...". Rich media is progressively rendered from the
   // separate placement manifest.
   return markdown
+    .replace(/(^|\n)> \[!MEDIA\]\n(?:>.*\n?)*(?=\n|$)/g, "$1")
     .replace(/\n## Recursos visuais do reader[\s\S]*?(?=\n## Referências de base desta edição)/g, "\n")
-    .replace(/\nAlém destes medias externos\/licenciados,[^\n]*\n/g, "\n");
+    .replace(/\nAlém destes medias externos\/licenciados,[^\n]*\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n");
 }
 
 export async function getDigitalLibraryPreview(guide: DigitalLibraryGuide) {
