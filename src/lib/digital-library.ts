@@ -14,6 +14,41 @@ export type DigitalLibraryGuide = {
   structuredAtlasPath?: string;
 };
 
+
+export type LibraryMediaPlacement = {
+  id: string;
+  kind: "media" | "video" | "original-visual";
+  anchor: string;
+  position: "before" | "after";
+  alt: string;
+  caption: string;
+  render?: string;
+  watch_for?: string[];
+};
+
+export type LibraryMediaRecord = {
+  id: string;
+  type: "image" | "video-embed";
+  title?: string;
+  publisher?: string;
+  source_page?: string;
+  embed_url?: string;
+  asset_path?: string;
+  asset_url?: string;
+  license?: string;
+  attribution?: string;
+  attribution_required?: boolean;
+  alt_pt_br?: string;
+  caption_pt_br?: string;
+};
+
+type MediaPlacementMaster = {
+  guides: Record<string, {
+    slug: string;
+    placements: LibraryMediaPlacement[];
+  }>;
+};
+
 export type DigitalLibraryIndex = {
   version: string;
   collection: {
@@ -26,7 +61,7 @@ export type DigitalLibraryIndex = {
 };
 
 const CONTENT_REPO = "nexflowx-hub/mypets-data";
-const CONTENT_REF = process.env.MYPETS_CONTENT_REF || "cf75919727dc611fa5c7064480e1f3042e0bfa43";
+const CONTENT_REF = process.env.MYPETS_CONTENT_REF || "b5275697433cd3a32ebe06aee9eb3894c7a3add9";
 const RAW_BASE = "https://raw.githubusercontent.com/" + CONTENT_REPO + "/" + encodeURIComponent(CONTENT_REF);
 
 async function fetchContentFile(path: string) {
@@ -38,6 +73,64 @@ async function fetchContentFile(path: string) {
     throw new Error("MyPets content fetch failed: " + path + " (" + response.status + ")");
   }
   return response.text();
+}
+
+
+function parseSimpleMediaRegistryYaml(raw: string): LibraryMediaRecord[] {
+  const lines = raw.split("\n");
+  const records: LibraryMediaRecord[] = [];
+  let current: Record<string, unknown> | null = null;
+
+  function commit() {
+    if (!current?.id || !current?.type) return;
+    records.push(current as LibraryMediaRecord);
+  }
+
+  for (const line of lines) {
+    const idMatch = /^\s+- id:\s*(.+?)\s*$/.exec(line);
+    if (idMatch) {
+      commit();
+      current = { id: idMatch[1].trim() };
+      continue;
+    }
+    if (!current) continue;
+
+    const fieldMatch = /^\s{4}([a-zA-Z_]+):\s*(.*?)\s*$/.exec(line);
+    if (!fieldMatch) continue;
+    const [, key, rawValue] = fieldMatch;
+    if (["topics", "notes", "frontend_source", "license_action"].includes(key)) continue;
+
+    let value: unknown = rawValue.trim();
+    if (value === "true") value = true;
+    else if (value === "false") value = false;
+    else if (
+      typeof value === "string" &&
+      ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'")))
+    ) {
+      value = value.slice(1, -1);
+    }
+    current[key] = value;
+  }
+  commit();
+  return records;
+}
+
+export async function getGuideMediaBundle(guide: DigitalLibraryGuide) {
+  try {
+    const [masterRaw, registryRaw] = await Promise.all([
+      fetchContentFile("media/media-placement-master.json"),
+      fetchContentFile("media/registry.yaml"),
+    ]);
+    const master = JSON.parse(masterRaw) as MediaPlacementMaster;
+    const placements = Object.values(master.guides).find((entry) => entry.slug === guide.slug)?.placements ?? [];
+    const registry = parseSimpleMediaRegistryYaml(registryRaw);
+    const wanted = new Set(placements.filter((item) => item.kind !== "original-visual").map((item) => item.id));
+    const mediaRecords = registry.filter((item) => wanted.has(item.id));
+    return { placements, mediaRecords };
+  } catch {
+    // Rich media should improve the reader, never make the paid content unreadable.
+    return { placements: [] as LibraryMediaPlacement[], mediaRecords: [] as LibraryMediaRecord[] };
+  }
 }
 
 export async function getDigitalLibraryIndex(): Promise<DigitalLibraryIndex> {

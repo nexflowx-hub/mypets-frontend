@@ -11,6 +11,7 @@ import {
   entitlementKeysForGuide,
   extractGuideHeadings,
   getDigitalLibraryContent,
+  getGuideMediaBundle,
   resolveDigitalLibraryGuide,
 } from "@/lib/digital-library";
 
@@ -49,7 +50,10 @@ export default async function DigitalLibraryReaderPage({
     redirect("/ebooks/colecao");
   }
 
-  const markdown = await getDigitalLibraryContent(guide);
+  const [markdown, mediaBundle] = await Promise.all([
+    getDigitalLibraryContent(guide),
+    getGuideMediaBundle(guide),
+  ]);
   const headings = extractGuideHeadings(markdown);
 
   return (
@@ -92,6 +96,8 @@ export default async function DigitalLibraryReaderPage({
             markdown={markdown}
             headings={headings.filter((heading) => heading.level === 2)}
             progressKey={"mypets-library:" + guide.id + ":v2"}
+            mediaPlacements={mediaBundle.placements}
+            mediaRecords={mediaBundle.mediaRecords}
           />
 
           <div className="mt-14 rounded-[2rem] bg-[#0f241b] p-7 text-white sm:p-9 print:border print:border-gray-300 print:bg-white print:text-black">
