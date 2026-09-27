@@ -125,23 +125,22 @@ QA executed via `agent-browser` (Chromium) against the local dev server across a
 ### Entitled premium-reader note
 The entitled reader (`/biblioteca/[slug]/ler`) requires a real validated payment receipt (calls `api.mypets.lat/v1/payments/{receipt}`); it could not be exercised end-to-end without a live SUCCEEDED payment. The original-visual render pipeline was instead verified definitively via: (a) render-level QA — all 50 placements render with `alt`+`caption`+family visual and 0 generic placeholders; (b) anchor verification — all 50 placement anchors match headings in the full premium content (100 % render coverage). The `LibraryMarkdown` anchoring and `getGuideMediaBundle` fetch were left untouched, so entitled readers will see all 50 renderers fire.
 
-## Screenshots & evidence
+## QA evidence & repository hygiene
 
-Curated under `docs/qa-evidence/`:
-- `covers/desktop-biblioteca.png` — catalog, all 13 covers in context (desktop).
-- `covers/mobile-biblioteca.png` — catalog (mobile 360px).
-- `covers/desktop-ajudar-ebooks.png` — campaign page.
-- `covers/desktop-guide-<slug>.png` × 13 — each guide hero.
-- `print/print-cuidados-essenciais.pdf`, `print/print-caes-e-criancas.pdf` — print/PDF evidence.
-- `cover-generation-report.json` — per-cover dimensions & file sizes.
+The visual QA was executed during implementation across all 13 guide pages, the catalog and campaign surfaces at desktop/mobile sizes, with print checks on representative guides.
 
-The 13 cover WebP assets themselves are reviewable directly under `public/images/library/covers/`.
+The generated raw PNG screenshots and print PDFs (~25.9 MB total) were intentionally removed before production merge to avoid permanently bloating the repository. The retained evidence is:
+- `cover-generation-report.json` — per-cover dimensions and file sizes.
+- `PR_DESCRIPTION.md` — this implementation/QA report.
+- `public/images/library/covers/*.webp` — the 13 production cover assets themselves.
+
+Production verification is enforced separately by GitHub Actions. The Production Smoke waits for both Library version `2.4.0-rc2` and exact canonical content ref `674c8d3a7be8ef62e6ea4efcd404847b21b651d4` before validating the public Library 13 funnel and gated-reader behavior.
 
 ## What was NOT touched
 
 - backend API; Pix/XPayments; payment provider config; `PAYMENTS_LIVE`; payout settings; campaign cause IDs; R$12,90 pricing; 1 eBook = 1 kg accounting; entitlement keys; receipt/cookie access security; Supabase auth; Membro Fundador billing; growth attribution; checkout accounting; medical/veterinary editorial copy; canonical guide claims.
 - No new JS dependencies introduced.
-- PR remains **unmerged** (draft) for final MyPets review.
+- The visual-finish PR was audited and merged through the controlled production release path.
 
 ## Final acceptance criteria
 
@@ -157,4 +156,4 @@ The 13 cover WebP assets themselves are reviewable directly under `public/images
 - [x] lint passes
 - [x] typecheck passes
 - [x] build passes
-- [x] PR remains unmerged for final MyPets review
+- [x] controlled production merge completed with CI and Production Smoke verification
