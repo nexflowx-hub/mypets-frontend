@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, Check, ChevronDown, Heart, PawPrint, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Heart, PawPrint } from "lucide-react";
 import { CauseCheckout } from "@/components/payments/cause-checkout";
 import {
   solidarityAmountCents,
@@ -74,7 +74,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
     "&via=apoio-confirmado";
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white p-5 text-petrol shadow-2xl shadow-black/20 sm:p-6">
+    <div data-ebook-racao-funnel="fast-pix-v5" data-fast-pix-options="1,3,13" className="rounded-[2rem] border border-white/10 bg-white p-5 text-petrol shadow-2xl shadow-black/20 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.17em] text-emerald-700">
