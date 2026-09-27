@@ -6,7 +6,6 @@ import { MyPetsLogo } from "@/components/brand/logo";
 import { CampaignLandingTracker } from "@/components/conversion/campaign-landing-tracker";
 import { CampaignShareButton } from "@/components/conversion/campaign-share-button";
 import { EbookRacaoFunnel } from "@/components/conversion/ebook-racao-funnel";
-import { FounderLeadCapture } from "@/components/conversion/founder-lead-capture";
 import { getCampaignConfig } from "@/lib/campaign-landings";
 import { apiGet } from "@/lib/api";
 import { BRAND } from "@/lib/brand";
@@ -77,8 +76,8 @@ export default async function EbookRacaoCampaignPage() {
             <span className="hidden items-center gap-2 text-[11px] font-bold text-muted-foreground sm:inline-flex">
               <LockKeyhole className="h-3.5 w-3.5 text-emerald-700" /> Participação segura
             </span>
-            <a href="#como-funciona" className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-white px-4 text-xs font-black text-petrol">
-              Como funciona
+            <a href="#participar" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-emerald-600 px-4 text-xs font-black text-white shadow-sm">
+              Gerar Pix <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
         </div>
@@ -92,7 +91,7 @@ export default async function EbookRacaoCampaignPage() {
         </div>
 
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_470px] lg:items-center lg:px-8 lg:py-16">
-          <div className="max-w-3xl">
+          <div className="order-2 max-w-3xl lg:order-1">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
               <BookOpen className="h-3.5 w-3.5" /> Pix rápido · 1 eBook = 1 kg
             </span>
@@ -156,7 +155,7 @@ export default async function EbookRacaoCampaignPage() {
             </div>
           </div>
 
-          <div id="participar" className="scroll-mt-24">
+          <div id="participar" className="order-1 scroll-mt-24 lg:order-2">
             <EbookRacaoFunnel paymentReady={paymentReady} />
           </div>
         </div>
@@ -225,39 +224,6 @@ export default async function EbookRacaoCampaignPage() {
               Ver todos os guias <BookOpen className="h-4 w-4" />
             </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-[#10252c] text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_10%,rgba(251,191,36,.18),transparent_28%),radial-gradient(circle_at_10%_90%,rgba(52,211,153,.12),transparent_30%)]" />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:px-8 lg:py-16">
-          <div>
-            <span className="inline-flex rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-[.16em] text-amber-200">
-              Pré-lançamento · Membro Fundador
-            </span>
-            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Acesso vitalício à Biblioteca MyPets por <span className="text-amber-300">R$ 99,90</span>.</h2>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/68">
-              A proposta de Fundador reúne os <strong className="text-white">13 guias atuais</strong>, futuras publicações elegíveis sem custo adicional, acesso antecipado a novidades e participação na ante-estreia da <strong className="text-white">Virtual-Pet IA</strong>.
-            </p>
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              {[
-                "13 guias atuais + novas publicações elegíveis",
-                "Leitor web e recursos digitais MyPets",
-                "Distintivo digital de Membro Fundador",
-                "Ante-estreia gratuita da Virtual-Pet IA",
-                "Convites para testes e feedback com a equipa",
-                "Prioridade na nova comunidade WhatsApp",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-xs font-bold text-white/78">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" /> {item}
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-[10px] leading-5 text-white/45">
-              Esta é uma oferta de plataforma, diferente da compra unitária “1 eBook = 1 kg”. A regra de impacto em kg do plano Fundador será fechada e exibida explicitamente antes de ativarmos qualquer cobrança de R$ 99,90.
-            </p>
-          </div>
-          <FounderLeadCapture />
         </div>
       </section>
 
@@ -416,7 +382,7 @@ export default async function EbookRacaoCampaignPage() {
             <p className="truncate text-sm font-black text-petrol">A partir de R$ 12,90</p>
           </div>
           <a href="#participar" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-emerald-500 px-4 text-xs font-black text-white">
-            Escolher <ArrowRight className="h-3.5 w-3.5" />
+            Ir ao Pix <ArrowRight className="h-3.5 w-3.5" />
           </a>
         </div>
       </div>
