@@ -22,9 +22,8 @@ const curatedPackSlugs: Record<number, string[]> = {
 
 const packOptions = [
   { count: 1, label: "1 guia", impact: "1 kg", note: "R$ 12,90" },
-  { count: 3, label: "3 guias", impact: "3 kg", note: "R$ 38,70", featured: true },
-  { count: 5, label: "5 guias", impact: "5 kg", note: "R$ 64,50" },
-  { count: 13, label: "Biblioteca", impact: "13 kg", note: "R$ 167,70" },
+  { count: 3, label: "Pack 3", impact: "3 kg", note: "R$ 38,70", featured: true },
+  { count: 13, label: "Todos os 13", impact: "13 kg", note: "R$ 167,70" },
 ];
 
 function money(cents: number) {
@@ -83,7 +82,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
           </p>
           <h2 className="mt-1 text-2xl font-black tracking-tight">Escolha. Pague por Pix. Pronto.</h2>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Sem quiz obrigatório. Escolha um pack agora; só abra a lista completa se quiser personalizar.
+            Comece com 1 guia, escolha o Pack 3 ou leve os 13. A lista completa só aparece se quiser personalizar.
           </p>
         </div>
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
@@ -91,7 +90,7 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
         </span>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Escolher pack">
+      <div className="mt-5 grid grid-cols-3 gap-2" aria-label="Escolher pack">
         {packOptions.map((pack) => {
           const active = selected.length === pack.count && !showAll;
           return (
@@ -186,21 +185,6 @@ export function EbookRacaoFunnel({ paymentReady }: { paymentReady: boolean }) {
           </p>
         </div>
       )}
-
-      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-xl bg-sand/45 px-2 py-2.5">
-          <ShieldCheck className="mx-auto h-4 w-4 text-emerald-700" />
-          <p className="mt-1 text-[9px] font-black">Pix seguro</p>
-        </div>
-        <div className="rounded-xl bg-sand/45 px-2 py-2.5">
-          <BookOpen className="mx-auto h-4 w-4 text-emerald-700" />
-          <p className="mt-1 text-[9px] font-black">Acesso digital</p>
-        </div>
-        <div className="rounded-xl bg-sand/45 px-2 py-2.5">
-          <Sparkles className="mx-auto h-4 w-4 text-emerald-700" />
-          <p className="mt-1 text-[9px] font-black">Sem assinatura</p>
-        </div>
-      </div>
 
       <div className="mt-4">
         {paymentReady ? (
