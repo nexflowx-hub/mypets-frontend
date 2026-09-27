@@ -64,6 +64,8 @@ type Props = {
   successActionHref?: string;
   successActionLabel?: string;
   requireEmail?: boolean;
+  requireContact?: boolean;
+  autoOpenSuccessAction?: boolean;
   successHeadline?: string;
   successDescription?: string;
   successWhatsappUrl?: string;
@@ -125,6 +127,30 @@ function validCpf(value: string) {
   return digit(9) === numbers[9] && digit(10) === numbers[10];
 }
 
+function brazilPhoneDigits(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.startsWith("55") && digits.length >= 12) return digits.slice(2, 13);
+  return digits.slice(0, 11);
+}
+
+function formatBrazilPhone(value: string) {
+  const digits = brazilPhoneDigits(value);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7) return "(" + digits.slice(0, 2) + ") " + digits.slice(2);
+  if (digits.length <= 10) return "(" + digits.slice(0, 2) + ") " + digits.slice(2, 6) + "-" + digits.slice(6);
+  return "(" + digits.slice(0, 2) + ") " + digits.slice(2, 7) + "-" + digits.slice(7);
+}
+
+function validBrazilPhone(value: string) {
+  const digits = brazilPhoneDigits(value);
+  return digits.length === 10 || digits.length === 11;
+}
+
+function normalizedBrazilPhone(value: string) {
+  const digits = brazilPhoneDigits(value);
+  return validBrazilPhone(value) ? "+55" + digits : null;
+}
+
 function whatsappMessageUrl(baseUrl: string | undefined, text: string) {
   if (!baseUrl) return null;
   try {
@@ -184,6 +210,8 @@ export function CauseCheckout({
   successActionHref,
   successActionLabel = "Aceder ao conteúdo",
   requireEmail = false,
+  requireContact = false,
+  autoOpenSuccessAction = false,
   successHeadline = "Apoio confirmado. Obrigado!",
   successDescription,
   successWhatsappUrl,
@@ -212,7 +240,6 @@ export function CauseCheckout({
   const [donorEmail, setDonorEmail] = React.useState("");
   const [donorPhone, setDonorPhone] = React.useState("");
   const [donorDocument, setDonorDocument] = React.useState("");
-  const [payerOwnershipConfirmed, setPayerOwnershipConfirmed] = React.useState(false);
   const [marketCountry, setMarketCountry] = React.useState<string | null>(null);
   const [choice, setChoice] = React.useState<PaymentChoice>(brazilPixOnly ? "pix" : "checkout");
   const selectionTouched = React.useRef(false);
@@ -232,6 +259,9 @@ export function CauseCheckout({
       ? Math.round((Number(customAmount.replace(",", ".")) || 0) * 100)
       : amountCents;
   const nativeMethods = React.useMemo(() => preferredNativeMethods(currency, marketCountry), [currency, marketCountry]);
+  const successHrefWithReceipt = successActionHref && intent?.id
+    ? successActionHref + (successActionHref.includes("?") ? "&" : "?") + "receipt=" + encodeURIComponent(intent.id)
+    : successActionHref;
 
   React.useEffect(() => {
     if (brazilPixOnly) {
@@ -287,7 +317,18 @@ export function CauseCheckout({
     return () => window.clearTimeout(timer);
   }, [open, paid, presentation, resetCheckout]);
 
+  React.useEffect(() => {
+    if (!paid || !autoOpenSuccessAction || !successHrefWithReceipt) return;
+    const timer = window.setTimeout(() => {
+      window.location.assign(successHrefWithReceipt);
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [autoOpenSuccessAction, paid, successHrefWithReceipt]);
+
   const applyStatus = React.useCallback((status: string | undefined) => {
+    if (status) {
+      setIntent((current) => current ? { ...current, status } : current);
+    }
     if (status === "SUCCEEDED") {
       setPaid(true);
       setVerifying(false);
@@ -312,14 +353,14 @@ export function CauseCheckout({
 
   const verifyPayment = React.useCallback(async (intentId: string) => {
     setVerifying(true);
-    for (let attempt = 0; attempt < 18; attempt += 1) {
+    for (let attempt = 0; attempt < 80; attempt += 1) {
       try {
         const status = await fetchPaymentStatus(intentId);
         if (applyStatus(status)) return;
       } catch {
         // Reconciliation is best effort while XPayments finalises the transaction.
       }
-      await new Promise((resolve) => window.setTimeout(resolve, 1800));
+      await new Promise((resolve) => window.setTimeout(resolve, 1500));
     }
     setVerifying(false);
     setError(brazilPixOnly
@@ -329,23 +370,31 @@ export function CauseCheckout({
 
   React.useEffect(() => {
     const intentId = intent?.id;
-    if (!intentId || paid || verifying) return;
+    if (!intentId || paid) return;
     let cancelled = false;
     async function reconcileSilently() {
       try {
         const status = await fetchPaymentStatus(intentId!);
         if (!cancelled) applyStatus(status);
       } catch {
-        // Signed webhook / server-side reconciliation remains the source of truth.
+        // The next poll, focus event or manual verification retries reconciliation.
       }
     }
+    const onFocus = () => void reconcileSilently();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void reconcileSilently();
+    };
     void reconcileSilently();
-    const timer = window.setInterval(() => void reconcileSilently(), 2000);
+    const timer = window.setInterval(() => void reconcileSilently(), 1500);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [applyStatus, fetchPaymentStatus, intent?.id, paid, verifying]);
+  }, [applyStatus, fetchPaymentStatus, intent?.id, paid]);
 
   React.useEffect(() => {
     function onMessage(event: MessageEvent) {
@@ -532,6 +581,14 @@ export function CauseCheckout({
       setError(brazilPixOnly ? "Informe um email válido para continuar." : "Indique um email válido para este meio de pagamento.");
       return false;
     }
+    if (brazilPixOnly && donorPhone.trim() && !validBrazilPhone(donorPhone)) {
+      setError("Informe um WhatsApp válido com DDD.");
+      return false;
+    }
+    if (brazilPixOnly && requireContact && !donorEmail.trim() && !validBrazilPhone(donorPhone)) {
+      setError("Informe um email ou WhatsApp para receber e recuperar o acesso.");
+      return false;
+    }
     return true;
   }
 
@@ -587,10 +644,6 @@ export function CauseCheckout({
         setError("Informe um CPF válido do titular da conta que fará o Pix.");
         return;
       }
-      if (!payerOwnershipConfirmed) {
-        setError("Confirme que o CPF informado pertence ao titular da conta que realizará o Pix.");
-        return;
-      }
     }
     if ((method === "mb_way" || method === "bizum") && !donorPhone.trim()) {
       setError(`Informe o número de telefone associado ao ${methodLabel[method]}.`);
@@ -606,7 +659,7 @@ export function CauseCheckout({
         method,
         donorName: donorName.trim() || null,
         donorEmail: donorEmail.trim() || null,
-        donorPhone: donorPhone.trim() || null,
+        donorPhone: method === "pix" ? normalizedBrazilPhone(donorPhone) : donorPhone.trim() || null,
         donorDocument: method === "pix" ? cpfDigits(donorDocument) : donorDocument.trim() || null,
         rewardKeys,
         ...tracking(),
@@ -629,9 +682,6 @@ export function CauseCheckout({
 
   const triggerLabel = paid ? "Apoio confirmado" : intent ? "Retomar apoio" : "Apoiar agora";
   const hasEmbeddedCheckout = Boolean(intent?.embedUrl);
-  const successHrefWithReceipt = successActionHref && intent?.id
-    ? `${successActionHref}${successActionHref.includes("?") ? "&" : "?"}receipt=${encodeURIComponent(intent.id)}`
-    : successActionHref;
   const successWhatsappHref = intent?.id
     ? whatsappMessageUrl(
         successWhatsappUrl,
