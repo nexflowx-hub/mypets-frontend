@@ -223,6 +223,7 @@ export function CauseCheckout({
 }: Props) {
   const router = useRouter();
   const brazilPixOnly = currency === "BRL";
+  const fastCampaignPix = brazilPixOnly && presentation === "campaign" && Boolean(lockedAmountCents);
   const presets = React.useMemo(
     () => amountPresetsCents?.length ? amountPresetsCents : amountOptions(currency),
     [amountPresetsCents, currency],
@@ -787,17 +788,33 @@ export function CauseCheckout({
                 <div aria-hidden className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[#32bcad]/10 blur-2xl" />
                 <DialogHeader className="relative text-left">
                   {brazilPixOnly && <div className="mb-4 inline-flex w-fit items-center rounded-xl bg-white px-3 py-2"><PixBrand className="h-6 w-auto" /></div>}
-                  <DialogTitle className="text-xl font-extrabold text-white">{brazilPixOnly ? `Apoiar com Pix · ${causeTitle}` : `Apoiar ${causeTitle}`}</DialogTitle>
+                  <DialogTitle className="text-xl font-extrabold text-white">
+                    {fastCampaignPix ? `Gerar Pix · ${money(effectiveAmount, currency)}` : brazilPixOnly ? `Apoiar com Pix · ${causeTitle}` : `Apoiar ${causeTitle}`}
+                  </DialogTitle>
                   <DialogDescription className="text-sm leading-6 text-white/65">
-                    {brazilPixOnly
-                      ? "Escolha o valor, identifique o titular pagador e gere o QR Code ou Pix Copia e Cola sem sair do MyPets."
-                      : "Escolha o valor e o meio de pagamento. O MyPets mantém a origem da campanha para medir o impacto do funil."}
+                    {fastCampaignPix
+                      ? "Identifique o titular, informe o CPF e deixe email ou WhatsApp para recuperar o acesso. Depois é só gerar o Pix."
+                      : brazilPixOnly
+                        ? "Escolha o valor, identifique o titular pagador e gere o QR Code ou Pix Copia e Cola sem sair do MyPets."
+                        : "Escolha o valor e o meio de pagamento. O MyPets mantém a origem da campanha para medir o impacto do funil."}
                   </DialogDescription>
                 </DialogHeader>
               </div>
 
-              <div className="max-h-[78svh] space-y-5 overflow-y-auto p-6">
-                <div>
+              <div className={cn("max-h-[78svh] space-y-5 overflow-y-auto p-6", fastCampaignPix && "space-y-4 p-5")}>
+                {fastCampaignPix && (
+                  <div className="flex items-center justify-between gap-4 rounded-2xl border border-[#32bcad]/25 bg-[#f2fbfa] px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 min-w-14 items-center justify-center rounded-xl bg-white px-2 ring-1 ring-black/5"><PixBrand className="h-5 w-auto" /></span>
+                      <div>
+                        <p className="text-xs font-black text-petrol">Cobrança única</p>
+                        <p className="text-[10px] text-muted-foreground">Sem assinatura · acesso após confirmação</p>
+                      </div>
+                    </div>
+                    <p className="shrink-0 text-lg font-black text-petrol">{money(effectiveAmount, currency)}</p>
+                  </div>
+                )}
+                <div className={cn(fastCampaignPix && "hidden")}>
                   <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Valor do apoio</p>
                   {lockedAmountCents ? (
                     <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4 text-center">
@@ -826,7 +843,7 @@ export function CauseCheckout({
                   )}
                 </div>
 
-                <div>
+                <div className={cn(fastCampaignPix && "hidden")}>
                   <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Como quer apoiar</p>
                   {brazilPixOnly ? (
                     <div className="mt-3 flex items-center justify-between gap-4 rounded-2xl border border-[#32bcad]/30 bg-[#f2fbfa] p-4">
@@ -1069,19 +1086,29 @@ function NativePending({
 
       {method === "pix" && (
         <div className="mt-5 space-y-4 text-center">
+          {pixCode && (
+            <div className="rounded-2xl border border-[#32bcad]/30 bg-[#f2fbfa] p-4">
+              <p className="text-sm font-black text-petrol">Pix Copia e Cola já disponível</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">É a forma mais rápida no mesmo telemóvel. Copie e cole no app do seu banco.</p>
+              <div className="mt-3 max-h-20 overflow-hidden break-all rounded-xl bg-white p-3 text-left text-[10px] text-petrol ring-1 ring-black/5">{pixCode}</div>
+              <Button type="button" onClick={onCopy} className="mt-3 w-full rounded-xl bg-[#147f75] text-white hover:bg-[#116e66]">
+                {copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                {copied ? "Código Pix copiado" : "Copiar código Pix"}
+              </Button>
+            </div>
+          )}
           <div className="rounded-2xl border border-[#32bcad]/25 bg-[#f4fbfa] p-4">
-            <p className="text-sm font-black text-petrol">Escaneie no app do seu banco</p>
-            <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Use a conta de titularidade correspondente ao CPF informado. Assim que o banco confirmar, esta tela muda automaticamente.</p>
+            <p className="text-sm font-black text-petrol">Ou escaneie o QR Code</p>
+            <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Use a conta correspondente ao CPF informado. Assim que o banco confirmar, esta tela muda automaticamente.</p>
             {qrSource ? (
-              <img src={qrSource} alt="QR Code Pix" className="mx-auto mt-4 h-52 w-52 rounded-xl border border-border bg-white object-contain p-2" />
+              <img src={qrSource} alt="QR Code Pix" loading="eager" decoding="async" className="mx-auto mt-4 h-48 w-48 rounded-xl border border-border bg-white object-contain p-2" />
             ) : (
-              <div className="mx-auto mt-4 flex h-52 w-52 flex-col items-center justify-center rounded-xl border border-border bg-white">
+              <div className="mx-auto mt-4 flex h-48 w-48 flex-col items-center justify-center rounded-xl border border-border bg-white">
                 <Loader2 className="h-7 w-7 animate-spin text-[#147f75]" />
                 <p className="mt-3 text-[10px] font-bold text-muted-foreground">Preparando QR Code…</p>
               </div>
             )}
           </div>
-          {pixCode && <><p className="text-xs font-bold text-muted-foreground">Pix Copia e Cola</p><div className="break-all rounded-xl bg-sand/70 p-3 text-left text-xs text-petrol">{pixCode}</div><Button type="button" variant="outline" onClick={onCopy} className="w-full rounded-xl">{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copiado" : "Copiar código Pix"}</Button></>}
         </div>
       )}
 
