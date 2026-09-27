@@ -164,12 +164,13 @@ jobs:
           for attempt in $(seq 1 24); do
             curl --retry 3 --retry-delay 2 --retry-all-errors --max-time 20 -LfsS \
               https://www.mypets.lat/biblioteca -o /tmp/library.html
-            if grep -Fq 'data-library-version="2.4.0-rc2"' /tmp/library.html; then
+            if grep -Fq 'data-library-version="2.4.0-rc2"' /tmp/library.html \
+              && grep -Fq 'data-library-ref="674c8d3a7be8ef62e6ea4efcd404847b21b651d4"' /tmp/library.html; then
               release_ready=true
-              echo "Library release marker ready on attempt=$attempt"
+              echo "Library release + exact content ref ready on attempt=$attempt"
               break
             fi
-            echo "Waiting for Library 2.4.0-rc2 deployment, attempt=$attempt"
+            echo "Waiting for Library 2.4.0-rc2 + 674c8d3 content deployment, attempt=$attempt"
             sleep 5
           done
           [ "$release_ready" = "true" ] || { echo "Library 2.4.0-rc2 never became active" >&2; exit 1; }
