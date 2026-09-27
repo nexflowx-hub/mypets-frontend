@@ -14,7 +14,7 @@ Canonical content:
 `nexflowx-hub/mypets-data`
 
 Pinned editorial release:
-`507dfbc03e30f036d8b5fbc6f31c4473b2083b7b`
+`674c8d3a7be8ef62e6ea4efcd404847b21b651d4`
 
 Read first:
 - `src/components/library/guide-cover.tsx`
