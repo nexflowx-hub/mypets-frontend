@@ -64,6 +64,8 @@ type Props = {
   successActionHref?: string;
   successActionLabel?: string;
   requireEmail?: boolean;
+  requireContact?: boolean;
+  autoOpenSuccessAction?: boolean;
   successHeadline?: string;
   successDescription?: string;
   successWhatsappUrl?: string;
@@ -125,6 +127,30 @@ function validCpf(value: string) {
   return digit(9) === numbers[9] && digit(10) === numbers[10];
 }
 
+function brazilPhoneDigits(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.startsWith("55") && digits.length >= 12) return digits.slice(2, 13);
+  return digits.slice(0, 11);
+}
+
+function formatBrazilPhone(value: string) {
+  const digits = brazilPhoneDigits(value);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7) return "(" + digits.slice(0, 2) + ") " + digits.slice(2);
+  if (digits.length <= 10) return "(" + digits.slice(0, 2) + ") " + digits.slice(2, 6) + "-" + digits.slice(6);
+  return "(" + digits.slice(0, 2) + ") " + digits.slice(2, 7) + "-" + digits.slice(7);
+}
+
+function validBrazilPhone(value: string) {
+  const digits = brazilPhoneDigits(value);
+  return digits.length === 10 || digits.length === 11;
+}
+
+function normalizedBrazilPhone(value: string) {
+  const digits = brazilPhoneDigits(value);
+  return validBrazilPhone(value) ? "+55" + digits : null;
+}
+
 function whatsappMessageUrl(baseUrl: string | undefined, text: string) {
   if (!baseUrl) return null;
   try {
@@ -184,6 +210,8 @@ export function CauseCheckout({
   successActionHref,
   successActionLabel = "Aceder ao conteúdo",
   requireEmail = false,
+  requireContact = false,
+  autoOpenSuccessAction = false,
   successHeadline = "Apoio confirmado. Obrigado!",
   successDescription,
   successWhatsappUrl,
@@ -212,7 +240,6 @@ export function CauseCheckout({
   const [donorEmail, setDonorEmail] = React.useState("");
   const [donorPhone, setDonorPhone] = React.useState("");
   const [donorDocument, setDonorDocument] = React.useState("");
-  const [payerOwnershipConfirmed, setPayerOwnershipConfirmed] = React.useState(false);
   const [marketCountry, setMarketCountry] = React.useState<string | null>(null);
   const [choice, setChoice] = React.useState<PaymentChoice>(brazilPixOnly ? "pix" : "checkout");
   const selectionTouched = React.useRef(false);
@@ -232,6 +259,9 @@ export function CauseCheckout({
       ? Math.round((Number(customAmount.replace(",", ".")) || 0) * 100)
       : amountCents;
   const nativeMethods = React.useMemo(() => preferredNativeMethods(currency, marketCountry), [currency, marketCountry]);
+  const successHrefWithReceipt = successActionHref && intent?.id
+    ? successActionHref + (successActionHref.includes("?") ? "&" : "?") + "receipt=" + encodeURIComponent(intent.id)
+    : successActionHref;
 
   React.useEffect(() => {
     if (brazilPixOnly) {
@@ -287,7 +317,18 @@ export function CauseCheckout({
     return () => window.clearTimeout(timer);
   }, [open, paid, presentation, resetCheckout]);
 
+  React.useEffect(() => {
+    if (!paid || !autoOpenSuccessAction || !successHrefWithReceipt) return;
+    const timer = window.setTimeout(() => {
+      window.location.assign(successHrefWithReceipt);
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [autoOpenSuccessAction, paid, successHrefWithReceipt]);
+
   const applyStatus = React.useCallback((status: string | undefined) => {
+    if (status) {
+      setIntent((current) => current ? { ...current, status } : current);
+    }
     if (status === "SUCCEEDED") {
       setPaid(true);
       setVerifying(false);
@@ -312,14 +353,14 @@ export function CauseCheckout({
 
   const verifyPayment = React.useCallback(async (intentId: string) => {
     setVerifying(true);
-    for (let attempt = 0; attempt < 18; attempt += 1) {
+    for (let attempt = 0; attempt < 80; attempt += 1) {
       try {
         const status = await fetchPaymentStatus(intentId);
         if (applyStatus(status)) return;
       } catch {
         // Reconciliation is best effort while XPayments finalises the transaction.
       }
-      await new Promise((resolve) => window.setTimeout(resolve, 1800));
+      await new Promise((resolve) => window.setTimeout(resolve, 1500));
     }
     setVerifying(false);
     setError(brazilPixOnly
@@ -329,23 +370,31 @@ export function CauseCheckout({
 
   React.useEffect(() => {
     const intentId = intent?.id;
-    if (!intentId || paid || verifying) return;
+    if (!intentId || paid) return;
     let cancelled = false;
     async function reconcileSilently() {
       try {
         const status = await fetchPaymentStatus(intentId!);
         if (!cancelled) applyStatus(status);
       } catch {
-        // Signed webhook / server-side reconciliation remains the source of truth.
+        // The next poll, focus event or manual verification retries reconciliation.
       }
     }
+    const onFocus = () => void reconcileSilently();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void reconcileSilently();
+    };
     void reconcileSilently();
-    const timer = window.setInterval(() => void reconcileSilently(), 2000);
+    const timer = window.setInterval(() => void reconcileSilently(), 1500);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [applyStatus, fetchPaymentStatus, intent?.id, paid, verifying]);
+  }, [applyStatus, fetchPaymentStatus, intent?.id, paid]);
 
   React.useEffect(() => {
     function onMessage(event: MessageEvent) {
@@ -532,6 +581,14 @@ export function CauseCheckout({
       setError(brazilPixOnly ? "Informe um email válido para continuar." : "Indique um email válido para este meio de pagamento.");
       return false;
     }
+    if (brazilPixOnly && donorPhone.trim() && !validBrazilPhone(donorPhone)) {
+      setError("Informe um WhatsApp válido com DDD.");
+      return false;
+    }
+    if (brazilPixOnly && requireContact && !donorEmail.trim() && !validBrazilPhone(donorPhone)) {
+      setError("Informe um email ou WhatsApp para receber e recuperar o acesso.");
+      return false;
+    }
     return true;
   }
 
@@ -587,10 +644,6 @@ export function CauseCheckout({
         setError("Informe um CPF válido do titular da conta que fará o Pix.");
         return;
       }
-      if (!payerOwnershipConfirmed) {
-        setError("Confirme que o CPF informado pertence ao titular da conta que realizará o Pix.");
-        return;
-      }
     }
     if ((method === "mb_way" || method === "bizum") && !donorPhone.trim()) {
       setError(`Informe o número de telefone associado ao ${methodLabel[method]}.`);
@@ -606,7 +659,7 @@ export function CauseCheckout({
         method,
         donorName: donorName.trim() || null,
         donorEmail: donorEmail.trim() || null,
-        donorPhone: donorPhone.trim() || null,
+        donorPhone: method === "pix" ? normalizedBrazilPhone(donorPhone) : donorPhone.trim() || null,
         donorDocument: method === "pix" ? cpfDigits(donorDocument) : donorDocument.trim() || null,
         rewardKeys,
         ...tracking(),
@@ -629,9 +682,6 @@ export function CauseCheckout({
 
   const triggerLabel = paid ? "Apoio confirmado" : intent ? "Retomar apoio" : "Apoiar agora";
   const hasEmbeddedCheckout = Boolean(intent?.embedUrl);
-  const successHrefWithReceipt = successActionHref && intent?.id
-    ? `${successActionHref}${successActionHref.includes("?") ? "&" : "?"}receipt=${encodeURIComponent(intent.id)}`
-    : successActionHref;
   const successWhatsappHref = intent?.id
     ? whatsappMessageUrl(
         successWhatsappUrl,
@@ -810,42 +860,72 @@ export function CauseCheckout({
                   ) : null}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={brazilPixOnly ? "Nome do titular pagador" : choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
-                  <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para identificar e recuperar o acesso" : choice === "pix" || choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
-                </div>
-                {brazilPixOnly && successWhatsappUrl && !requireEmail && (
-                  <p className="-mt-1 text-[10px] leading-4 text-muted-foreground">Email opcional. Depois da confirmação, você pode abrir os eBooks imediatamente ou pedir o envio pelo WhatsApp.</p>
-                )}
-
-                {(choice === "mb_way" || choice === "bizum") && !brazilPixOnly && (
-                  <Input value={donorPhone} onChange={(event) => setDonorPhone(event.target.value)} inputMode="tel" placeholder={choice === "mb_way" ? "Telemóvel +351" : "Móvel +34"} maxLength={40} />
-                )}
-                {brazilPixOnly && (
-                  <div className="rounded-2xl border border-border bg-[#fbfcfc] p-4">
-                    <label htmlFor={`pix-cpf-${causeId}`} className="text-xs font-extrabold text-petrol">CPF do titular da conta pagadora</label>
+                {brazilPixOnly ? (
+                  <>
                     <Input
-                      id={`pix-cpf-${causeId}`}
-                      className="mt-2 bg-white"
-                      value={donorDocument}
-                      onChange={(event) => { setDonorDocument(formatCpf(event.target.value)); setPayerOwnershipConfirmed(false); setError(null); }}
-                      inputMode="numeric"
-                      autoComplete="off"
-                      placeholder="000.000.000-00"
-                      maxLength={14}
-                      aria-describedby={`pix-cpf-help-${causeId}`}
+                      value={donorName}
+                      onChange={(event) => { setDonorName(event.target.value); setError(null); }}
+                      placeholder="Nome do titular pagador"
+                      maxLength={120}
+                      autoComplete="name"
                     />
-                    <p id={`pix-cpf-help-${causeId}`} className="mt-2 text-[11px] leading-5 text-muted-foreground">Informe o CPF da pessoa titular da conta bancária que efetivamente fará este Pix. O documento é enviado à XPAYMENTS como identificação do pagador.</p>
-                    <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl bg-[#eef8f7] p-3 text-[11px] font-semibold leading-5 text-petrol">
-                      <input
-                        type="checkbox"
-                        checked={payerOwnershipConfirmed}
-                        onChange={(event) => { setPayerOwnershipConfirmed(event.target.checked); setError(null); }}
-                        className="mt-0.5 h-4 w-4 shrink-0 accent-[#32bcad]"
+
+                    <div className="rounded-2xl border-2 border-[#32bcad]/45 bg-[#f2fbfa] p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <label htmlFor={`pix-cpf-${causeId}`} className="text-sm font-black text-petrol">CPF do titular que fará o Pix</label>
+                        <span className="rounded-full bg-[#32bcad]/15 px-2.5 py-1 text-[9px] font-black uppercase tracking-wide text-[#147f75]">obrigatório</span>
+                      </div>
+                      <Input
+                        id={`pix-cpf-${causeId}`}
+                        className="mt-2 h-12 bg-white text-base font-black tracking-wide"
+                        value={donorDocument}
+                        onChange={(event) => { setDonorDocument(formatCpf(event.target.value)); setError(null); }}
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder="000.000.000-00"
+                        maxLength={14}
+                        aria-describedby={`pix-cpf-help-${causeId}`}
                       />
-                      <span>Confirmo que o CPF informado pertence ao titular da conta que realizará o Pix.</span>
-                    </label>
-                  </div>
+                      <p id={`pix-cpf-help-${causeId}`} className="mt-2 text-[11px] font-semibold leading-5 text-petrol/65">
+                        Use o CPF da pessoa titular da conta bancária que efetivamente realizará este Pix.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-[#fbfcfc] p-4">
+                      <p className="text-xs font-black text-petrol">Para receber ou recuperar o acesso</p>
+                      <p className="mt-1 text-[10px] leading-4 text-muted-foreground">
+                        Informe email ou WhatsApp. Um dos dois basta.
+                      </p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <Input
+                          type="email"
+                          value={donorEmail}
+                          onChange={(event) => { setDonorEmail(event.target.value); setError(null); }}
+                          placeholder="Email"
+                          maxLength={254}
+                          autoComplete="email"
+                        />
+                        <Input
+                          value={donorPhone}
+                          onChange={(event) => { setDonorPhone(formatBrazilPhone(event.target.value)); setError(null); }}
+                          inputMode="tel"
+                          placeholder="WhatsApp com DDD"
+                          maxLength={16}
+                          autoComplete="tel"
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Input value={donorName} onChange={(event) => setDonorName(event.target.value)} placeholder={choice === "checkout" ? "Nome (opcional)" : "Nome do pagador"} maxLength={120} autoComplete="name" />
+                      <Input type="email" value={donorEmail} onChange={(event) => setDonorEmail(event.target.value)} placeholder={requireEmail ? "Email para identificar e recuperar o acesso" : choice === "checkout" ? "Email (opcional)" : "Email"} maxLength={254} autoComplete="email" />
+                    </div>
+                    {(choice === "mb_way" || choice === "bizum") && (
+                      <Input value={donorPhone} onChange={(event) => setDonorPhone(event.target.value)} inputMode="tel" placeholder={choice === "mb_way" ? "Telemóvel +351" : "Móvel +34"} maxLength={40} />
+                    )}
+                  </>
                 )}
 
                 {error && <p className="rounded-xl bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p>}
@@ -991,8 +1071,15 @@ function NativePending({
         <div className="mt-5 space-y-4 text-center">
           <div className="rounded-2xl border border-[#32bcad]/25 bg-[#f4fbfa] p-4">
             <p className="text-sm font-black text-petrol">Escaneie no app do seu banco</p>
-            <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Use a conta de titularidade correspondente ao CPF informado no passo anterior.</p>
-            {qrSource && <img src={qrSource} alt="QR Code Pix" className="mx-auto mt-4 h-52 w-52 rounded-xl border border-border bg-white object-contain p-2" />}
+            <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Use a conta de titularidade correspondente ao CPF informado. Assim que o banco confirmar, esta tela muda automaticamente.</p>
+            {qrSource ? (
+              <img src={qrSource} alt="QR Code Pix" className="mx-auto mt-4 h-52 w-52 rounded-xl border border-border bg-white object-contain p-2" />
+            ) : (
+              <div className="mx-auto mt-4 flex h-52 w-52 flex-col items-center justify-center rounded-xl border border-border bg-white">
+                <Loader2 className="h-7 w-7 animate-spin text-[#147f75]" />
+                <p className="mt-3 text-[10px] font-bold text-muted-foreground">Preparando QR Code…</p>
+              </div>
+            )}
           </div>
           {pixCode && <><p className="text-xs font-bold text-muted-foreground">Pix Copia e Cola</p><div className="break-all rounded-xl bg-sand/70 p-3 text-left text-xs text-petrol">{pixCode}</div><Button type="button" variant="outline" onClick={onCopy} className="w-full rounded-xl">{copied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}{copied ? "Copiado" : "Copiar código Pix"}</Button></>}
         </div>
@@ -1011,7 +1098,7 @@ function NativePending({
 
       {redirect && <a href={redirect} target="_blank" rel="noopener noreferrer" className="mt-5 flex min-h-12 items-center justify-center rounded-xl bg-coral px-4 text-sm font-extrabold text-white">Continuar pagamento <ExternalLink className="ml-2 h-4 w-4" /></a>}
 
-      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">{verifying || intent.status === "PENDING" || intent.status === "PROCESSING" ? <Loader2 className="h-4 w-4 animate-spin text-coral" /> : null}<span>{verifying ? "A confirmar o pagamento…" : "Aguardando confirmação financeira"}</span></div>
+      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">{verifying || intent.status === "PENDING" || intent.status === "PROCESSING" ? <Loader2 className="h-4 w-4 animate-spin text-coral" /> : null}<span>{verifying ? "Confirmando com o banco e a XPAYMENTS…" : intent.status === "PROCESSING" ? "Pagamento identificado · finalizando confirmação" : "Aguardando pagamento · esta tela atualiza sozinha"}</span></div>
       {method === "pix" && (
         <Button type="button" variant="outline" onClick={onVerify} disabled={verifying} className="mt-4 w-full rounded-xl border-[#32bcad]/40 text-petrol hover:bg-[#f2fbfa]">
           {verifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4 text-[#147f75]" />}
