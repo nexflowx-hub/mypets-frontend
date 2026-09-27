@@ -1,8 +1,11 @@
 "use client";
 
-import { ExternalLink, Film, ImageIcon, Sparkles } from "lucide-react";
+import { ExternalLink, Film, ImageIcon } from "lucide-react";
 import type { LibraryMediaPlacement, LibraryMediaRecord } from "@/lib/digital-library";
+import { OriginalVisual, visualLabel } from "@/components/library/visuals";
 import { cn } from "@/lib/utils";
+
+export { visualLabel };
 
 function commonsImageUrl(sourcePage?: string) {
   if (!sourcePage?.startsWith("https://commons.wikimedia.org/wiki/File:")) return null;
@@ -19,41 +22,9 @@ function youtubeEmbedUrl(value?: string) {
   return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
 }
 
-function visualLabel(render?: string) {
-  const labels: Record<string, string> = {
-    "traffic-light": "Semáforo visual",
-    timeline: "Linha do tempo",
-    "day-grid": "Plano por dias",
-    "week-grid": "Plano semanal",
-    process: "Processo visual",
-    staircase: "Progressão",
-    matrix: "Matriz prática",
-    "room-checklist": "Mapa + checklist",
-    floorplan: "Mapa do ambiente",
-    "trigger-map": "Mapa de gatilhos",
-    "distance-diagram": "Diagrama de distância",
-    "body-map": "Mapa corporal",
-    "warning-grid": "Quadro de alertas",
-    "step-cards": "Passo a passo",
-    "child-poster": "Poster familiar",
-    "room-diagram": "Mapa de espaço seguro",
-    "category-wheel": "Roda de atividades",
-    slider: "Escala de dificuldade",
-    "weekly-grid": "Planeador semanal",
-    "checklist-card": "Cartão prático",
-    "comparison-matrix": "Matriz comparativa",
-    "decision-tree": "Árvore de decisão",
-    "annotated-card": "Cartão explicado",
-    "photo-grid": "Galeria editorial",
-    "annual-calendar": "Calendário anual",
-    tracker: "Tracker",
-    "observation-board": "Quadro de observação",
-    "silhouette-guide": "Guia visual",
-    "annotated-label": "Rótulo explicado",
-    "route-cards": "Rotas práticas",
-  };
-  return (render && labels[render]) || "Visual MyPets";
-}
+// `visualLabel` is now maintained in `./visuals` and re-exported above so any
+// existing caller (e.g. tests or tooling) continues to resolve the extended map
+// including the two new families (`annotated-body`, `child-card`).
 
 export function LibraryMediaSlot({
   placement,
@@ -142,27 +113,6 @@ export function LibraryMediaSlot({
   }
 
   return (
-    <figure
-      role="group"
-      aria-label={placement.alt}
-      className={cn("my-7 overflow-hidden rounded-[1.5rem] border border-emerald-100 bg-[linear-gradient(135deg,#f0fbf4,#fffaf0)] p-5 shadow-sm", className)}
-    >
-      <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-petrol text-emerald-200">
-          <Sparkles className="h-5 w-5" />
-        </span>
-        <div>
-          <p className="text-[9px] font-black uppercase tracking-[.15em] text-emerald-700">{visualLabel(placement.render)}</p>
-          <p className="mt-1 text-sm font-black text-petrol">{placement.alt}</p>
-        </div>
-      </div>
-      <div className="mt-4 grid grid-cols-4 gap-2" aria-hidden="true">
-        {[0, 1, 2, 3].map((item) => (
-          <span key={item} className="h-2 rounded-full bg-petrol/10 first:bg-emerald-400 last:bg-amber-300" />
-        ))}
-      </div>
-      <figcaption className="mt-4 text-xs leading-6 text-petrol/68">{placement.caption}</figcaption>
-      <p className="mt-2 text-[9px] font-bold uppercase tracking-wide text-petrol/35 print:hidden">Visual editorial MyPets · versão acessível</p>
-    </figure>
+    <OriginalVisual placement={placement} className={className} />
   );
 }

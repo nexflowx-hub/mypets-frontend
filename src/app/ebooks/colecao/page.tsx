@@ -6,6 +6,7 @@ import { ArrowRight, BookOpen, CheckCircle2, Heart } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { getEbookAccessPayment } from "@/lib/ebook-access";
 import { solidarityEbookBySlug, solidarityEbooks } from "@/lib/solidarity-ebooks";
+import { coverBackgroundForSlug } from "@/lib/cover-backgrounds";
 
 export const metadata: Metadata = {
   title: "A sua Biblioteca MyPets",
@@ -98,7 +99,7 @@ export default async function EbookCollectionPage({
               className="group grid overflow-hidden rounded-3xl border border-border bg-white sm:grid-cols-[150px_1fr] transition hover:-translate-y-0.5 hover:shadow-lg"
             >
               <div className="relative min-h-40">
-                <Image src={ebook.image} alt="" fill sizes="150px" className="object-cover" />
+                <Image src={coverBackgroundForSlug(ebook.slug, ebook.image)} alt="" fill sizes="150px" className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-petrol/40 to-transparent" />
               </div>
               <div className="p-5">

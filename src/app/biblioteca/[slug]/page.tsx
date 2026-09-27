@@ -14,6 +14,7 @@ import {
   getGuideMediaBundle,
   resolveDigitalLibraryGuide,
 } from "@/lib/digital-library";
+import { coverBackgroundForSlug } from "@/lib/cover-backgrounds";
 
 export const revalidate = 300;
 
@@ -83,7 +84,7 @@ export default async function LibraryGuidePage({ params }: { params: Promise<{ s
               <GuideCover
                 slug={guide.slug}
                 title={guide.title}
-                image={guide.image}
+                image={coverBackgroundForSlug(guide.slug, guide.image)}
                 className="aspect-[4/3] rounded-[2rem] shadow-2xl shadow-petrol/10"
               />
             </div>
