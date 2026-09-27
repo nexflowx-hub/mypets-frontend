@@ -9,9 +9,9 @@ This PR closes the remaining visual/editorial production gaps to reach launch-qu
 | | |
 |---|---|
 | Base frontend commit | `217d5b5cebad4228826fb9b6c886331739918000` |
-| Canonical content ref (mypets-data) | `507dfbc03e30f036d8b5fbc6f31c4473b2083b7b` |
+| Canonical content ref (mypets-data) | `674c8d3a7be8ef62e6ea4efcd404847b21b651d4` |
 
-Mission 0 (release sync) updates the fallback `CONTENT_REF` in `src/lib/digital-library.ts`, the pinned release in `docs/ZAI_PRODUCTION_VISUAL_FINISH_PROMPT.md`, and `.env.example` to `507dfbc03e30f036d8b5fbc6f31c4473b2083b7b`. No guide editorial copy was modified; no veterinary/nutritional/behavioural claims were reinterpreted.
+Mission 0 (release sync) updates the fallback `CONTENT_REF` in `src/lib/digital-library.ts`, the pinned release in `docs/ZAI_PRODUCTION_VISUAL_FINISH_PROMPT.md`, and `.env.example` to `674c8d3a7be8ef62e6ea4efcd404847b21b651d4`. No guide editorial copy was modified; no veterinary/nutritional/behavioural claims were reinterpreted.
 
 ## Mission 1 — 13 final premium cover backgrounds
 
@@ -149,7 +149,7 @@ The 13 cover WebP assets themselves are reviewable directly under `public/images
 - [x] 13/13 covers pass campaign/catalog/preview QA
 - [x] 0 known production original-visual placements use the generic placeholder
 - [x] no editorial facts fabricated
-- [x] canonical content pinned to `507dfbc03e30f036d8b5fbc6f31c4473b2083b7b`
+- [x] canonical content pinned to `674c8d3a7be8ef62e6ea4efcd404847b21b651d4`
 - [x] all required attribution remains present
 - [x] videos do not autoplay
 - [x] mobile has no horizontal overflow
