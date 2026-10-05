@@ -16,3 +16,16 @@ export async function apiGet<T>(path: string): Promise<T> {
 
   return response.json() as Promise<T>;
 }
+
+export async function apiGetPublic<T>(path: string, revalidate = 30): Promise<T> {
+  const response = await fetch(apiUrl(path), {
+    headers: { Accept: "application/json" },
+    next: { revalidate: Math.max(1, Math.trunc(revalidate)) },
+  });
+
+  if (!response.ok) {
+    throw new Error(`MyPets API ${response.status}: ${path}`);
+  }
+
+  return response.json() as Promise<T>;
+}

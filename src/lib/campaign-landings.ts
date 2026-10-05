@@ -1,4 +1,4 @@
-import { apiGet } from "@/lib/api";
+import { apiGetPublic } from "@/lib/api";
 
 export type CampaignVertical = "FOOD" | "VET" | "RESCUE" | "SHELTER" | "EMERGENCY";
 
@@ -94,6 +94,7 @@ export type PublicConfig = {
   paymentsLive: boolean;
   paymentProvider?: string | null;
   paymentCurrencies?: string[];
+  paymentWebhookCurrencies?: string[];
   embeddedCheckout?: boolean;
 };
 
@@ -101,7 +102,7 @@ type Envelope<T> = { data: T };
 
 export async function getCampaignSummary(campaignKey: string): Promise<CampaignSummary | null> {
   try {
-    return (await apiGet<Envelope<CampaignSummary>>(`/cause-campaigns/${encodeURIComponent(campaignKey)}`)).data;
+    return (await apiGetPublic<Envelope<CampaignSummary>>(`/cause-campaigns/${encodeURIComponent(campaignKey)}`, 30)).data;
   } catch {
     return null;
   }
@@ -110,7 +111,7 @@ export async function getCampaignSummary(campaignKey: string): Promise<CampaignS
 export async function getVerticalCampaigns(vertical: CampaignVertical, limit = 12): Promise<CampaignSummary[]> {
   try {
     const safeLimit = Math.max(1, Math.min(50, Math.trunc(limit)));
-    return (await apiGet<Envelope<CampaignSummary[]>>(`/causes/vertical/${vertical}?limit=${safeLimit}`)).data;
+    return (await apiGetPublic<Envelope<CampaignSummary[]>>(`/causes/vertical/${vertical}?limit=${safeLimit}`, 30)).data;
   } catch {
     return [];
   }
@@ -124,8 +125,8 @@ export function campaignSegmentForProject(projectSlug: string): CampaignRouteSeg
 
 export async function getCampaignCause(slug: string): Promise<CampaignCause | null> {
   try {
-    const cause = (await apiGet<Envelope<Omit<CampaignCause, "vertical" | "campaignKey" | "campaignMeta">>>(`/causes/${encodeURIComponent(slug)}`)).data;
-    const marketing = await apiGet<Envelope<CampaignSummary>>(`/causes/${encodeURIComponent(slug)}/marketing`).catch(() => null);
+    const cause = (await apiGetPublic<Envelope<Omit<CampaignCause, "vertical" | "campaignKey" | "campaignMeta">>>(`/causes/${encodeURIComponent(slug)}`, 20)).data;
+    const marketing = await apiGetPublic<Envelope<CampaignSummary>>(`/causes/${encodeURIComponent(slug)}/marketing`, 30).catch(() => null);
     return {
       ...cause,
       vertical: marketing?.data.vertical ?? "GENERAL",
@@ -139,9 +140,9 @@ export async function getCampaignCause(slug: string): Promise<CampaignCause | nu
 
 export async function getCampaignConfig(): Promise<PublicConfig> {
   try {
-    return (await apiGet<Envelope<PublicConfig>>("/config")).data;
+    return (await apiGetPublic<Envelope<PublicConfig>>("/config", 10)).data;
   } catch {
-    return { paymentsLive: false, paymentCurrencies: [] };
+    return { paymentsLive: false, paymentCurrencies: [], paymentWebhookCurrencies: [] };
   }
 }
 
