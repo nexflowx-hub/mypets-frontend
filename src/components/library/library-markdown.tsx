@@ -7,7 +7,16 @@ import type { GuideHeading, LibraryMediaPlacement, LibraryMediaRecord } from "@/
 import { LibraryMediaSlot } from "@/components/library/library-media-slot";
 
 function headingId(text: string) {
-  return text.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9\\s-]/g, "").trim().replace(/\\s+/g, "-").replace(/-+/g, "-");
+  // Match extractGuideHeadings in src/lib/digital-library.ts so TOC,
+  // chapter progress and reader anchors share identical identifiers.
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 function textFromChildren(children: React.ReactNode) {
