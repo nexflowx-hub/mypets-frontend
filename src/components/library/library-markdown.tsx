@@ -7,7 +7,16 @@ import type { GuideHeading, LibraryMediaPlacement, LibraryMediaRecord } from "@/
 import { LibraryMediaSlot } from "@/components/library/library-media-slot";
 
 function headingId(text: string) {
-  return text.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9\\s-]/g, "").trim().replace(/\\s+/g, "-").replace(/-+/g, "-");
+  // Match extractGuideHeadings in src/lib/digital-library.ts so TOC,
+  // chapter progress and reader anchors share identical identifiers.
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 function textFromChildren(children: React.ReactNode) {
@@ -34,6 +43,16 @@ export function LibraryMarkdown({
     () => new Map(mediaRecords.map((item) => [item.id, item] as const)),
     [mediaRecords],
   );
+
+  // The server TOC counts repeated headings in document order.
+  // Use identical occurrence suffixes in the client-rendered HTML.
+  const headingOccurrences = new Map<string, number>();
+  function uniqueHeadingId(text: string) {
+    const base = headingId(text);
+    const occurrence = (headingOccurrences.get(base) ?? 0) + 1;
+    headingOccurrences.set(base, occurrence);
+    return occurrence === 1 ? base : `${base}-${occurrence}`;
+  }
 
   function slots(anchor: string, position: "before" | "after") {
     return mediaPlacements
@@ -95,7 +114,7 @@ export function LibraryMarkdown({
             ),
             h2: ({ children }) => {
               const text = textFromChildren(children);
-              const id = headingId(text);
+              const id = uniqueHeadingId(text);
               const anchor = "## " + text;
               const isDone = completed.includes(id);
               return (
@@ -124,7 +143,7 @@ export function LibraryMarkdown({
               return (
                 <>
                   {slots(anchor, "before")}
-                  <h3 id={headingId(text)} className="mt-9 scroll-mt-28 text-xl font-black text-petrol">{children}</h3>
+                  <h3 id={uniqueHeadingId(text)} className="mt-9 scroll-mt-28 text-xl font-black text-petrol">{children}</h3>
                   {slots(anchor, "after")}
                 </>
               );

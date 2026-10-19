@@ -61,7 +61,7 @@ export type DigitalLibraryIndex = {
 };
 
 const CONTENT_REPO = "nexflowx-hub/mypets-data";
-export const DIGITAL_LIBRARY_CONTENT_REF = process.env.MYPETS_CONTENT_REF || "674c8d3a7be8ef62e6ea4efcd404847b21b651d4";
+export const DIGITAL_LIBRARY_CONTENT_REF = process.env.MYPETS_CONTENT_REF || "2b31def5bc768b404372215492753e5a0b324958";
 const CONTENT_REF = DIGITAL_LIBRARY_CONTENT_REF;
 const RAW_BASE = "https://raw.githubusercontent.com/" + CONTENT_REPO + "/" + encodeURIComponent(CONTENT_REF);
 
@@ -182,13 +182,22 @@ export function headingId(text: string) {
 }
 
 export function extractGuideHeadings(markdown: string): GuideHeading[] {
-  return markdown
-    .split("\n")
-    .map((line) => {
-      const match = /^(##|###)\s+(.+)$/.exec(line.trim());
-      if (!match) return null;
-      const text = match[2].replace(/[*_`]/g, "").trim();
-      return { id: headingId(text), text, level: match[1].length };
-    })
-    .filter((item): item is GuideHeading => Boolean(item));
+  // Repeated labels such as "Dia 1", "Passo a passo" or "Pontos de atenção"
+  // must not generate duplicate HTML ids. The reader and TOC use the same rule.
+  const seen = new Map<string, number>();
+  const result: GuideHeading[] = [];
+  for (const line of markdown.split("\n")) {
+    const match = /^(##|###)\s+(.+)$/.exec(line.trim());
+    if (!match) continue;
+    const text = match[2].replace(/[*_`]/g, "").trim();
+    const base = headingId(text);
+    const occurrence = (seen.get(base) ?? 0) + 1;
+    seen.set(base, occurrence);
+    result.push({
+      id: occurrence === 1 ? base : `${base}-${occurrence}`,
+      text,
+      level: match[1].length,
+    });
+  }
+  return result;
 }
