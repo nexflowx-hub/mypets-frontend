@@ -124,7 +124,7 @@ export default function CampanhaLivrosPage() {
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[.18em] text-[#d6ede0]">
               <Sparkles size={14} /> Coleção Cuidar Melhor
             </span>
-            <h1 className={styles.heroTitle + " mt-7 max-w-[680px] font-serif text-[clamp(3rem,5vw,5.2rem)] leading-[1.04] tracking-[-.055em]">
+            <h1 className={styles.heroTitle + " mt-7 max-w-[680px] font-serif text-[clamp(3rem,5vw,5.2rem)] leading-[1.04] tracking-[-.055em]"}>
               Um livro para cuidar. <span className="text-[#ffad77]">Um quilo para alimentar.</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-[#e3efeb]">
@@ -157,7 +157,7 @@ export default function CampanhaLivrosPage() {
                 </div>
               ))}
             </div>
-            <div className={styles.promiseSeal + " relative mx-auto mt-10 w-fit rounded-[1.5rem] border border-[#a9d8bd]/40 bg-[#0c5448]/95 px-7 py-4 text-center shadow-xl shadow-black/20">
+            <div className={styles.promiseSeal + " relative mx-auto mt-10 w-fit rounded-[1.5rem] border border-[#a9d8bd]/40 bg-[#0c5448]/95 px-7 py-4 text-center shadow-xl shadow-black/20"}>
               <PawPrint className="mx-auto mb-2 h-6 w-6 text-[#ffb881]" />
               <strong className="block text-lg">1 eBook = 1 kg de ração</strong>
               <small className="mt-1 block text-xs text-white/80">Compromisso por compra confirmada</small>
@@ -183,11 +183,11 @@ export default function CampanhaLivrosPage() {
           </div>
           <div className="mt-14 grid gap-7 md:grid-cols-2 xl:grid-cols-3">
             {products.map((p) => (
-              <article key={p.slug} id={p.slug} className={styles.productCard + " group scroll-mt-28 overflow-hidden rounded-[1.75rem] border border-[#dfe8de] bg-white shadow-[0_18px_55px_-30px_rgba(9,63,56,.25)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_-25px_rgba(9,63,56,.28)]">
+              <article key={p.slug} id={p.slug} className={styles.productCard + " group scroll-mt-28 overflow-hidden rounded-[1.75rem] border border-[#dfe8de] bg-white shadow-[0_18px_55px_-30px_rgba(9,63,56,.25)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_-25px_rgba(9,63,56,.28)]"}>
                 <div className={`relative flex h-[245px] items-center justify-center overflow-hidden bg-gradient-to-br ${p.tint}`}>
                   <div className="absolute left-5 top-5 z-10 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[#0b5144]">eBook {p.number}</div>
                   <div className="absolute inset-0 opacity-15 [background-image:radial-gradient(circle_at_center,#45816c_1px,transparent_1px)] [background-size:22px_22px]" />
-                  <div className={styles.coverFloat + " relative h-[202px] w-[160px] overflow-hidden rounded-lg shadow-[12px_16px_25px_rgba(6,45,31,.28)] transition duration-500 group-hover:rotate-[-2deg] group-hover:scale-105">
+                  <div className={styles.coverFloat + " relative h-[202px] w-[160px] overflow-hidden rounded-lg shadow-[12px_16px_25px_rgba(6,45,31,.28)] transition duration-500 group-hover:rotate-[-2deg] group-hover:scale-105"}>
                     <Image src={p.image} alt={`Imagem de referência de ${p.title}`} fill sizes="160px" className="object-cover" />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#052e29] via-[#052e29]/75 to-transparent px-3 pb-4 pt-12">
                       <p className="text-center text-[11px] font-black leading-tight text-white">{p.title}</p>
@@ -322,7 +322,7 @@ export default function CampanhaLivrosPage() {
       </section>
       <SiteFooter />
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 p-3 sm:hidden">
-        <a href="#livros" className={styles.mobileCta + " pointer-events-auto mx-auto flex max-w-sm items-center justify-center gap-2 rounded-full bg-[#f4763b] px-6 py-3.5 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(0,0,0,.25)]">Escolher um eBook <ArrowRight size={17}/></a>
+        <a href="#livros" className={styles.mobileCta + " pointer-events-auto mx-auto flex max-w-sm items-center justify-center gap-2 rounded-full bg-[#f4763b] px-6 py-3.5 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(0,0,0,.25)]"}>Escolher um eBook <ArrowRight size={17}/></a>
       </div>
     </main>
   );
