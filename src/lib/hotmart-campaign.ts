@@ -52,7 +52,7 @@ export const campaignBooks: CampaignBook[] = [
     tagline: "Mais bem-estar, mesmo com poucos metros quadrados.",
     audience: "Para famílias que vivem com cães em apartamentos.",
     intro: "Um guia para adaptar ambientes, passeios, descanso e enriquecimento às necessidades individuais do seu cão — com atenção especial à convivência no condomínio.",
-    cover: "/images/campanha-livros/capa-eb09.png",
+    cover: "/images/library/covers/09-cao-em-apartamento.webp",
     banner: "/images/campanha-livros/banner-eb09.png",
     checkout: "https://pay.hotmart.com/J108259918Q",
     benefits: ["Organize um ambiente seguro", "Enriqueça o dia a dia em casa", "Melhore a rotina de passeios"],
