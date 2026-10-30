@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight, BookOpen, CheckCircle2, ChevronDown, Download, Heart, LockKeyhole,
-  PawPrint, ShieldCheck, Sparkles, Star, Wallet,
+  PawPrint, ShieldCheck, Sparkles, Wallet,
 } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { SiteFooter } from "@/components/layout/site-footer";
