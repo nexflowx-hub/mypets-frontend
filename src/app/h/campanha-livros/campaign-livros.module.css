@@ -1,0 +1,76 @@
+/* MyPets · campanha de livros premium
+   All motion is decorative. Content and checkout remain fully usable without JS. */
+
+.hero {
+  background-image:
+    radial-gradient(ellipse 70% 65% at 88% 15%, rgba(66, 152, 126, .32), transparent 70%),
+    linear-gradient(145deg, #0b4a3c 0%, #07332c 50%, #052b27 100%);
+}
+.glow {
+  animation: glowBreath 13s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.heroTitle {
+  animation: riseIn .75s cubic-bezier(.18,.74,.3,1) both;
+  text-wrap: balance;
+}
+.heroBooks {
+  animation: riseIn .9s .14s cubic-bezier(.18,.74,.3,1) both;
+}
+.promiseSeal {
+  animation: breathe 5.8s ease-in-out infinite;
+}
+.productCard {
+  will-change: auto;
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+.productCard:hover, .productCard:focus-within {
+  border-color: #bbd3bf;
+  transform: translateY(-5px);
+}
+.coverFloat {
+  transform-origin: 50% 60%;
+  transition: transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.productCard:hover .coverFloat,
+.productCard:focus-within .coverFloat {
+  transform: rotate(-2deg) translateY(-3px);
+}
+.showcaseScroll {
+  scrollbar-width: thin;
+  scrollbar-color: #9ab7a5 transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.showcaseScroll::-webkit-scrollbar { height: 7px; }
+.showcaseScroll::-webkit-scrollbar-thumb {
+  background: #a4b9a8;
+  border-radius: 10px;
+}
+.mobileCta {
+  animation: slideIn .45s .45s both cubic-bezier(.2,.7,.2,1);
+}
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes glowBreath {
+  from { opacity: .65; transform: scale(.96); }
+  to { opacity: 1; transform: scale(1.05); }
+}
+@keyframes breathe {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(35px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroTitle, .heroBooks, .glow, .promiseSeal, .mobileCta {
+    animation: none !important;
+  }
+  .productCard, .coverFloat {
+    transition: none !important;
+    transform: none !important;
+  }
+}
