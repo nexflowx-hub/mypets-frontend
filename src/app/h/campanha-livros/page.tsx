@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -8,7 +9,6 @@ import {
   BookOpen,
   Check,
   CheckCircle2,
-  Clock3,
   FileText,
   Heart,
   LockKeyhole,
@@ -74,7 +74,7 @@ const questions = [
   },
 ];
 
-function Ribbon({ children }: { children: React.ReactNode }) {
+function Ribbon({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex items-center gap-2 rounded-full border border-[#fac7a8]/35 bg-[#ff762f]/15 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#ffb88d] sm:text-xs">
       <PawPrint aria-hidden="true" className="h-4 w-4" />
@@ -133,7 +133,7 @@ export default function HotmartCampaignBooksPage() {
             <div aria-hidden="true" className="absolute inset-x-5 bottom-14 h-20 rounded-[50%] bg-black/30 blur-3xl" />
             <div className="relative z-10 flex items-center justify-center">
               <div className="relative -mr-14 mt-16 h-[260px] w-[190px] -rotate-[14deg] overflow-hidden rounded-[1.3rem] border-[5px] border-white/75 bg-[#f4eade] shadow-[0_30px_55px_rgba(0,0,0,.3)] sm:-mr-20 sm:h-[340px] sm:w-[238px]">
-                <Image src="/images/campanha-livros/capa-eb09.png" alt="Capa do eBook Cão em Apartamento" fill sizes="(max-width: 640px) 190px, 238px" className="object-cover" />
+                <Image src="/images/library/covers/09-cao-em-apartamento.webp" alt="Capa do eBook Cão em Apartamento" fill sizes="(max-width: 640px) 190px, 238px" className="object-cover" />
               </div>
               <div className="relative z-20 h-[310px] w-[218px] -rotate-[2deg] overflow-hidden rounded-[1.4rem] border-[6px] border-white/85 bg-[#faeee1] shadow-[0_40px_75px_rgba(0,0,0,.4)] sm:h-[415px] sm:w-[285px]">
                 <Image src="/images/campanha-livros/capa-eb02.png" alt="Capa do eBook Os Primeiros 30 Dias com um Filhote" fill priority sizes="(max-width: 640px) 218px, 285px" className="object-cover" />
