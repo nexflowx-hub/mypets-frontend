@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { MyPetsLogo } from "@/components/brand/logo";
 import { SiteFooter } from "@/components/layout/site-footer";
+import styles from "./campaign-livros.module.css";
 
 export const metadata: Metadata = {
   title: "Coleção Cuidar Melhor — 5 eBooks por R$ 12,90 cada",
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 
 type Product = {
   number: string; slug: string; title: string; eyebrow: string; line: string;
-  image: string; checkout: string; preview: string; highlight: string;
+  image: string; banner: string; checkout: string; preview: string; highlight: string;
   learn: string[]; ideal: string; tint: string;
 };
 
@@ -33,7 +34,7 @@ const products: Product[] = [
   {
     number: "01", slug: "cuidados-essenciais", title: "Cuidados Essenciais com o Seu Cão",
     eyebrow: "O guia para começar bem", line: "Rotina, segurança, higiene, prevenção e bem-estar com mais confiança.",
-    image: "/images/library/covers/01-cuidados-essenciais.webp",
+    image: "/images/library/covers/01-cuidados-essenciais.webp", banner: "/images/campaign-livros/banner-eb01.png",
     checkout: "https://pay.hotmart.com/C108190802Y", preview: "/biblioteca/cuidados-essenciais",
     highlight: "Um cuidado melhor começa com informação clara.",
     learn: ["Rotina e cuidados diários", "Higiene e prevenção", "Conforto e segurança"],
@@ -42,7 +43,7 @@ const products: Product[] = [
   {
     number: "02", slug: "primeiros-30-dias", title: "Os Primeiros 30 Dias com um Filhote",
     eyebrow: "O início de uma história", line: "Acolha seu filhote com mais organização, paciência e segurança.",
-    image: "/images/library/covers/02-primeiros-30-dias.webp",
+    image: "/images/campaign-livros/capa-eb02.png", banner: "/images/campaign-livros/banner-eb02.png",
     checkout: "https://pay.hotmart.com/M108259866W", preview: "/biblioteca/primeiros-30-dias",
     highlight: "Os primeiros dias merecem atenção especial.",
     learn: ["Primeiro dia e primeira noite", "Sono, higiene e rotina", "Socialização e treino gentil"],
@@ -51,7 +52,7 @@ const products: Product[] = [
   {
     number: "09", slug: "cao-em-apartamento", title: "Cão em Apartamento",
     eyebrow: "Espaço pequeno, vida completa", line: "Bem-estar e enriquecimento para a vida em espaços compactos.",
-    image: "/images/library/covers/09-cao-em-apartamento.webp",
+    image: "/images/campaign-livros/capa-eb09.png", banner: "/images/campaign-livros/banner-eb09.png",
     checkout: "https://pay.hotmart.com/J108259918Q", preview: "/biblioteca/cao-em-apartamento",
     highlight: "Bem-estar não se mede apenas em metros quadrados.",
     learn: ["Ambientes e varandas mais seguros", "Passeios e brincadeiras", "Rotina e convivência"],
@@ -60,7 +61,7 @@ const products: Product[] = [
   {
     number: "11", slug: "adotei-cao-adulto", title: "Adotei um Cão Adulto: E Agora?",
     eyebrow: "Todo recomeço merece carinho", line: "Aprenda a acolher, respeitar o tempo de adaptação e construir confiança.",
-    image: "/images/library/covers/11-adotei-cao-adulto.webp",
+    image: "/images/campaign-livros/capa-eb11.png", banner: "/images/campaign-livros/banner-eb11.png",
     checkout: "https://pay.hotmart.com/R108259979J", preview: "/biblioteca/adotei-cao-adulto",
     highlight: "Construir vínculo é respeitar o ritmo de cada cão.",
     learn: ["Primeiros dias na nova casa", "Vínculo, sinais e segurança", "Adaptação e convivência"],
@@ -69,7 +70,7 @@ const products: Product[] = [
   {
     number: "08", slug: "ficar-sozinho", title: "Ficar Sozinho em Casa",
     eyebrow: "Autonomia sem medo", line: "Construa pequenas ausências com observação, segurança e respeito.",
-    image: "/images/library/covers/08-ficar-sozinho.webp",
+    image: "/images/campaign-livros/capa-eb08.png", banner: "/images/campaign-livros/banner-eb08.png",
     checkout: "https://pay.hotmart.com/T108260019G", preview: "/biblioteca/ficar-sozinho",
     highlight: "Autonomia se desenvolve no ritmo do seu cão.",
     learn: ["Ambiente seguro e previsível", "Treinos graduais de ausência", "Sinais de desconforto e quando pedir ajuda"],
@@ -115,19 +116,19 @@ export default function CampanhaLivrosPage() {
         </div>
       </header>
 
-      <section className="relative isolate overflow-hidden bg-[#083c34] text-white">
-        <div className="pointer-events-none absolute -right-40 -top-40 h-[600px] w-[600px] rounded-full bg-[#298c74]/25 blur-3xl" />
+      <section className={"relative isolate overflow-hidden bg-[#083c34] text-white " + styles.hero}>
+        <div className={"pointer-events-none absolute -right-40 -top-40 h-[600px] w-[600px] rounded-full bg-[#298c74]/25 blur-3xl " + styles.glow} />
         <div className="pointer-events-none absolute -bottom-48 -left-40 h-[500px] w-[500px] rounded-full bg-[#f68e51]/10 blur-3xl" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 md:py-24 lg:grid-cols-[1.03fr_.97fr] lg:gap-16">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[.18em] text-[#d6ede0]">
               <Sparkles size={14} /> Coleção Cuidar Melhor
             </span>
-            <h1 className="mt-7 max-w-[680px] font-serif text-[clamp(3rem,5vw,5.2rem)] leading-[1.04] tracking-[-.055em]">
-              Cuidar melhor é um gesto de <span className="text-[#ffad77]">amor.</span>
+            <h1 className={styles.heroTitle + " mt-7 max-w-[680px] font-serif text-[clamp(3rem,5vw,5.2rem)] leading-[1.04] tracking-[-.055em]">
+              Um livro para cuidar. <span className="text-[#ffad77]">Um quilo para alimentar.</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-[#e3efeb]">
-              Cinco guias digitais para transformar dúvidas em cuidado. Escolha o tema que faz sentido para você e participe de uma causa que alimenta vidas.
+              Aprenda a cuidar melhor do seu cão com guias práticos e acessíveis. A cada eBook comprado e confirmado, o MyPets assume o compromisso de 1 kg de ração para animais resgatados.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a href="#livros" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#f4763b] px-7 py-3 text-sm font-extrabold text-white shadow-lg shadow-black/10 hover:bg-[#dc5729]">
@@ -143,7 +144,7 @@ export default function CampanhaLivrosPage() {
               <span className="inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#b8e6ba]" /> Compra pela Hotmart</span>
             </div>
           </div>
-          <div aria-label="Capas fotográficas da coleção" className="relative mx-auto w-full max-w-[560px]">
+          <div aria-label="Capas fotográficas da coleção" className={styles.heroBooks + " relative mx-auto w-full max-w-[560px]"}>
             <div className="grid grid-cols-3 items-end gap-3 sm:gap-4">
               {[products[1], products[3], products[2]].map((p, i) => (
                 <div key={p.slug} className={`overflow-hidden rounded-[1.3rem] border-[5px] border-white/15 bg-white/10 shadow-2xl shadow-black/35 ${i === 1 ? "-translate-y-7" : "translate-y-4"}`}>
@@ -156,7 +157,7 @@ export default function CampanhaLivrosPage() {
                 </div>
               ))}
             </div>
-            <div className="relative mx-auto mt-10 w-fit rounded-[1.5rem] border border-[#a9d8bd]/40 bg-[#0c5448]/95 px-7 py-4 text-center shadow-xl shadow-black/20">
+            <div className={styles.promiseSeal + " relative mx-auto mt-10 w-fit rounded-[1.5rem] border border-[#a9d8bd]/40 bg-[#0c5448]/95 px-7 py-4 text-center shadow-xl shadow-black/20">
               <PawPrint className="mx-auto mb-2 h-6 w-6 text-[#ffb881]" />
               <strong className="block text-lg">1 eBook = 1 kg de ração</strong>
               <small className="mt-1 block text-xs text-white/80">Compromisso por compra confirmada</small>
@@ -182,11 +183,11 @@ export default function CampanhaLivrosPage() {
           </div>
           <div className="mt-14 grid gap-7 md:grid-cols-2 xl:grid-cols-3">
             {products.map((p) => (
-              <article key={p.slug} id={p.slug} className="group scroll-mt-28 overflow-hidden rounded-[1.75rem] border border-[#dfe8de] bg-white shadow-[0_18px_55px_-30px_rgba(9,63,56,.25)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_-25px_rgba(9,63,56,.28)]">
+              <article key={p.slug} id={p.slug} className={styles.productCard + " group scroll-mt-28 overflow-hidden rounded-[1.75rem] border border-[#dfe8de] bg-white shadow-[0_18px_55px_-30px_rgba(9,63,56,.25)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_-25px_rgba(9,63,56,.28)]">
                 <div className={`relative flex h-[245px] items-center justify-center overflow-hidden bg-gradient-to-br ${p.tint}`}>
                   <div className="absolute left-5 top-5 z-10 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-widest text-[#0b5144]">eBook {p.number}</div>
                   <div className="absolute inset-0 opacity-15 [background-image:radial-gradient(circle_at_center,#45816c_1px,transparent_1px)] [background-size:22px_22px]" />
-                  <div className="relative h-[202px] w-[160px] overflow-hidden rounded-lg shadow-[12px_16px_25px_rgba(6,45,31,.28)] transition duration-500 group-hover:rotate-[-2deg] group-hover:scale-105">
+                  <div className={styles.coverFloat + " relative h-[202px] w-[160px] overflow-hidden rounded-lg shadow-[12px_16px_25px_rgba(6,45,31,.28)] transition duration-500 group-hover:rotate-[-2deg] group-hover:scale-105">
                     <Image src={p.image} alt={`Imagem de referência de ${p.title}`} fill sizes="160px" className="object-cover" />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#052e29] via-[#052e29]/75 to-transparent px-3 pb-4 pt-12">
                       <p className="text-center text-[11px] font-black leading-tight text-white">{p.title}</p>
@@ -219,6 +220,33 @@ export default function CampanhaLivrosPage() {
               <a href="#impacto" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-[#ffd7b6] hover:text-white">Entenda a iniciativa <ArrowRight size={16}/></a>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section aria-label="Conheça a coleção por dentro" className="overflow-hidden border-t border-[#dce9df] bg-[#f2eee5] px-5 py-20 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <div className="max-w-3xl">
+              <span className="text-xs font-extrabold uppercase tracking-[.2em] text-[#b85c37]">Explore antes de escolher</span>
+              <h2 className="mt-3 font-serif text-4xl leading-tight text-[#104c3f] sm:text-5xl">Cinco temas. Uma forma mais consciente de cuidar.</h2>
+              <p className="mt-4 text-[#527165]">Uma prévia visual das propostas de cada guia. Deslize para ver os outros títulos e escolha o seu favorito.</p>
+            </div>
+            <div className="hidden items-center gap-2 text-sm font-extrabold text-[#31715d] md:flex">Deslize para explorar <ArrowRight size={18}/></div>
+          </div>
+          <div className={styles.showcaseScroll + " mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-7"}>
+            {products.map((p) => (
+              <article key={p.slug} className="w-[min(86vw,560px)] shrink-0 snap-center overflow-hidden rounded-[1.75rem] border border-[#e0e5d8] bg-white shadow-[0_20px_45px_-28px_rgba(13,64,49,.2)] sm:snap-start">
+                <div className="relative aspect-[1491/1055] overflow-hidden bg-[#e4f1e9]">
+                  <Image src={p.banner} alt={`Peça promocional do livro ${p.title}`} fill sizes="(max-width: 768px) 86vw, 560px" className="object-contain" />
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#e7ede5] px-6 py-5">
+                  <div><p className="text-[10px] font-black uppercase tracking-[.15em] text-[#b46138]">eBook {p.number}</p><h3 className="mt-1 font-serif text-lg font-bold text-[#0d483a]">{p.title}</h3></div>
+                  <a href={p.checkout} data-hotmart-product={p.slug} data-hotmart-placement="showcase" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#0d614e] px-5 py-2 text-sm font-extrabold text-white transition hover:bg-[#093e33]">Comprar <ArrowRight size={15}/></a>
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className="mt-2 text-xs leading-6 text-[#72877c]">As imagens são peças de apresentação. Para conhecer o conteúdo antes da compra, utilize o link “Conhecer o conteúdo” em cada eBook.</p>
         </div>
       </section>
 
@@ -269,6 +297,20 @@ export default function CampanhaLivrosPage() {
         </div>
       </section>
 
+      <section className="bg-white px-5 py-16 sm:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 rounded-[2rem] border border-[#dce8dc] bg-[#f7faf5] p-8 sm:p-12 lg:flex-row lg:items-center">
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-[#a95b35]"><Heart size={17} /> Acompanhe o impacto</span>
+            <h2 className="mt-4 font-serif text-3xl leading-tight text-[#0b5141] sm:text-4xl">Não é só sobre livros. É sobre acompanhar o que construímos juntos.</h2>
+            <p className="mt-4 text-sm leading-7 text-[#597269]">Siga o MyPets nas redes sociais para conhecer as iniciativas, acompanhar novidades da campanha e ver as atualizações publicadas sobre os nossos projetos de cuidado animal.</p>
+          </div>
+          <div className="flex shrink-0 flex-col items-start gap-3">
+            <a href="https://www.facebook.com/mypets.lat" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#175e4f] px-6 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#103c33]">Acompanhar no Facebook <ArrowRight size={17}/></a>
+            <a href="https://www.instagram.com/mypets.lat/" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#0a6854] hover:underline">Seguir no Instagram <ArrowRight size={16}/></a>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-[#092f29] px-5 py-16 text-center text-white sm:px-8">
         <div className="mx-auto max-w-3xl">
           <Heart className="mx-auto h-8 w-8 fill-[#f4763b] text-[#f4763b]" />
@@ -280,7 +322,7 @@ export default function CampanhaLivrosPage() {
       </section>
       <SiteFooter />
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 p-3 sm:hidden">
-        <a href="#livros" className="pointer-events-auto mx-auto flex max-w-sm items-center justify-center gap-2 rounded-full bg-[#f4763b] px-6 py-3.5 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(0,0,0,.25)]">Escolher um eBook <ArrowRight size={17}/></a>
+        <a href="#livros" className={styles.mobileCta + " pointer-events-auto mx-auto flex max-w-sm items-center justify-center gap-2 rounded-full bg-[#f4763b] px-6 py-3.5 text-sm font-extrabold text-white shadow-[0_8px_30px_rgba(0,0,0,.25)]">Escolher um eBook <ArrowRight size={17}/></a>
       </div>
     </main>
   );
